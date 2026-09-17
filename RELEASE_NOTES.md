@@ -10,4 +10,4 @@ Download the Windows ZIP and extract all its contents beside Cemu. Keep your NFC
 
 Requires the supported English Cemu Skylanders build. Character dumps, games, and the optional artwork pack are not included.
 
-Validation: unit and Electron UI tests, plus native controller checks under Wine. Native Windows gameplay and fullscreen behavior have not been independently verified for this release.
+Validation: seven unit tests, Electron UI tests, and full Cemu swap tests under Wine passed, including mixed halves, Thumpling, and device-window dismissal. The native shortcut capture test could not be validated reliably because Cemu lost foreground focus under Wine/Xwayland. Shortcut action mappings passed unit tests; live keyboard capture, native Windows gameplay, and fullscreen behavior need a Windows check.
