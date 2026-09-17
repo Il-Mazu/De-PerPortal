@@ -1,0 +1,29 @@
+{
+  "name": "skyportal-manager",
+  "version": "0.2.0",
+  "description": "A portable two-player Skylanders portal manager for Cemu",
+  "author": "Il-Mazu",
+  "license": "GPL-2.0-or-later",
+  "main": "app/main.cjs",
+  "dependencies": {"adm-zip":"0.6.1"},
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "test:ui": "node tests/ui.cjs",
+    "dist": "electron-builder --win zip --x64"
+  },
+  "devDependencies": {
+    "electron": "44.4.1",
+    "electron-builder": "26.15.3",
+    "playwright": "1.63.0"
+  },
+  "build": {
+    "appId": "io.github.il-mazu.skyportal",
+    "productName": "SkyPortal",
+    "artifactName": "SkyPortal-${version}-windows-x64.${ext}",
+    "directories": { "output": "release" },
+    "files": ["app/**/*", "resources/**/*", "package.json", "README.md", "LICENSE"],
+    "extraResources": [{ "from": "out/SkyPortal-Probe.exe", "to": "portal-control.exe" }],
+    "win": { "target": ["zip"], "signAndEditExecutable": false }
+  }
+}

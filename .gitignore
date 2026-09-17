@@ -1,0 +1,10 @@
+/out/
+/node_modules/
+/release/
+/test-results/
+/skyportal-data/
+/NFC/
+*.sky
+*.bin
+*.dump
+*.dmp
