@@ -2,9 +2,10 @@
 /node_modules/
 /release/
 /test-results/
-/skyportal-data/
+/de-perportal-data/
 /NFC/
 *.sky
 *.bin
 *.dump
 *.dmp
+/skyportal-data/

@@ -7,7 +7,7 @@ const url='https://github.com/joaohypo/emulanders/releases/download/0.9.1/emulan
 const digest='82b7e097bab78c0fc5b3db0027874382db2d50f4abd9dac2769e67f69ce1331e';
 async function installArt(root,bytes) {
   if(createHash('sha256').update(bytes).digest('hex')!==digest) throw Error('Artwork download checksum did not match. No images installed.');
-  const dir=path.join(root,'skyportal-data/art');await fs.mkdir(dir,{recursive:true});
+  const dir=path.join(root,'de-perportal-data/art');await fs.mkdir(dir,{recursive:true});
   const archive=new AdmZip(bytes);let count=0;
   for(const entry of archive.getEntries()) {
     const name=entry.entryName.replaceAll('\\','/').split('/').pop();

@@ -35,13 +35,15 @@ jobs:
           }
       - uses: actions/upload-artifact@v4
         with:
-          name: SkyPortal-windows-x64
+          name: De-PerPortal-windows-x64
           path: |
             release/*.zip
             release/SHA256SUMS.txt
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          name: Dè PerPortal ${{ github.ref_name }}
+          make_latest: true
           prerelease: false
           body_path: RELEASE_NOTES.md
           files: |

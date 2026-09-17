@@ -7,10 +7,10 @@ const {spawn,execFile}=require('node:child_process');
 const {promisify}=require('node:util');
 const {Manager}=require('./manager.cjs');
 const exec=promisify(execFile);
-const root=process.env.SKYPORTAL_HOME || (app.isPackaged?path.dirname(process.execPath):path.resolve(__dirname,'..'));
-const helper=app.isPackaged?path.join(process.resourcesPath,'portal-control.exe'):path.join(__dirname,'../out/SkyPortal-Probe.exe');
+const root=process.env.DE_PERPORTAL_HOME || (app.isPackaged?path.dirname(process.execPath):path.resolve(__dirname,'..'));
+const helper=app.isPackaged?path.join(process.resourcesPath,'portal-control.exe'):path.join(__dirname,'../out/De-PerPortal-Probe.exe');
 const native=(args,options={})=>process.platform==='win32'?{file:helper,args,options}:{file:'wine',args:[helper,...args],options};
-let manager,win,watcher;
+let manager,win,watcher,overlay;
 protocol.registerSchemesAsPrivileged([{scheme:'art',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
 if(!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -19,7 +19,7 @@ else {
     manager=new Manager(root,async args=>{
       if(process.platform!=='win32' && args[0]==='load') args=[...args.slice(0,2),(await exec('winepath',['-w',args[2]])).stdout.trim()];
       const command=native(args);
-      try { const r=await exec(command.file,command.args,{windowsHide:true,timeout:25000,maxBuffer:1024*1024,env:{...process.env,SKYPORTAL_BACKGROUND:'1',WINEDEBUG:'-all'}}); return r.stdout; }
+      try { const r=await exec(command.file,command.args,{windowsHide:true,timeout:25000,maxBuffer:1024*1024,env:{...process.env,DE_PERPORTAL_BACKGROUND:'1',WINEDEBUG:'-all'}}); return r.stdout; }
       catch(e) { throw Error((e.stderr||e.message).trim().split('\n').slice(-1)[0]); }
     });
     await manager.init();
@@ -29,20 +29,23 @@ else {
       if(!figure?.art) return new Response('',{status:404});
       return net.fetch(pathToFileURL(figure.art).toString());
     });
-    win=new BrowserWindow({width:1280,height:900,minWidth:980,minHeight:760,backgroundColor:'#0b1016',title:'SkyPortal',autoHideMenuBar:true,
+    win=new BrowserWindow({width:1280,height:900,minWidth:980,minHeight:760,backgroundColor:'#0b1016',title:'Dè PerPortal',autoHideMenuBar:true,
       webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
     win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
     win.webContents.on('will-navigate',event=>event.preventDefault());
     win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));
+    overlay=require('./overlay.cjs').createOverlay(manager,win);
+    win.on('closed',()=>overlay.destroy());
     manager.on('state',state=>{if(!win.isDestroyed()) win.webContents.send('state',state);});
     for(const [channel,handler] of Object.entries({
       state:()=>manager.state(), action:data=>manager.action(data),select:data=>manager.select(data),game:g=>manager.setGame(g),rescan:()=>manager.rescan(),
+      'overlay-show':()=>overlay.show(),
       enable:()=>manager.control(['enable']),
       launch:async()=>{
         if(manager.session.pid) throw Error('Cemu is already running.');
         const names=['Cemu-Skylanders-Emulated-Portal.exe','Cemu.exe'];
         let exe;for(const name of names) { try { await fs.access(path.join(root,name));exe=path.join(root,name);break; } catch{} }
-        if(!exe) throw Error('Place SkyPortal.exe and its release files beside your Cemu executable.');
+        if(!exe) throw Error('Place Dè PerPortal.exe and its release files beside your Cemu executable.');
         const child=spawn(process.platform==='win32'?exe:'wine',process.platform==='win32'?[]:[exe],{cwd:root,detached:true,stdio:'ignore'});
         child.on('error',e=>{manager.message=e.message;manager.publish();}); child.unref();
       },
@@ -58,8 +61,8 @@ else {
     let pending='';
     watcher.stdout.on('data',data=>{pending+=data.toString();const lines=pending.split('\n');pending=lines.pop();for(const line of lines){try{const event=JSON.parse(line);if(event.type==='session')manager.updateSession(event);if(event.type==='hotkey')manager.hotkey(event);}catch{}}});
     watcher.on('error',e=>{manager.message=`Portal connection unavailable: ${e.message}`;manager.publish();});
-    watcher.on('exit',()=>{manager.session={pid:0,supported:false,game:0,focused:false};manager.message='Portal monitor stopped. Restart SkyPortal to reconnect.';manager.publish();});
-  }).catch(e=>{dialog.showErrorBox('SkyPortal could not start',e.message);app.quit();});
+    watcher.on('exit',()=>{manager.session={pid:0,supported:false,game:0,focused:false};manager.message='Portal monitor stopped. Restart Dè PerPortal to reconnect.';manager.publish();});
+  }).catch(e=>{dialog.showErrorBox('Dè PerPortal could not start',e.message);app.quit();});
   app.on('window-all-closed',()=>app.quit());
   app.on('before-quit',()=>watcher?.kill());
 }

@@ -8,3 +8,11 @@
 .portrait img{border-radius:6px}
 .pair img{border-radius:5px;object-fit:contain}
 .favorite .edit{top:0;right:0;font-size:11px}
+
+.art-banner{display:flex;align-items:center;gap:14px;padding:12px 18px;margin-top:14px;background:linear-gradient(90deg,#1a2d3a,#162130);border:1px solid #2a4a5a;border-radius:12px;font-size:12px;color:#c8dde6}
+.art-banner[hidden]{display:none}
+.art-banner-icon{font-size:24px;flex-shrink:0}
+.art-banner>div{flex:1;line-height:1.6}
+.art-banner strong{color:#9fd8f5}
+.art-banner>#art-banner-btn{flex-shrink:0;font-size:11px;padding:9px 16px;background:#1b3d52;border-color:#2e6278;white-space:nowrap}
+.art-banner>#art-banner-dismiss{flex-shrink:0;opacity:.5}

@@ -1,11 +1,13 @@
 {
-  "name": "skyportal-manager",
-  "version": "0.2.0",
+  "name": "de-perportal-manager",
+  "version": "0.3.0",
   "description": "A portable two-player Skylanders portal manager for Cemu",
   "author": "Il-Mazu",
   "license": "GPL-2.0-or-later",
   "main": "app/main.cjs",
-  "dependencies": {"adm-zip":"0.6.1"},
+  "dependencies": {
+    "adm-zip": "0.6.1"
+  },
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
@@ -18,12 +20,31 @@
     "playwright": "1.63.0"
   },
   "build": {
-    "appId": "io.github.il-mazu.skyportal",
-    "productName": "SkyPortal",
-    "artifactName": "SkyPortal-${version}-windows-x64.${ext}",
-    "directories": { "output": "release" },
-    "files": ["app/**/*", "resources/**/*", "package.json", "README.md", "LICENSE"],
-    "extraResources": [{ "from": "out/SkyPortal-Probe.exe", "to": "portal-control.exe" }],
-    "win": { "target": ["zip"], "signAndEditExecutable": false }
+    "appId": "io.github.il-mazu.deperportal",
+    "productName": "D\u00e8 PerPortal",
+    "artifactName": "De-PerPortal-${version}-windows-x64.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "app/**/*",
+      "resources/**/*",
+      "package.json",
+      "README.md",
+      "docs/assets/**/*",
+      "LICENSE"
+    ],
+    "extraResources": [
+      {
+        "from": "out/De-PerPortal-Probe.exe",
+        "to": "portal-control.exe"
+      }
+    ],
+    "win": {
+      "target": [
+        "zip"
+      ],
+      "signExecutable": false
+    }
   }
 }

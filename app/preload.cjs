@@ -1,6 +1,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
-contextBridge.exposeInMainWorld('skyportal',{
+contextBridge.exposeInMainWorld('dePerPortal',{
   state:()=>ipcRenderer.invoke('state'),
+  overlay:()=>ipcRenderer.invoke('overlay-show'),
   action:data=>ipcRenderer.invoke('action',data),
   select:data=>ipcRenderer.invoke('select',data),
   game:value=>ipcRenderer.invoke('game',value),

@@ -144,6 +144,9 @@ static void session(void) {
     wchar_t s[512]=L""; if(main_window) title(main_window,s);
     printf("{\"type\":\"session\",\"pid\":%lu,\"supported\":%s,\"focused\":%s,\"title\":",(unsigned long)pid,supported?"true":"false",main_window && GetForegroundWindow()==main_window?"true":"false");
     json_string(s);
+    RECT bounds={0};
+    if(main_window) GetWindowRect(main_window,&bounds);
+    printf(",\"bounds\":{\"x\":%ld,\"y\":%ld,\"width\":%ld,\"height\":%ld}",(long)bounds.left,(long)bounds.top,(long)(bounds.right-bounds.left),(long)(bounds.bottom-bounds.top));
     printf(",\"rows\":[");
     portal=NULL; dialog=NULL; nl=nc=ne=0;
     if(pid && supported) {EnumWindows(find_windows,0);if(portal)EnumChildWindows(portal,collect,0);}
@@ -161,7 +164,7 @@ static LRESULT CALLBACK keyboard(int code,WPARAM message,LPARAM data) {
         if(key<256 && supported && GetForegroundWindow()==main_window && (message==WM_KEYDOWN || message==WM_SYSKEYDOWN)) {
             wchar_t s[512]; GetWindowTextW(main_window,s,512);
             BOOL game=StrStrIW(s,L"Skylander")!=NULL || StrStrIW(s,L"10142d00")!=NULL;
-            if(game && (k->flags & LLKHF_ALTDOWN) && !(GetAsyncKeyState(VK_CONTROL)&0x8000) && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key=='T')) {
+            if(game && (k->flags & LLKHF_ALTDOWN) && !(GetAsyncKeyState(VK_CONTROL)&0x8000) && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key=='T' || strchr("QWERYUIO",key))) {
                 if(!pressed[key]) {
                     printf("{\"type\":\"hotkey\",\"player\":%d,\"key\":\"%c\"}\n",(GetAsyncKeyState(VK_SHIFT)&0x8000)?1:0,key==VK_OEM_MINUS?'-':(char)key);
                     fflush(stdout); pressed[key]=1;
@@ -198,7 +201,7 @@ int main(int argc,char **argv) {
     }
     LocalFree(wide_argv);
     if(argc==2 && !strcmp(argv[1],"watch")) return watch();
-    HANDLE mutex=CreateMutexW(NULL,TRUE,L"Local\\SkyPortalProbe");
+    HANDLE mutex=CreateMutexW(NULL,TRUE,L"Local\\DePerPortalProbe");
     if(!mutex || GetLastError()==ERROR_ALREADY_EXISTS) fail("Another portal operation is running.");
     if(argc<2 || (strcmp(argv[1],"inspect") && strcmp(argv[1],"enable") && strcmp(argv[1],"load") && strcmp(argv[1],"clear")))
         fail("Usage: portal-probe inspect | enable | load ROW ABSOLUTE_PATH | clear ROW");
@@ -222,7 +225,7 @@ int main(int argc,char **argv) {
     if(!tested_binary()) fail("Unsupported Cemu executable: this prototype targets the tested portal build only.");
     { wchar_t s[512]; title(main_window,s); fprintf(stderr,"Cemu: %s pid=%lu menu-count=%d\n",utf8(s),(unsigned long)pid,GetMenuItemCount(GetMenu(main_window))); }
     HWND previous_foreground=GetForegroundWindow();
-    BOOL background=GetEnvironmentVariableW(L"SKYPORTAL_BACKGROUND",NULL,0)>0;
+    BOOL background=GetEnvironmentVariableW(L"DE_PERPORTAL_BACKGROUND",NULL,0)>0;
     EnumWindows(find_windows,0);
     if(dialog) fail("An existing dump dialog is open. Close it first.");
     UINT command=menu_command(GetMenu(main_window));

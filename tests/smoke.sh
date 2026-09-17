@@ -8,7 +8,7 @@ if test "$#" -ne 2; then
     exit 1
 fi
 export WINEDEBUG=-all
-probe() { wine out/SkyPortal-Probe.exe "$@"; }
+probe() { wine out/De-PerPortal-Probe.exe "$@"; }
 initial=$(probe inspect)
 empty=$(printf '%s\n' "$initial" | grep -c 'class=Edit text=None ')
 if test "$empty" -ne 16; then

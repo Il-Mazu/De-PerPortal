@@ -1,5 +1,5 @@
 'use strict';
-const api=window.skyportal;
+const api=window.dePerPortal;
 let state,player=0,picking=null,pendingTop=null,pickerSaving=false,toastTimer,artBannerDismissed=false;
 const $=id=>document.getElementById(id);
 const colors={Magic:'#bd9ded',Water:'#71c3e4',Tech:'#eac46b',Fire:'#f58d68',Earth:'#bd9671',Life:'#9bd47c',Air:'#b7d7e4',Undead:'#baabde',Light:'#eee4a2',Dark:'#a69aca'};
@@ -36,7 +36,7 @@ function render() {
   $('thumpback').title=state.game<2?'Available in Giants and later':'Load Thumpback for Player 1 · Alt+T';
   $('thumpling').disabled=state.busy || !state.figures.some(f=>f.id===541 && f.info?.game<4 && compatible(f));
   for(let p=0;p<2;p++) {
-    const current=state.active[p],f=chosen(current),favorite=state.profile.players[p].favorite,ff=chosen(favorite);
+    const defaults=state.profile.players[p],current=state.active[p],f=chosen(current),favorite=defaults.favorite,ff=chosen(favorite);
     $(`player-${p}`).innerHTML=`<div class="player-label"><b>0${p+1}</b> PLAYER ${p+1}</div><button class="active-card" title="Choose Player ${p+1}’s active Skylander"><div class="portrait">${art(current)}</div><span class="active-name">${e(f?name(f):'Choose Skylander')}</span><span class="figure-meta">${e(f?`${f.info?.element||''} · ${current?.bottom?'Swap combination':f.info?.kind||'Skylander'}`:'Click to load a figure')}</span></button>${f?'<button class="remove">Remove from portal</button>':''}`;
     $(`player-${p}`).querySelector('.active-card').onclick=()=>openPicker({player:p,target:'direct'});
     const observed=state.observed?.[p*2];
@@ -47,6 +47,11 @@ function render() {
     }
     $(`player-${p}`).querySelector('.remove')?.addEventListener('click',()=>perform(()=>api.action({player:p,target:'remove'})));
     $(`favorite-${p}`).innerHTML=`<span class="label">PLAYER ${p+1} DEFAULT</span><button class="edit" aria-label="Change Player ${p+1} default">Edit</button><button class="load-favorite" title="Return to Player ${p+1} default"><div class="portrait">${portrait(ff)}</div><span class="name">${e(ff?name(ff):'Choose default')}</span><div class="shortcut"><kbd>ALT</kbd> ${p?'+ <kbd>SHIFT</kbd> ':''}+ <kbd>0</kbd></div></button>`;
+    const presets=document.createElement('div');
+    presets.className='default-presets';presets.setAttribute('role','group');presets.setAttribute('aria-label',`Player ${p+1} default presets`);
+    presets.innerHTML=defaults.favorites.map((choice,i)=>`<button aria-label="Player ${p+1} default preset ${i+1}${choice?'':', empty'}" aria-pressed="${i===defaults.activeFavorite}" title="${choice?e(choiceName(choice)):'Choose default'}" ${state.busy?'disabled':''}>${i+1}${choice?'':' +'}</button>`).join('');
+    [...presets.children].forEach((button,i)=>button.onclick=()=>defaults.favorites[i]?perform(()=>api.select({player:p,target:'active-favorite',preset:i})):openPicker({player:p,target:'favorite',preset:i}));
+    $(`favorite-${p}`).append(presets);
     if(f)$(`player-${p}`).querySelector('.active-name').textContent=choiceName(current);
     $(`favorite-${p}`).querySelector('.portrait').innerHTML=art(favorite);
     $(`favorite-${p}`).querySelector('.name').textContent=ff?choiceName(favorite):'Choose default';
@@ -71,6 +76,16 @@ function render() {
     card.querySelector('.edit').onclick=()=>openPicker({player,target:el});
     card.querySelector('.element-load').onclick=()=>state.profile.players[player].elements[el]?perform(()=>api.action({player,target:el})):openPicker({player,target:el});
   }
+  const showPerks=state.game===3;
+  $('perks-section').hidden=!showPerks;
+  if(showPerks) {
+    $('perks-player').textContent=`PLAYER ${player+1}`;
+    $('perks').innerHTML=state.perks.map(perk=>{
+      const bottom=state.figures.find(f=>f.id===perk.id && f.half==='bottom' && f.variant===8192) || state.figures.find(f=>f.id===perk.id && f.half==='bottom');
+      return `<div class="perk-card"><button class="perk-load" data-key="${perk.key}" title="Load ${e(perk.name)} base for Player ${player+1}"><span class="element-label">${e(perk.name)}</span><div class="portrait">${bottom?halfPortrait(bottom):'<span class="placeholder">◈</span>'}</div><span class="name">${e(bottom?name(bottom):'Base not found')}</span></button><span class="slot-key">${perk.key}</span></div>`;
+    }).join('');
+    for(const card of $('perks').children) card.querySelector('.perk-load').onclick=()=>perform(()=>api.action({player,target:`perk-${card.querySelector('.perk-load').dataset.key}`}));
+  }
   $('status').textContent=state.message;
   $('library-count').textContent=`${state.figures.length} figures in your library`;
   $('root-path').textContent=state.root;
@@ -88,9 +103,10 @@ function available() {
   return state.figures.filter(f=>compatible(f) && f.half!=='bottom' && (!query || `${f.info.name} ${f.id} ${f.key}`.toLowerCase().includes(query)) && (picking.target==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4)) && (!state.elements.includes(picking.target) || (core(f) && f.info.element===picking.target)));
 }
 function openPicker(options) {
+  if(options.target==='favorite') options={...options,preset:options.preset ?? state.profile.players[options.player].activeFavorite};
   picking=options;
   pendingTop=null;
-  $('picker-title').textContent=options.target==='sidekick'?'Choose your sidekick':options.target==='direct'?`Player ${options.player+1} · choose a Skylander`:options.target==='favorite'?`Player ${options.player+1} · default Skylander`:`Player ${options.player+1} · ${options.target}`;
+  $('picker-title').textContent=options.target==='sidekick'?'Choose your sidekick':options.target==='direct'?`Player ${options.player+1} · choose a Skylander`:options.target==='favorite'?`Player ${options.player+1} · default preset ${options.preset+1}`:`Player ${options.player+1} · ${options.target}`;
   $('search').value='';
   $('half-controls').hidden=true;
   renderPicker();$('picker').showModal();$('search').focus();
@@ -122,6 +138,7 @@ $('change-top').onclick=()=>{pendingTop=null;$('half-controls').hidden=true;$('s
 $('picker-close').onclick=()=>$('picker').close();
 $('search').oninput=renderPicker;
 $('settings').onclick=()=>$('settings-dialog').showModal();
+$('overlay').onclick=()=>perform(()=>api.overlay());
 $('settings-close').onclick=()=>$('settings-dialog').close();
 $('game').onchange=()=>perform(()=>api.game(Number($('game').value)));
 $('launch').onclick=()=>perform(()=>api.launch());

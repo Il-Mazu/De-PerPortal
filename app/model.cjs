@@ -4,6 +4,12 @@ const path = require('node:path');
 const catalog = require('../resources/catalog.json');
 const elements = ['Magic','Water','Tech','Fire','Earth','Life','Air','Undead','Light','Dark'];
 const games = ["Spyro’s Adventure",'Giants','Swap Force','Trap Team','SuperChargers','Imaginators'];
+const perks = [
+  {key:'Q',name:'Rocket',id:1000}, {key:'W',name:'Tornado',id:1003},
+  {key:'E',name:'Spring',id:1005}, {key:'R',name:'Speed',id:1014},
+  {key:'Y',name:'Digging',id:1007}, {key:'U',name:'Portals',id:1008},
+  {key:'I',name:'Sneak',id:1009}, {key:'O',name:'Climber',id:1011}
+];
 const index = new Map(catalog.map(f => [`${f.id}:${f.variant}`, f]));
 
 function identify(bytes) {
@@ -72,6 +78,24 @@ function choice(f,figures) {
   if(!other) return null;
   return f.half==='top'?{top:f.key,bottom:other.key}:{top:other.key,bottom:f.key};
 }
+function perkChoice(figures,key) {
+  const perk=perks.find(p=>p.key===key);
+  if(!perk) return null;
+  const bottoms=figures.filter(f=>f.half==='bottom' && f.id===perk.id && compatible(f,3))
+    .sort((a,b)=>Number(b.variant===8192)-Number(a.variant===8192) || a.variant-b.variant || a.key.localeCompare(b.key));
+  for(const bottom of bottoms) {
+    const top=figures.find(f=>f.half==='top' && f.id===bottom.id+1000 && f.variant===bottom.variant);
+    if(top) return {perk,top,bottom};
+  }
+  return null;
+}
+function normalizeDefaults(player) {
+  if(!Array.isArray(player.favorites)) player.favorites=[player.favorite || null,null,null];
+  player.favorites=Array.from({length:3},(_,i)=>player.favorites[i] || null);
+  if(!Number.isInteger(player.activeFavorite) || player.activeFavorite<0 || player.activeFavorite>2) player.activeFavorite=0;
+  // Keep the existing favorite field as the active choice for older consumers.
+  player.favorite=player.favorites[player.activeFavorite];
+}
 function newProfile(figures,game) {
   const used=new Set();
   function pick(options) {
@@ -82,7 +106,10 @@ function newProfile(figures,game) {
   const sorted=[...figures].sort((a,b)=>(a.variant!==0)-(b.variant!==0) || a.id-b.id || a.variant-b.variant || a.key.localeCompare(b.key));
   const players=[0,1].map(()=>({favorite:null,elements:{}}));
   for(const element of elements) for(const p of players) p.elements[element]=pick(candidates(sorted,game,element));
-  for(const p of players) p.favorite=p.elements.Magic || Object.values(p.elements).find(Boolean) || null;
+  for(const p of players) {
+    p.favorite=p.elements.Magic || Object.values(p.elements).find(Boolean) || null;
+    normalizeDefaults(p);
+  }
   return {players,sidekick:null};
 }
 function resolveChoice(selected,figures,game) {
@@ -93,4 +120,4 @@ function resolveChoice(selected,figures,game) {
   if(top.half==='whole' && selected.bottom) throw Error('A whole figure cannot have a bottom half.');
   return top.half==='top'?[top,bottom]:[top];
 }
-module.exports={elements,games,identify,scan,detectGame,compatible,core,playable,candidates,choice,newProfile,resolveChoice};
+module.exports={elements,games,perks,identify,scan,detectGame,compatible,core,playable,candidates,choice,perkChoice,normalizeDefaults,newProfile,resolveChoice};
