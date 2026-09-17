@@ -177,6 +177,25 @@ class Manager extends EventEmitter {
   }
   async hotkey({player,key}) {
     if(!this.session.game) return;
+    if(key==='Left' || key==='Right') {
+      if(![0,1].includes(player) || this.busy || this.switchingPreset) return;
+      this.switchingPreset=true;
+      try {
+        const defaults=this.profile.players[player],direction=key==='Right'?1:-1;
+        for(let step=1;step<=3;step++) {
+          const preset=(defaults.activeFavorite+direction*step+3)%3;
+          if(!defaults.favorites[preset]) continue;
+          try {
+            await this.select({player,target:'active-favorite',preset});
+            const names=model.resolveChoice(defaults.favorites[preset],this.figures,this.game).map(f=>f.info.name);
+            this.emit('notification',`Player ${player+1} · Preset ${preset+1}: ${names.join(' / ')}`);
+          } catch(e) { this.message=e.message; this.publish();this.emit('notification',e.message); }
+          return;
+        }
+        this.emit('notification',`Player ${player+1}: assign a default preset first.`);
+      } finally { this.switchingPreset=false; }
+      return;
+    }
     const target=key==='T'?(player===1?'thumpling':'thumpback'):key==='0'?'favorite':model.elements[['1','2','3','4','5','6','7','8','9','-'].indexOf(key)] || (this.game===3 && model.perks.some(p=>p.key===key)?`perk-${key}`:null);
     if(!target) return;
     try { await this.action({player,target}); } catch(e) { this.message=e.message; this.publish(); }

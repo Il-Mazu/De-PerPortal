@@ -1,6 +1,6 @@
 {
   "name": "de-perportal-manager",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A portable two-player Skylanders portal manager for Cemu",
   "author": "Il-Mazu",
   "license": "GPL-2.0-or-later",
@@ -21,7 +21,7 @@
   },
   "build": {
     "appId": "io.github.il-mazu.deperportal",
-    "productName": "D\u00e8 PerPortal",
+    "productName": "Dè PerPortal",
     "artifactName": "De-PerPortal-${version}-windows-x64.${ext}",
     "directories": {
       "output": "release"

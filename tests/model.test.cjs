@@ -160,3 +160,31 @@ test('renamed portable data preserves legacy settings and artwork without overwr
   const next=new Manager(root,async()=>{});await next.init();assert.equal(next.config.game,2);
  } finally {await fs.rm(root,{recursive:true,force:true});}
 });
+
+
+test('arrow hotkeys cycle assigned defaults independently, wrap, persist, and notify without loading',async()=>{
+ const calls=[];const {root,manager}=await setup(async a=>calls.push(a));
+ try {
+  const notices=[];manager.on('notification',text=>notices.push(text));
+  await manager.select({player:0,target:'favorite',preset:2,choice:{top:'16-0.sky',bottom:null}});
+  await manager.hotkey({player:0,key:'Right'});
+  assert.equal(manager.profile.players[0].activeFavorite,0);
+  await manager.hotkey({player:0,key:'Left'});
+  assert.equal(manager.profile.players[0].activeFavorite,2);
+  assert.match(notices.at(-1),/Player 1 · Preset 3: Spyro/);
+  assert.equal(manager.profile.players[1].activeFavorite,0);
+  await manager.select({player:1,target:'favorite',preset:1,choice:{top:'18-0.sky',bottom:null}});
+  await manager.hotkey({player:1,key:'Left'});
+  assert.equal(manager.profile.players[1].activeFavorite,0);
+  await manager.hotkey({player:1,key:'Left'});
+  assert.equal(manager.profile.players[1].activeFavorite,1);
+  assert.match(notices.at(-1),/Player 2 · Preset 2/);
+  assert.equal(calls.length,0);
+  manager.busy=true;await manager.hotkey({player:0,key:'Right'});
+  assert.equal(manager.profile.players[0].activeFavorite,2);manager.busy=false;
+  const saved=JSON.parse(await fs.readFile(path.join(root,'de-perportal-data/settings.json')));
+  assert.equal(saved.profiles[3].players[0].activeFavorite,2);
+  manager.session.game=0;await manager.hotkey({player:0,key:'Right'});
+  assert.equal(manager.config.profiles[3].players[0].activeFavorite,2);
+ }finally{await fs.rm(root,{recursive:true,force:true});}
+});

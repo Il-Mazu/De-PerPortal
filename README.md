@@ -22,7 +22,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 
 ## Download and setup
 
-Download **De-PerPortal-0.3.0-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.3.1-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -42,6 +42,8 @@ The build currently requires Cemu's English interface. In Settings, enable the C
 | --- | --- |
 | Alt + T | Load Thumpback for Player 1 |
 | Alt + Shift + T | Add Thumpling as the sidekick |
+| Alt + Left / Right | Select previous / next assigned preset for Player 1 |
+| Alt + Shift + Left / Right | Select previous / next assigned preset for Player 2 |
 | Alt + 0 | Load Player 1's default |
 | Alt + Shift + 0 | Load Player 2's default |
 | Alt + 1–9 / minus | Load Player 1's assigned element |
@@ -65,7 +67,7 @@ The Emulated USB Devices window closes after successful swaps. File dialogs may 
 
 ## Shortcut overlay
 
-The small shortcut overlay appears at the bottom center of Cemu's display while a supported game has focus. It shows official element icons and their keys, plus the eight movement icons in Swap Force. Hold Alt for Player 1 or Alt+Shift for Player 2. The × dismisses it for the current Dè PerPortal session; the toolbar's **Overlay** button reopens it (and lets you preview it without a game). It does not take keyboard focus. Close Dè PerPortal to close the overlay too. Window-manager and exclusive-fullscreen behavior can vary; use windowed or borderless Cemu if your desktop hides it.
+The small shortcut overlay appears at the bottom center of Cemu's display while a supported game has focus. It shows official element icons and their keys, plus the eight movement icons in Swap Force. Hold Alt for Player 1 or Alt+Shift for Player 2. The × dismisses it for the current Dè PerPortal session; the toolbar's **Overlay** button reopens it (and lets you preview it without a game). Drag the reminder anywhere on the display; its position is retained for the current session. Preset arrow shortcuts skip empty slots and wrap around, with a brief player/preset notification on the same overlay layer, even when the reminder is dismissed. It does not take keyboard focus. Close Dè PerPortal to close the overlay too. Window-manager and exclusive-fullscreen behavior can vary; use windowed or borderless Cemu if your desktop hides it.
 
 Icon artwork is sourced from Activision's official manuals; see `app/ui/icons/SOURCES.md` for provenance and ownership.
 

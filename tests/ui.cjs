@@ -30,6 +30,16 @@ const {installArt}=require('../app/artwork.cjs');
     return {visible:w.isVisible(),focusable:w.isFocusable(),top:w.isAlwaysOnTop()};
   });
   assert.deepEqual(await overlayFlags(),{visible:true,focusable:false,top:true});
+  assert.equal(await overlay.locator('main').evaluate(el=>getComputedStyle(el).getPropertyValue('-webkit-app-region')),'drag');
+  assert.equal(await overlay.locator('#close').evaluate(el=>getComputedStyle(el).getPropertyValue('-webkit-app-region')),'no-drag');
+  const movedPosition=await instance.evaluate(({BrowserWindow,screen})=>{
+    const w=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html'));
+    const area=screen.getDisplayMatching(w.getBounds()).workArea;
+    w.setPosition(area.x+30,area.y+30);w.emit('moved');return w.getPosition();
+  });
+  await page.selectOption('#game','2');
+  assert.deepEqual(await instance.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html')).getPosition()),movedPosition);
+  await page.selectOption('#game','3');
   await overlay.screenshot({path:'out/de-perportal-overlay.png'});
   await overlay.locator('#close').click();
   assert.equal((await overlayFlags()).visible,false);

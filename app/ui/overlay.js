@@ -10,6 +10,8 @@ function entry(label,key,file,x,y,scale,width,height){
   icon.append(img);const k=document.createElement('span');k.className='key';k.textContent=key;cell.append(icon,k);return cell;
 }
 window.overlay.onState(state=>{
+  document.querySelector('main').hidden=!state.reminders;
+  const notice=document.getElementById('notification');notice.hidden=!state.notification;notice.textContent=state.notification || '';
   document.getElementById('elements').replaceChildren(...state.elements.filter(e=>state.game>=4 || !['Light','Dark'].includes(e)).map(e=>{
     const i=state.elements.indexOf(e);return entry(e,i===9?'-':String(i+1),'elements',...elements[e],.28,805,1000);
   }));

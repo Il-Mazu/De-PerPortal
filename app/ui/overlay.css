@@ -4,3 +4,5 @@ main{position:relative;height:100%;display:flex;flex-direction:column;background
 button{border:0;background:transparent;color:#fff;font-size:18px;line-height:16px;padding:0 3px;cursor:pointer}button:hover{background:#536174;border-radius:4px}button:focus-visible{outline:1px solid white}
 .row{display:flex;justify-content:space-around;flex:1;min-height:0;align-items:center}.row[hidden]{display:none}
 .entry{display:flex;align-items:center;gap:3px}.icon{display:block;position:relative;width:28px;height:28px;zoom:1.28;overflow:hidden;border-radius:50%;flex-shrink:0}.row:has(.entry:nth-child(10)) .icon{zoom:1.14}.icon img{position:absolute;max-width:none;pointer-events:none}.key{font-size:13px;color:#fff}
+
+body{display:flex;flex-direction:column}main{flex:1;min-height:0;app-region:drag;-webkit-app-region:drag}button{-webkit-app-region:no-drag;app-region:no-drag}main[hidden],#notification[hidden]{display:none}#notification{height:54px;flex-shrink:0;background:rgba(15,19,25,.94);border:1px solid #71c3e4;border-radius:8px;padding:8px 12px;display:flex;align-items:center;font-size:14px;overflow:hidden}
