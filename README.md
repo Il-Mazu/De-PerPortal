@@ -3,7 +3,6 @@
 </p>
 
 <h1 align="center">Dè PerPortal</h1>
-<p align="center"><strong>Your figures. Your shortcuts. Your Portal of Power.</strong></p>
 <p align="center">
   <a href="https://github.com/Il-Mazu/De-PerPortal/releases/latest">Download for Windows</a> ·
   <a href="#download-and-setup">Get started</a> ·
