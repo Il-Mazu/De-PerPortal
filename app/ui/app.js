@@ -3,6 +3,7 @@ const api=window.dePerPortal;
 let state,player=0,picking=null,pendingTop=null,pickerSaving=false,toastTimer,artBannerDismissed=false;
 const $=id=>document.getElementById(id);
 const colors={Magic:'#bd9ded',Water:'#71c3e4',Tech:'#eac46b',Fire:'#f58d68',Earth:'#bd9671',Life:'#9bd47c',Air:'#b7d7e4',Undead:'#baabde',Light:'#eee4a2',Dark:'#a69aca'};
+const portals={1:['portal.png','Original stone portal'],2:['portal.png','Giants · stone portal'],3:['portals/swap-force.png','Swap Force · arched portal'],4:['portals/trap-team.png','Trap Team · Traptanium portal'],5:['portals/superchargers.png','SuperChargers · engine portal'],6:['portals/swap-force.png','Imaginators · arched portal']};
 const icons={Magic:'✦',Water:'◈',Tech:'⚙',Fire:'♨',Earth:'◆',Life:'❧',Air:'≋',Undead:'☽',Light:'☀',Dark:'◐'};
 const e=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const figure=key=>state.figures.find(f=>f.key===key);
@@ -24,6 +25,11 @@ function render() {
   if(!state)return;
   document.body.classList.toggle('busy',state.busy);
   const connected=state.session.supported;
+  const portal=portals[state.game];
+  const portalImage=document.querySelector('.portal');
+  if(portalImage.getAttribute('src')!==portal[0])portalImage.src=portal[0];
+  portalImage.alt=portal[1];
+  document.body.dataset.game=state.game;
   $('connection').textContent=connected?'Cemu connected':state.session.pid?'Unsupported Cemu':'Waiting for Cemu';
   $('connection').parentElement.classList.toggle('connected',connected);
   $('game').innerHTML=state.games.map((g,i)=>`<option value="${i+1}">${e(g)}</option>`).join('');
@@ -37,6 +43,11 @@ function render() {
   $('thumpling').disabled=state.busy || !state.figures.some(f=>f.id===541 && f.info?.game<4 && compatible(f));
   for(let p=0;p<2;p++) {
     const defaults=state.profile.players[p],current=state.active[p],f=chosen(current),favorite=defaults.favorite,ff=chosen(favorite);
+    const tone=colors[f?.info?.element] || '#829798';
+    document.body.style.setProperty(`--player-${p}`,tone);
+    $(`player-${p}`).style.setProperty('--player-color',tone);
+    $(`player-${p}`).dataset.element=f?.info?.element || '';
+    document.querySelector(p?'.aura-two':'.aura-one').classList.toggle('is-active',!!f);
     $(`player-${p}`).innerHTML=`<div class="player-label"><b>0${p+1}</b> PLAYER ${p+1}</div><button class="active-card" title="Choose Player ${p+1}’s active Skylander"><div class="portrait">${art(current)}</div><span class="active-name">${e(f?name(f):'Choose Skylander')}</span><span class="figure-meta">${e(f?`${f.info?.element||''} · ${current?.bottom?'Swap combination':f.info?.kind||'Skylander'}`:'Click to load a figure')}</span></button>${f?'<button class="remove">Remove from portal</button>':''}`;
     $(`player-${p}`).querySelector('.active-card').onclick=()=>openPicker({player:p,target:'direct'});
     const observed=state.observed?.[p*2];
@@ -65,7 +76,6 @@ function render() {
     if(!side)$('sidekick').querySelector('.name').textContent=state.observed[4];
     const remove=document.createElement('button');remove.className='remove';remove.textContent='Remove';remove.onclick=()=>perform(()=>api.action({target:'remove-sidekick'}));$('sidekick').append(remove);
   }
-  $('portal-count').textContent=`${state.active.filter(Boolean).length} / 2 PLAYERS ACTIVE`;
   for(let p=0;p<2;p++) $(`tab-${p}`).classList.toggle('selected',p===player);
   $('elements').innerHTML=state.elements.map((element,i)=>{
     const c=state.profile.players[player].elements[element],f=chosen(c);
@@ -86,6 +96,8 @@ function render() {
     }).join('');
     for(const card of $('perks').children) card.querySelector('.perk-load').onclick=()=>perform(()=>api.action({player,target:`perk-${card.querySelector('.perk-load').dataset.key}`}));
   }
+  renderAccessories();
+  if(picking && $('picker').open && !pickerSaving)renderPicker();
   $('status').textContent=state.message;
   $('library-count').textContent=`${state.figures.length} figures in your library`;
   $('root-path').textContent=state.root;
@@ -95,25 +107,48 @@ function render() {
   for(const edit of document.querySelectorAll('.edit'))edit.textContent='Edit';
   orientHalves();
 }
+function accessoryIcon(slot) {
+  const paths={item:'M4 9h16v11H4z M3 5h18v4H3z M12 5v15 M9 5C4 5 7 0 12 5C17 0 20 5 15 5',trap:'M8 3h8l4 7-8 11-8-11z M8 3l-1 7 5 11 5-11-1-7 M4 10h16',vehicle:'M5 8l2-4h10l2 4 M3 8h18v9H3z M5 17v3 M19 17v3 M6 12h2 M16 12h2',trophy:'M7 3h10v6a5 5 0 0 1-10 0z M7 5H3v3a4 4 0 0 0 4 4 M17 5h4v3a4 4 0 0 1-4 4 M12 14v5 M8 21h8 M9 19h6'};
+  return `<svg class="accessory-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="${paths[slot]}"></path></svg>`;
+}
+function renderAccessories() {
+  const slots=state.accessorySlots.filter(s=>state.game>=s.from || state.accessories[s.key] || (state.observed?.[s.row-1] && state.observed[s.row-1]!=='None'));
+  $('accessories').innerHTML=slots.map(slot=>{
+    const f=chosen(state.accessories[slot.key]),observed=state.observed?.[slot.row-1];
+    const occupied=!!f || (!!observed && observed!=='None');
+    const count=state.figures.filter(f=>f.accessory?.slot===slot.key).length;
+    return `<article class="accessory-card ${occupied?'occupied':''}" data-slot="${slot.key}"><div class="accessory-art">${f?.art?portrait(f):accessoryIcon(slot.key)}</div><div class="accessory-content"><span class="label">${e(slot.key==='vehicle' && state.game===5?'Shared vehicle':slot.label)}</span><h3>${e(f?name(f):occupied?observed:'Nothing placed')}</h3><div class="accessory-actions"><button class="choose-accessory" ${state.busy?'disabled':''}>${occupied?'Change':'Choose'}${!occupied?` · ${count}`:''}</button>${occupied?`<button class="remove-accessory" ${state.busy?'disabled':''}>Remove</button>`:''}</div></div></article>`;
+  }).join('');
+  for(const card of $('accessories').children) {
+    card.querySelector('.choose-accessory').onclick=()=>openPicker({target:'accessory',slot:card.dataset.slot});
+    card.querySelector('.remove-accessory')?.addEventListener('click',()=>perform(()=>api.action({target:'remove-accessory',slot:card.dataset.slot})));
+  }
+}
 function compatible(f) { return f.info && f.info.game<=state.game; }
 function core(f) { return f.info?.kind==='Skylander' && !/lightcore|elite/i.test(f.info.name) && (f.variant & 0x600)!==0x200; }
 function available() {
   const query=$('search').value.trim().toLowerCase();
+  if(picking.target==='accessory')return state.figures.filter(f=>f.accessory?.slot===picking.slot && (!query || `${f.info.name} ${f.accessory.type} ${f.info.element} ${f.key}`.toLowerCase().includes(query)));
   if(pendingTop) return state.figures.filter(f=>compatible(f) && f.half==='bottom' && (!query || `${f.info.name} ${f.key}`.toLowerCase().includes(query))).sort((a,b)=>Number(b.id===pendingTop.id-1000 && b.variant===pendingTop.variant)-Number(a.id===pendingTop.id-1000 && a.variant===pendingTop.variant));
-  return state.figures.filter(f=>compatible(f) && f.half!=='bottom' && (!query || `${f.info.name} ${f.id} ${f.key}`.toLowerCase().includes(query)) && (picking.target==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4)) && (!state.elements.includes(picking.target) || (core(f) && f.info.element===picking.target)));
+  return state.figures.filter(f=>compatible(f) && f.half!=='bottom' && (!query || `${f.info.name} ${f.id} ${f.key}`.toLowerCase().includes(query)) && (picking.target==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei','Crystal'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4)) && (!state.elements.includes(picking.target) || (core(f) && f.info.element===picking.target)));
 }
 function openPicker(options) {
   if(options.target==='favorite') options={...options,preset:options.preset ?? state.profile.players[options.player].activeFavorite};
   picking=options;
   pendingTop=null;
   $('picker-title').textContent=options.target==='sidekick'?'Choose your sidekick':options.target==='direct'?`Player ${options.player+1} · choose a Skylander`:options.target==='favorite'?`Player ${options.player+1} · default preset ${options.preset+1}`:`Player ${options.player+1} · ${options.target}`;
+  const accessory=options.target==='accessory';
+  if(accessory)$('picker-title').textContent=state.accessorySlots.find(s=>s.key===options.slot).label;
+  $('search').placeholder=accessory?'Search items, elements or vehicle types':'Search Skylanders';
   $('search').value='';
   $('half-controls').hidden=true;
   renderPicker();$('picker').showModal();$('search').focus();
 }
 function renderPicker() {
   const options=available();$('picker-empty').hidden=!!options.length;
-  $('picker-results').innerHTML=options.map(f=>`<button class="picker-item" data-key="${e(f.key)}"><div class="portrait">${f.half==='whole'?portrait(f):halfPortrait(f)}</div><span>${e(f.info.name)}</span><small>${e(f.info.element)} · ${pendingTop && f.id===pendingTop.id-1000 && f.variant===pendingTop.variant?'Matching bottom':e(f.info.kind)}</small><small class="filename" title="${e(f.key)}">${e(f.key.split('/').pop())}</small></button>`).join('');
+  $('picker-empty').textContent=picking.target==='accessory'?'No matching accessories in your NFC library for this game. Add your own dumps and rescan in Settings.':'No compatible figures found in your NFC folder.';
+  $('picker-results').classList.toggle('accessory-picker',picking.target==='accessory');
+  $('picker-results').innerHTML=options.map(f=>`<button class="picker-item" data-key="${e(f.key)}"${picking.target==='accessory'?` title="${e(f.accessory.effect)}"`: ''}><div class="portrait">${f.half==='whole'?portrait(f):halfPortrait(f)}</div><span>${e(f.info.name)}</span><small>${e(f.info.element)} · ${pendingTop && f.id===pendingTop.id-1000 && f.variant===pendingTop.variant?'Matching bottom':e(f.info.kind)}</small>${picking.target==='accessory'?`<small class="accessory-type">${e(f.accessory.type)}</small>`:''}<small class="filename" title="${e(f.key)}">${e(f.key.split('/').pop())}</small></button>`).join('');
   orientHalves();
   for(const button of $('picker-results').children) button.onclick=()=>perform(async()=>{
     if(pickerSaving)return;
@@ -128,7 +163,7 @@ function renderPicker() {
     const data={...picking,choice:{top:pendingTop?.key || f.key,bottom:pendingTop?f.key:null}};
     pickerSaving=true;$('picker-results').inert=true;
     try {
-      if(data.target==='direct') await api.action(data);
+      if(data.target==='direct' || data.target==='accessory') await api.action(data);
       else {await api.select(data);if(data.target==='sidekick') await api.action(data);}
       $('picker').close();
     } finally {pickerSaving=false;$('picker-results').inert=false;}

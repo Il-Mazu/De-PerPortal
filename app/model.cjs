@@ -66,7 +66,7 @@ function core(f) {
   // LightCore/Elite variants are omitted from automatic ordinary teams too.
   return f?.info?.kind==='Skylander' && f.half==='whole' && !/lightcore|elite/i.test(f.info.name) && (f.variant & 0x600)!==0x200;
 }
-function playable(f,game) { return compatible(f,game) && ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4); }
+function playable(f,game) { return compatible(f,game) && ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei','Crystal'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4); }
 function candidates(figures,game,element=null,kind='player') {
   return figures.filter(f=>compatible(f,game) && (kind==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : playable(f,game)) && (!element || (f.info.element===element && core(f))));
 }

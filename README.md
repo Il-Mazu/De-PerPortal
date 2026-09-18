@@ -18,11 +18,13 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - **Three saved defaults:** keep three presets per player, per game, and switch between them.
 - **Mix your Swap Force:** pick tops and bottoms visually, then swap movement bases with a shortcut.
 - **Keys within reach:** an in-game reminder overlay shows element and movement shortcuts.
+- **Game-aware accessories:** activate magic items, adventures, traps, racing trophies, vehicles and Imaginite chests from the GUI.
+- **A portal for every adventure:** game-matched portal artwork and subtle lighting from both active Skylanders’ elements.
 - **A portable library:** scan nested NFC folders and add optional community character artwork.
 
 ## Download and setup
 
-Download **De-PerPortal-0.3.1-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.4.0-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -61,13 +63,23 @@ Click a character to load it; use **Edit** to change an assignment. For Swap For
 
 In Swap Force, fixed perk bases are Rocket (Boom Jet), Tornado (Doom Stone), Spring (Fire Kraken), Speed (Freeze Blade), Digging (Grilla Drilla), Portals (Hoot Loop), Sneak (Trap Shadow), and Climber (Spy Rise). A perk shortcut changes only the bottom when Dè PerPortal is already tracking a Swap Force top for that player; otherwise it loads that base's matching complete pair. Each perk needs matching top and bottom dumps in the NFC library.
 
-Cemu opens the selected dump directly and saves progress to it. Dè PerPortal does not rewrite dump bytes. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick; in-game player ownership is determined by the game.
+Cemu opens the selected dump directly and saves progress to it. Dè PerPortal does not rewrite dump bytes. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
+## Items, traps and vehicles (v0.4.0)
+
+The **On the portal** section offers the accessory categories available for your game. Click **Choose**, search your NFC library, then select a figure to activate it. Hover over a figure in the picker for its game-specific effect. **Change** replaces only that accessory; **Remove** leaves both players in place. No extra keyboard shortcuts are required.
+
+SuperChargers story co-op uses one **Shared vehicle**: one player drives and the other attacks. Racing makes its vehicle selections in-game; change the vehicle when prompted. Older magic items become Academy treasures in SuperChargers and rewards in Imaginators. Adventure pieces only unlock their original levels in supported games. Vehicles and trophies remain useful in Imaginators Racing.
+
+Creation Crystals are playable figures in Imaginators: choose one from a player's Skylander picker or save it as a default. Imaginators adventure pieces and Imaginite chests appear with items. The app uses the dumps already in your NFC folder and does not reset their progress or remaining rewards. See [figure support and research](docs/FIGURE-SUPPORT.md).
+
+The portal illustration follows your game profile. Spyro's Adventure and Giants share the original stone design; Swap Force and Imaginators share the arched design. Trap Team and SuperChargers have their own artwork. Both active players contribute their element's color to the surrounding light and card accents. Motion respects your operating system's reduced-motion preference. [Portal artwork provenance](app/ui/portals/SOURCES.md).
+
 ## Shortcut overlay
 
-The small shortcut overlay appears at the bottom center of Cemu's display while a supported game has focus. It shows official element icons and their keys, plus the eight movement icons in Swap Force. Hold Alt for Player 1 or Alt+Shift for Player 2. The × dismisses it for the current Dè PerPortal session; the toolbar's **Overlay** button reopens it (and lets you preview it without a game). Drag the reminder anywhere on the display; its position is retained for the current session. Preset arrow shortcuts skip empty slots and wrap around, with a brief player/preset notification on the same overlay layer, even when the reminder is dismissed. It does not take keyboard focus. Close Dè PerPortal to close the overlay too. Window-manager and exclusive-fullscreen behavior can vary; use windowed or borderless Cemu if your desktop hides it.
+The small shortcut overlay appears at the bottom center of Cemu's display while a supported game has focus. It shows official element icons and their keys, plus the eight movement icons in Swap Force. Hold Alt for Player 1 or Alt+Shift for Player 2. The × dismisses it for the current Dè PerPortal session; the toolbar's **Overlay** button reopens it (and lets you preview it without a game). Drag the reminder anywhere on the display; its position is retained for the current session across figure changes, focus changes and preset notifications. Moving it to another monitor is supported; disconnecting that monitor keeps the reminder within an available display. Preset arrow shortcuts skip empty slots and wrap around, with a brief player/preset notification on the same overlay layer, even when the reminder is dismissed. It does not take keyboard focus. Close Dè PerPortal to close the overlay too. Window-manager and exclusive-fullscreen behavior can vary; use windowed or borderless Cemu if your desktop hides it.
 
 Icon artwork is sourced from Activision's official manuals; see `app/ui/icons/SOURCES.md` for provenance and ownership.
 
