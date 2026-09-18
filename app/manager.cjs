@@ -3,13 +3,14 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {EventEmitter}=require('node:events');
 const model=require('./model.cjs');
+const accessories=require('./accessories.cjs');
 
 class Manager extends EventEmitter {
   constructor(root,control) {
     super(); this.root=root; this.control=control;
     this.config={game:2,profiles:{},artRoot:null}; this.figures=[]; this.warnings=[];
     this.session={pid:0,supported:false,game:0,focused:false};
-    this.active=[null,null]; this.sidekick=null; this.observed=[]; this.labels={}; this.busy=false; this.message='Start Cemu to connect your portal.';
+    this.active=[null,null]; this.sidekick=null; this.accessories={}; this.observed=[]; this.labels={}; this.busy=false; this.message='Start Cemu to connect your portal.';
   }
   get game() { return this.session.game || this.config.game; }
   get profile() {
@@ -43,20 +44,24 @@ class Manager extends EventEmitter {
   state() {
     const hasArt=this.figures.some(f=>f.art);
     return {game:this.game,detected:!!this.session.game,session:this.session,profile:this.profile,
-      active:this.active,sidekick:this.sidekick,observed:this.observed,busy:this.busy,message:this.message,warnings:this.warnings,
+      active:this.active,sidekick:this.sidekick,accessories:this.accessories,accessorySlots:accessories.slots,observed:this.observed,busy:this.busy,message:this.message,warnings:this.warnings,
       hasArt,
-      figures:this.figures.map(({path:_,uid:__,art,...f})=>({...f,art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
+      figures:this.figures.map(({path:_,uid:__,art,...f})=>({...f,accessory:accessories.describe(f,this.game),art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
       root:this.root,elements:model.elements,perks:model.perks,games:model.games};
   }
   publish() { this.emit('state',this.state()); }
   updateSession(s) {
     const next={pid:s.pid,supported:s.supported,focused:s.focused,game:model.detectGame(s.title||''),bounds:s.bounds||null};
-    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.labels={}; }
+    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.accessories={}; this.labels={}; }
     const changed=JSON.stringify(next)!==JSON.stringify(this.session);
     const rowsChanged=JSON.stringify(s.rows||[])!==JSON.stringify(this.observed);
     this.observed=s.rows||[];
     if(!this.busy) {
       for(let p=0;p<2;p++) if(this.observed[p*2]==='None' || (this.labels[p*2+1] && this.observed[p*2] && this.labels[p*2+1]!==this.observed[p*2])) this.active[p]=null;
+      for(const slot of accessories.slots) {
+        const observed=this.observed[slot.row-1];
+        if(observed==='None' || (this.labels[slot.row] && observed && this.labels[slot.row]!==observed)) delete this.accessories[slot.key];
+      }
       if(this.observed[4]==='None' || (this.labels[5] && this.observed[4] && this.labels[5]!==this.observed[4]))this.sidekick=null;
     }
     this.session=next;
@@ -102,10 +107,18 @@ class Manager extends EventEmitter {
     if(!Number.isInteger(game)||game<1||game>6) throw Error('Invalid game.');
     this.config.game=game; this.profile; await this.save(); this.publish();
   }
-  async action({player=0,target='favorite',choice=null}) {
+  async action(data) {
     if(this.busy) throw Error('A portal swap is already in progress.');
+    // Hold the lock during async file validation as well as native writes.
+    this.busy=true;
+    try { return await this.performAction(data); }
+    finally { this.busy=false; this.publish(); }
+  }
+  async performAction({player=0,target='favorite',choice=null,slot=null}) {
+    const game=this.game,pid=this.session.pid;
     if(!this.session.pid || !this.session.supported) throw Error('Start the recommended Cemu build first.');
     if(![0,1].includes(player)) throw Error('Invalid player.');
+    if(target==='accessory' || target==='remove-accessory') return this.accessoryAction({target,choice,slot});
     let selected, perkBase=null, replaceBottom=false;
     if(target==='thumpback') {
       player=0;
@@ -136,19 +149,19 @@ class Manager extends EventEmitter {
     } else if(target!=='remove' && target!=='remove-sidekick') files=model.resolveChoice(selected,this.figures,this.game);
     if(replaceBottom) files=[perkBase.bottom];
     // Reject duplicates and changed dumps before touching any Cemu row.
-    const others=[...this.active.flatMap((c,p)=>p===player && target!=='sidekick'?[]:c?[c.top,c.bottom].filter(Boolean):[]),...(target!=='sidekick' && this.sidekick?[this.sidekick.top]:[])];
+    const others=[...Object.values(this.accessories).map(c=>c.top),...this.active.flatMap((c,p)=>p===player && target!=='sidekick'?[]:c?[c.top,c.bottom].filter(Boolean):[]),...(target!=='sidekick' && this.sidekick?[this.sidekick.top]:[])];
     const otherFigures=others.map(k=>this.figures.find(f=>f.key===k)).filter(Boolean);
     for(const f of files) {
       const now=model.identify(await fs.readFile(f.path));
       if(now.id!==f.id || now.variant!==f.variant || now.uid!==f.uid) throw Error('A figure changed since scanning. Rescan your NFC folder.');
       if(otherFigures.some(x=>x.key===f.key || x.uid===f.uid)) throw Error('That figure is already on the portal. Choose a different figure for each player.');
     }
-    const game=this.game, pid=this.session.pid;
     this.busy=true; this.message='Swapping on the portal…'; this.publish();
     try {
       const run=async(args)=>{
         if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
         const output=await this.control(args);
+        if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
         const label=typeof output==='string' && output.match(/Row (\d+): .* -> (.*)/);
         if(label)this.labels[Number(label[1])]=label[2].trim();
         return output;
@@ -173,7 +186,33 @@ class Manager extends EventEmitter {
       }
       this.message=target==='remove-sidekick'?'Sidekick removed.':target==='remove'?`Player ${player+1} removed.`:replaceBottom?`${perkBase.perk.name} base is on Player ${player+1}.`:`${files[0].info.name} is on the portal.`;
     } catch(e) { this.message=`Swap stopped: ${e.message} Check Cemu before retrying.`; throw e; }
-    finally { this.busy=false; this.publish(); }
+  }
+  async accessoryAction({target,choice,slot}) {
+    const game=this.game,pid=this.session.pid;
+    const definition=accessories.slots.find(s=>s.key===slot);
+    if(!definition) throw Error('Choose a valid accessory slot.');
+    const removing=target==='remove-accessory';
+    const f=this.figures.find(f=>f.key===choice?.top);
+    if(!removing) {
+      if(choice?.bottom || !accessories.available(f,this.game,slot)) throw Error('This accessory is unavailable in the selected game or slot.');
+      const now=model.identify(await fs.readFile(f.path));
+      if(now.id!==f.id || now.variant!==f.variant || now.uid!==f.uid) throw Error('A figure changed since scanning. Rescan your NFC folder.');
+      const keys=[...this.active.flatMap(c=>c?[c.top,c.bottom]:[]),this.sidekick?.top,
+        ...Object.entries(this.accessories).filter(([key])=>key!==slot).map(([,c])=>c.top)];
+      if(this.figures.some(other=>keys.includes(other.key) && (other.key===f.key || other.uid===f.uid))) throw Error('That figure is already on the portal. Choose a different figure.');
+    }
+    const row=String(definition.row);
+    this.busy=true;this.message=removing?'Removing accessory…':'Activating accessory…';this.publish();
+    try {
+      if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
+      const output=await this.control(removing?['clear',row]:['load',row,f.path]);
+      const label=typeof output==='string' && output.match(/Row (\d+): .* -> (.*)/);
+      if(label)this.labels[Number(label[1])]=label[2].trim();
+      if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
+      if(removing)delete this.accessories[slot];
+      else this.accessories[slot]={top:f.key,bottom:null};
+      this.message=removing?'Accessory removed.':`${f.info.name} is on the portal.`;
+    } catch(e) { this.message=`Accessory swap stopped: ${e.message} Check Cemu before retrying.`;throw e; }
   }
   async hotkey({player,key}) {
     if(!this.session.game) return;

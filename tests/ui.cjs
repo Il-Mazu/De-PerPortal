@@ -7,14 +7,15 @@ const {installArt}=require('../app/artwork.cjs');
 (async()=>{
  const root=await fs.mkdtemp(path.resolve('out/ui-'));
  await fs.mkdir(path.join(root,'NFC'));
- const entries=[[16,0],[18,0],[12,0],[14,0],[9,0],[8,0],[19,0],[20,0],[4,0],[5,0],[24,0],[25,0],[0,0],[1,0],[29,0],[30,0],[107,4614],[2000,8192],[1000,8192],[505,0],[1001,8192],[541,4096]];
+ const entries=[[16,0],[18,0],[12,0],[14,0],[9,0],[8,0],[19,0],[20,0],[4,0],[5,0],[24,0],[25,0],[0,0],[1,0],[29,0],[30,0],[107,4614],[2000,8192],[1000,8192],[505,0],[1001,8192],[541,4096],[200,0],[300,0],[211,12289],[3224,16384],[3222,16384],[3503,16384],[310,20480],[311,20480],[235,20481],[685,21007]];
  for(const [id,variant] of entries){const b=Buffer.alloc(1024);b.writeUInt32LE(id+1);b.writeUInt16LE(id,16);b.writeUInt16LE(variant,28);await fs.writeFile(path.join(root,'NFC',`${id}-${variant}.sky`),b);}
  try {await installArt(root,await fs.readFile('out/artwork-pack.zip'));}catch(e){if(e.code!=='ENOENT')throw e;}
- const instance=await electron.launch({args:[path.resolve('.'),'--no-sandbox',`--user-data-dir=${path.join(root,'electron-data')}`],env:{...process.env,DE_PERPORTAL_HOME:root}});
+ const instance=await electron.launch({args:[path.resolve('.'),'--no-sandbox',...(process.platform==='linux'?['--ozone-platform=x11']:[]),`--user-data-dir=${path.join(root,'electron-data')}`],env:{...process.env,DE_PERPORTAL_HOME:root}});
  try {
   const page=await instance.firstWindow();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.locator('#library-count').filter({hasText:'22 figures'}).waitFor();
-  await page.selectOption('#game','3');
+  const selectGame=async value=>{await page.selectOption('#game',value);await page.waitForFunction(game=>document.body.dataset.game===game,value);};
+  await page.locator('#library-count').filter({hasText:'32 figures'}).waitFor();
+  await selectGame('3');
   assert.equal(await page.locator('#perks-section').isVisible(),true);
   assert.equal(await page.locator('#perks .perk-card').count(),8);
   assert.match(await page.locator('#perks .perk-card').first().textContent(),/Rocket/);
@@ -35,20 +36,20 @@ const {installArt}=require('../app/artwork.cjs');
   const movedPosition=await instance.evaluate(({BrowserWindow,screen})=>{
     const w=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html'));
     const area=screen.getDisplayMatching(w.getBounds()).workArea;
-    w.setPosition(area.x+30,area.y+30);w.emit('moved');return w.getPosition();
+    w.setPosition(area.x+30,area.y+30);return w.getPosition();
   });
-  await page.selectOption('#game','2');
+  await selectGame('2');
   assert.deepEqual(await instance.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html')).getPosition()),movedPosition);
-  await page.selectOption('#game','3');
+  await selectGame('3');
   await overlay.screenshot({path:'out/de-perportal-overlay.png'});
   await overlay.locator('#close').click();
   assert.equal((await overlayFlags()).visible,false);
   await page.locator('#overlay').click();
   assert.equal((await overlayFlags()).visible,true);
-  await page.selectOption('#game','5');
+  await selectGame('5');
   await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===10);
   assert.equal(await overlay.locator('#perks').isVisible(),false);
-  await page.selectOption('#game','3');
+  await selectGame('3');
   await overlay.locator('#close').click();
   await page.locator('#favorite-0 .edit').click();
   await page.locator('#search').fill('Boom Jet');
@@ -86,20 +87,76 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('#favorite-0 .name').filter({hasText:'Spyro'}).waitFor();
   await page.locator('#favorite-0 .default-presets button').first().click();
   await page.locator('#favorite-0 .name').filter({hasText:'Boom Jet / Free Ranger'}).waitFor();
-  assert.equal(await page.locator('.portal').getAttribute('src'),'portal.png');
+  assert.equal(await page.locator('.portal').getAttribute('src'),'portals/swap-force.png');
   await page.locator('#tab-1').click();
   await page.getByRole('button',{name:'Change Water Skylander',exact:true}).click();
   assert.equal(await page.locator('.picker-item').count(),2); // no Giant Thumpback in ordinary Water choices
   await page.locator('#picker-close').click();
   await page.locator('#settings').click();await page.locator('#settings-close').click();
   await page.locator('#tab-0').click();
-  await page.selectOption('#game','2');
+  await selectGame('2');
   assert.equal(await page.locator('#perks-section').isVisible(),false);
-  await page.selectOption('#game','3');
+  await selectGame('3');
   await page.screenshot({path:'out/de-perportal-ui.png',fullPage:true});
+  // Per-game artwork and accessory filtering use the actual renderer and model state.
+  for(const [game,src,slots] of [['1','portal.png',1],['2','portal.png',1],['3','portals/swap-force.png',1],['4','portals/trap-team.png',2],['5','portals/superchargers.png',4],['6','portals/swap-force.png',4]]) {
+    await selectGame(game);
+    assert.equal(await page.locator('.portal').getAttribute('src'),src);
+    assert.equal(await page.locator('.accessory-card').count(),slots);
+    await page.waitForFunction(()=>document.querySelector('.portal').complete && document.querySelector('.portal').naturalWidth>0);
+  }
+  await page.locator('[data-slot="item"] .choose-accessory').click();
+  assert.equal(await page.locator('.picker-item').count(),5);
+  await page.locator('#search').fill('Enchanted');assert.equal(await page.locator('.picker-item').count(),1);
+  assert.match(await page.locator('.picker-item').getAttribute('title'),/corresponding adventure/);
+  await page.locator('#picker-close').click();
+  await page.locator('#player-0 .active-card').click();await page.locator('#search').fill('Fire Reactor');
+  assert.equal(await page.locator('.picker-item').count(),1);await page.locator('#picker-close').click();
+  await selectGame('5');
+  await page.locator('[data-slot="vehicle"] .choose-accessory').click();
+  assert.equal(await page.locator('.picker-item').count(),2);
+  await page.locator('#search').fill('sea');assert.equal(await page.locator('.picker-item').count(),1);
+  await page.locator('#picker-close').click();
+  // Mock only native actions for GUI interaction checks; manager behavior is tested separately.
+  if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
+    const fixture=await page.evaluate(()=>window.dePerPortal.state());
+    fixture.active=[{top:'16-0.sky',bottom:null},{top:'9-0.sky',bottom:null}];
+    fixture.session={pid:1,supported:true,game:5,focused:false};
+    await instance.evaluate(({ipcMain,BrowserWindow},fixture)=>{
+      globalThis.uiActions=[];globalThis.uiFixture=fixture;
+      const main=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/index.html'));
+      ipcMain.removeHandler('action');ipcMain.handle('action',(_event,data)=>{
+        globalThis.uiActions.push(data);
+        if(data.target==='accessory')fixture.accessories[data.slot]=data.choice;
+        else if(data.target==='remove-accessory')delete fixture.accessories[data.slot];
+        main.webContents.send('state',fixture);
+      });
+      main.webContents.send('state',fixture);
+    },fixture);
+    await page.locator('#player-0 .active-name').filter({hasText:'Spyro'}).waitFor();
+    assert.equal(await page.locator('#player-0').getAttribute('data-element'),'Magic');
+    assert.equal(await page.locator('#player-1').getAttribute('data-element'),'Fire');
+    assert.equal(await page.locator('.element-aura.is-active').count(),2);
+    await page.locator('[data-slot="vehicle"] .choose-accessory').click();
+    await page.locator('.picker-item[data-key="3224-16384.sky"]').click();
+    await page.locator('[data-slot="vehicle"] h3').filter({hasText:'Hot Streak'}).waitFor();
+    assert.equal(await page.locator('#player-0 .active-name').textContent(),'Spyro');
+    await page.locator('[data-slot="trap"] .choose-accessory').click();await page.locator('.picker-item').click();
+    await page.locator('[data-slot="trap"] h3').filter({hasText:'Water Tiki'}).waitFor();
+    await page.screenshot({path:'out/de-perportal-elements-and-items.png',fullPage:true});
+    await page.locator('[data-slot="vehicle"] .remove-accessory').click();
+    await page.locator('[data-slot="vehicle"] h3').filter({hasText:'Nothing placed'}).waitFor();
+    assert.deepEqual(await instance.evaluate(()=>globalThis.uiActions.map(a=>[a.target,a.slot])),[['accessory','vehicle'],['accessory','trap'],['remove-accessory','vehicle']]);
+    await page.emulateMedia({reducedMotion:'reduce'});
+    assert.equal(await page.locator('.aura-one').evaluate(el=>getComputedStyle(el).animationName),'none');
+    await page.setViewportSize({width:720,height:900});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await page.screenshot({path:'out/de-perportal-compact.png',fullPage:true});
+  }
   assert.deepEqual(errors,[]);
   // Integration is opt-in and requires a Cemu session with empty portal rows.
   if(process.env.DE_PERPORTAL_INTEGRATION==='1'){
+    await selectGame('3');
     await page.waitForFunction(()=>document.getElementById('connection').textContent==='Cemu connected');
     await page.locator('#thumpback').click();
     await page.waitForFunction(()=>document.querySelector('#player-0 .active-name').textContent==='Thumpback');
