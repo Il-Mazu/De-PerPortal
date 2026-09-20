@@ -20,7 +20,7 @@ function createOverlay(manager,mainWindow) {
     rememberPosition();
     const reminders=!dismissed && (preview || (state.session.supported && state.session.game && state.session.focused));
     const show=reminders || (notification && state.session.supported && state.session.game && state.session.focused);
-    if(!show){window.hide();return;}
+    if(!show){clearTimeout(timer);timer=null;window.hide();return;}
     let reference=mainWindow.getBounds();
     const bounds=state.session.bounds;
     if(bounds && bounds.width>0 && bounds.height>0) reference=process.platform==='win32'?screen.screenToDipRect(null,bounds):bounds;
@@ -41,6 +41,11 @@ function createOverlay(manager,mainWindow) {
     }
     window.webContents.send('overlay-state',{game:state.game,elements:state.elements,perks:state.perks,reminders,notification});
     if(!window.isVisible())window.showInactive();
+    // Swaps briefly focus Cemu's portal/file dialogs. Only count down while
+    // the notification is visible over the focused game; resume after a hide.
+    if(notification && state.session.focused && !timer) {
+      timer=setTimeout(()=>{timer=null;notification=null;update(manager.state());},4500);
+    }
   }
   function verify(event){if(event.sender!==window.webContents || event.senderFrame!==window.webContents.mainFrame)throw Error('Invalid overlay request.');}
   ipcMain.handle('overlay-ready',event=>{verify(event);ready=true;update();});
@@ -57,8 +62,7 @@ function createOverlay(manager,mainWindow) {
   // Capture the proposed bounds directly, before a state update can resize it.
   window.on('will-move',(_event,bounds)=>{if(!placing)position=[bounds.x,bounds.y];});
   const notify=message=>{
-    notification=message;clearTimeout(timer);update(manager.state());
-    timer=setTimeout(()=>{notification=null;update(manager.state());},2500);
+    notification=message;clearTimeout(timer);timer=null;update(manager.state());
   };
   manager.on('notification',notify);
   manager.on('state',update);

@@ -14,9 +14,11 @@ test('Trap Team arrow shortcuts cycle exact files, wrap, respect locks and game,
   await fs.mkdir(path.join(root,'NFC'));
   for(const [key,uid] of [['b.sky',100],['a.sky',101]])await fs.writeFile(path.join(root,'NFC',key),dump(211,12289,uid));
   const manager=new Manager(root,async args=>calls.push(args));await manager.init();
+  const notices=[];manager.on('notification',message=>notices.push(message));
   manager.updateSession({pid:1,supported:true,focused:true,title:'Skylanders Trap Team'});
   const press=key=>manager.hotkey({player:0,key});
   await press('Down');assert.equal(manager.accessories.trap.top,'a.sky');
+  assert.match(notices.at(-1),/^Trap 1\/2: Water Tiki · Water$/);
   await press('Down');assert.equal(manager.accessories.trap.top,'b.sky');
   await press('Down');assert.equal(manager.accessories.trap.top,'a.sky');
   await press('Up');assert.equal(manager.accessories.trap.top,'b.sky');

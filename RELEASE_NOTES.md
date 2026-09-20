@@ -1,3 +1,17 @@
+# Dè PerPortal 0.5.1
+
+- Existing Trap Team element slots now migrate to matching Trap Masters while preserving valid Trap Master choices and favorite presets.
+- Empty and unnamed, unverified traps are grouped under **Other traps** instead of prompting for a villain name. Players can still open that group and manually name an unverified trap.
+- Trap cycling notifications show the selected trap's position, name, and element, and remain visible for 4.5 seconds after Cemu regains focus.
+
+## Validation
+
+22 unit/regression tests and the Electron interface suite pass. Coverage includes saved profile migration, manual trap names, trap cycling, accessory checks, and overlay placement and notifications.
+
+GitHub Actions builds the Windows package and publishes its SHA-256 checksum. Live Windows gameplay has not been tested for this patch.
+
+---
+
 # Dè PerPortal 0.5.0
 
 - Added a Trap Team roster that detects whether a trap is occupied and lets players save a manual villain name per trap file. Names persist in app settings, and changed detectable occupants prompt players to update the name.

@@ -126,16 +126,22 @@ function renderAccessories() {
   const roster=$('trapped-villains'),traps=state.figures.filter(f=>f.info?.kind==='Trap').sort((a,b)=>a.info.element.localeCompare(b.info.element)||a.info.name.localeCompare(b.info.name)||a.key.localeCompare(b.key));
   roster.hidden=state.game!==4;
   if(state.game===4) {
-    $('villain-roster').innerHTML=traps.map(f=>{
+    const otherOpen=$('villain-roster').querySelector('details')?.open || false;
+    const hasVillain=f=>f.trap?.state!=='empty' && (f.trap?.state==='captured' || f.trapLabel);
+    const card=f=>{
       const status=f.trap||{state:'unknown'},saved=f.trapLabel;
       const changed=saved && status.state==='captured' && saved.recordId!==null && saved.recordId!==status.recordId;
       const label=status.state==='empty'?'Empty':changed?'Villain changed':saved?.name || (status.state==='captured'?'Villain detected':'Contents unknown');
       const detail=status.state==='empty'?'Empty trap':status.state==='captured'?'Villain detected':'Contents unverified';
-      return `<article class="villain-entry" data-key="${e(f.key)}"><button class="villain-card" ${state.busy?'disabled':''}><span>${e(label)}</span><small>${e(f.info.name)} · ${e(f.info.element)}</small><small>${e(detail)}${saved?' · Manual name':''}</small><small>${e(f.key)}</small></button><button class="name-trap" ${state.busy?'disabled':''}>${saved?'Edit name':'Name villain'}</button>${changed?'<small>Update the saved name after changing villains.</small>':''}</article>`;
-    }).join('') || '<p class="roster-empty">No traps in your NFC library.</p>';
+      const naming=status.state==='empty'?'':`<button class="name-trap" ${state.busy?'disabled':''}>${saved?'Edit name':status.state==='captured'?'Name villain':'Add name manually'}</button>`;
+      return `<article class="villain-entry" data-key="${e(f.key)}"><button class="villain-card" ${state.busy?'disabled':''}><span>${e(label)}</span><small>${e(f.info.name)} · ${e(f.info.element)}</small><small>${e(detail)}${saved?' · Manual name':''}</small><small>${e(f.key)}</small></button>${naming}${changed?'<small>Update the saved name after changing villains.</small>':''}</article>`;
+    };
+    const other=traps.filter(f=>!hasVillain(f));
+    $('villain-roster').innerHTML=(traps.filter(hasVillain).map(card).join('') || '<p class="roster-empty">No captured villains detected. Choose a trap above to capture one in-game.</p>')+(other.length?`<details class="other-traps" ${otherOpen?'open':''}><summary>Other traps (${other.length}) · empty or unverified</summary><p>These traps do not have a confirmed captured villain. If you know an unverified trap contains one, you can add its name manually.</p><div class="villain-roster">${other.map(card).join('')}</div></details>`:'');
     for(const card of $('villain-roster').querySelectorAll('.villain-entry')) {
       card.querySelector('.villain-card').onclick=()=>perform(()=>api.action({target:'accessory',slot:'trap',choice:{top:card.dataset.key,bottom:null}}));
-      card.querySelector('.name-trap').onclick=()=>{
+      const nameButton=card.querySelector('.name-trap');
+      if(nameButton)nameButton.onclick=()=>{
         const f=figure(card.dataset.key),dialog=$('trap-name-dialog');
         dialog.dataset.key=f.key;
         $('trap-name-file').textContent=`${f.info.name} · ${f.key}`;

@@ -24,7 +24,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 
 ## Download and setup
 
-Download **De-PerPortal-0.5.0-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.5.1-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -67,9 +67,13 @@ Cemu opens the selected dump directly and saves progress to it. Dè PerPortal do
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
-## Items, traps and vehicles (v0.5.0)
+## Items, traps and vehicles (v0.5.1)
 
 In Trap Team, **Alt+↑ / Alt+↓** loads the previous/next trap in roster order, wrapping at either end. The trap slot is shared by both players. These shortcuts work with Cemu focused and appear in the overlay.
+
+Trap cycling shows the selected trap's name, element, and position in the list for 4.5 seconds after the game regains focus. Notifications still appear if you have closed the shortcut reminders. Empty and unnamed unverified traps are grouped under **Other traps**; they do not prompt for a villain name. You can expand that group to load them or manually name an unverified trap whose contents you know.
+
+Existing Trap Team profiles automatically replace ordinary Skylanders in the numbered element slots with matching Trap Masters from your library. Already selected Trap Masters and favorite presets are preserved. A slot stays unassigned when no unused matching Trap Master is available.
 
 The **On the portal** section offers the accessory categories available for your game. Click **Choose**, search your NFC library, then select a figure to activate it. Hover over a figure in the picker for its game-specific effect. **Change** replaces only that accessory; **Remove** leaves both players in place. The picker remains available alongside the optional Trap Team shortcuts.
 

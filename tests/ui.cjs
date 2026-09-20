@@ -125,6 +125,8 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('#picker-close').click();
   // Save a manual trap name through real IPC, then reload the renderer.
   await selectGame('4');
+  assert.equal(await page.locator('.name-trap').isVisible(),false);
+  await page.locator('.other-traps summary').click();
   await page.locator('.name-trap').click();
   await page.locator('#trap-name').fill('My Gulper <test>');
   await page.locator('#trap-name-save').click();
@@ -135,6 +137,7 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('.name-trap').click();
   await page.locator('#trap-name').fill('');
   await page.locator('#trap-name-save').click();
+  await page.locator('.other-traps summary').click();
   await page.locator('.villain-card span').filter({hasText:'Contents unknown'}).waitFor();
   await selectGame('6');
   assert.equal(await page.locator('#trapped-villains').isVisible(),false);

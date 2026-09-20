@@ -128,4 +128,24 @@ function resolveChoice(selected,figures,game) {
   if(top.half==='whole' && selected.bottom) throw Error('A whole figure cannot have a bottom half.');
   return top.half==='top'?[top,bottom]:[top];
 }
-module.exports={elements,games,perks,identify,scan,detectGame,compatible,core,elementalDoorFigure,playable,candidates,choice,perkChoice,normalizeDefaults,newProfile,resolveChoice};
+function repairTrapTeamElements(profile,figures) {
+  if(!profile || !figures.length)return false;
+  const used=new Set(),pending=[];
+  for(const player of profile.players) for(const element of elements) {
+    const selected=player.elements[element],f=figures.find(f=>f.key===selected?.top);
+    if(!selected?.bottom && elementalDoorFigure(f,4,element)) used.add(f.uid);
+    else pending.push({player,element});
+  }
+  let changed=false;
+  const sorted=[...figures].sort((a,b)=>a.id-b.id || a.variant-b.variant || a.key.localeCompare(b.key));
+  for(const {player,element} of pending) {
+    const f=candidates(sorted,4,element).find(f=>!used.has(f.uid));
+    const selected=choice(f,figures);
+    if(f)used.add(f.uid);
+    if(JSON.stringify(player.elements[element] || null)!==JSON.stringify(selected)) {
+      player.elements[element]=selected;changed=true;
+    }
+  }
+  return changed;
+}
+module.exports={elements,games,perks,identify,scan,detectGame,compatible,core,elementalDoorFigure,playable,candidates,choice,perkChoice,normalizeDefaults,newProfile,resolveChoice,repairTrapTeamElements};

@@ -38,6 +38,7 @@ class Manager extends EventEmitter {
     if(this.busy) throw Error('Wait for the current swap.');
     const result=await model.scan(path.join(this.root,'NFC'),this.config.artRoot || path.join(this.root,'de-perportal-data/art'));
     this.figures=result.figures; this.warnings=result.warnings;
+    if(model.repairTrapTeamElements(this.config.profiles[4],this.figures)) await this.save();
     this.profile;
     this.publish();
   }
@@ -251,7 +252,7 @@ class Manager extends EventEmitter {
         await this.action({target:'accessory',slot:'trap',choice:{top:f.key,bottom:null}});
         const saved=this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
         const current=saved && f.trap?.state!=='empty' && (f.trap?.state!=='captured' || saved.recordId===null || saved.recordId===f.trap.recordId);
-        this.emit('notification',`Trap: ${current?saved.name:f.info.name}`);
+        this.emit('notification',`Trap ${next+1}/${traps.length}: ${current?saved.name:f.info.name} · ${f.info.element}${current?` · ${f.info.name}`:''}`);
       } catch(e) {this.message=e.message;this.publish();this.emit('notification',e.message);}
       return;
     }
