@@ -164,10 +164,11 @@ static LRESULT CALLBACK keyboard(int code,WPARAM message,LPARAM data) {
         if(key<256 && supported && GetForegroundWindow()==main_window && (message==WM_KEYDOWN || message==WM_SYSKEYDOWN)) {
             wchar_t s[512]; GetWindowTextW(main_window,s,512);
             BOOL game=StrStrIW(s,L"Skylander")!=NULL || StrStrIW(s,L"10142d00")!=NULL;
-            if(game && (k->flags & LLKHF_ALTDOWN) && !(GetAsyncKeyState(VK_CONTROL)&0x8000) && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key==VK_LEFT || key==VK_RIGHT || key=='T' || strchr("QWERYUIO",key))) {
+            BOOL trapGame=StrStrIW(s,L"Trap Team")!=NULL || StrStrIW(s,L"1017c600")!=NULL || StrStrIW(s,L"10181f00")!=NULL;
+            if((game || trapGame) && (k->flags & LLKHF_ALTDOWN) && !(GetAsyncKeyState(VK_CONTROL)&0x8000) && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key==VK_LEFT || key==VK_RIGHT || (trapGame && !(GetAsyncKeyState(VK_SHIFT)&0x8000) && (key==VK_UP || key==VK_DOWN)) || key=='T' || strchr("QWERYUIO",key))) {
                 if(!pressed[key]) {
                     char text[2]={(char)(key==VK_OEM_MINUS?'-':key),0};
-                    printf("{\"type\":\"hotkey\",\"player\":%d,\"key\":\"%s\"}\n",(GetAsyncKeyState(VK_SHIFT)&0x8000)?1:0,key==VK_LEFT?"Left":key==VK_RIGHT?"Right":text);
+                    printf("{\"type\":\"hotkey\",\"player\":%d,\"key\":\"%s\"}\n",(GetAsyncKeyState(VK_SHIFT)&0x8000)?1:0,key==VK_LEFT?"Left":key==VK_RIGHT?"Right":key==VK_UP?"Up":key==VK_DOWN?"Down":text);
                     fflush(stdout); pressed[key]=1;
                 }
                 return 1;

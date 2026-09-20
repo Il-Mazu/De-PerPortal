@@ -16,6 +16,7 @@ window.overlay.onState(state=>{
     const i=state.elements.indexOf(e);return entry(e,i===9?'-':String(i+1),'elements',...elements[e],.28,805,1000);
   }));
   const perks=document.getElementById('perks');perks.hidden=state.game!==3;
+  document.getElementById('traps').hidden=state.game!==4;
   perks.replaceChildren(...(state.game===3?state.perks.map(p=>entry(p.name,p.key,'perks',perkCenters[p.key],72,.27,1239,144)):[]));
 });
 document.getElementById('close').onclick=()=>window.overlay.close();

@@ -24,7 +24,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 
 ## Download and setup
 
-Download **De-PerPortal-0.4.0-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.5.0-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -67,9 +67,13 @@ Cemu opens the selected dump directly and saves progress to it. Dè PerPortal do
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
-## Items, traps and vehicles (v0.4.0)
+## Items, traps and vehicles (v0.5.0)
 
-The **On the portal** section offers the accessory categories available for your game. Click **Choose**, search your NFC library, then select a figure to activate it. Hover over a figure in the picker for its game-specific effect. **Change** replaces only that accessory; **Remove** leaves both players in place. No extra keyboard shortcuts are required.
+In Trap Team, **Alt+↑ / Alt+↓** loads the previous/next trap in roster order, wrapping at either end. The trap slot is shared by both players. These shortcuts work with Cemu focused and appear in the overlay.
+
+The **On the portal** section offers the accessory categories available for your game. Click **Choose**, search your NFC library, then select a figure to activate it. Hover over a figure in the picker for its game-specific effect. **Change** replaces only that accessory; **Remove** leaves both players in place. The picker remains available alongside the optional Trap Team shortcuts.
+
+In Trap Team, **Trapped villains** shows **Villain detected**, **Empty**, or **Contents unknown** from readable save records. Click **Name villain** to save a manual name per trap file; **Edit name** changes it, and saving a blank name clears it. Names persist across restarts in app settings. Update names after in-game swaps; a detected occupant change prompts you to rename it. Unknown saves can still be named. Moving or renaming a file requires naming it again. Use **Rescan NFC library** if automatic refresh misses a change. The app never writes trap dumps or changes the game-managed timer.
 
 SuperChargers story co-op uses one **Shared vehicle**: one player drives and the other attacks. Racing makes its vehicle selections in-game; change the vehicle when prompted. Older magic items become Academy treasures in SuperChargers and rewards in Imaginators. Adventure pieces only unlock their original levels in supported games. Vehicles and trophies remain useful in Imaginators Racing.
 

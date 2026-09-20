@@ -8,6 +8,30 @@ const accessories=require('../app/accessories.cjs');
 const {Manager}=require('../app/manager.cjs');
 function dump(id,variant=0,uid=id+1){const b=Buffer.alloc(1024);b.writeUInt32LE(uid);b.writeUInt16LE(id,16);b.writeUInt16LE(variant,28);return b;}
 function figure(id,variant=0){return {...model.identify(dump(id,variant)),key:`${id}-${variant}.sky`};}
+test('Trap Team arrow shortcuts cycle exact files, wrap, respect locks and game, and validate dumps',async()=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'trap-hotkeys-')),calls=[];
+ try {
+  await fs.mkdir(path.join(root,'NFC'));
+  for(const [key,uid] of [['b.sky',100],['a.sky',101]])await fs.writeFile(path.join(root,'NFC',key),dump(211,12289,uid));
+  const manager=new Manager(root,async args=>calls.push(args));await manager.init();
+  manager.updateSession({pid:1,supported:true,focused:true,title:'Skylanders Trap Team'});
+  const press=key=>manager.hotkey({player:0,key});
+  await press('Down');assert.equal(manager.accessories.trap.top,'a.sky');
+  await press('Down');assert.equal(manager.accessories.trap.top,'b.sky');
+  await press('Down');assert.equal(manager.accessories.trap.top,'a.sky');
+  await press('Up');assert.equal(manager.accessories.trap.top,'b.sky');
+  assert.ok(calls.every(args=>args[0]==='load' && args[1]==='7'));
+  const count=calls.length;manager.busy=true;await press('Up');manager.busy=false;
+  await manager.hotkey({player:1,key:'Down'});assert.equal(calls.length,count);
+  for(const game of ['SuperChargers','Imaginators']) {
+   manager.updateSession({pid:1,supported:true,title:`Skylanders ${game}`});await press('Down');
+  }
+  assert.equal(calls.length,count);
+  manager.updateSession({pid:1,supported:true,title:'Skylanders Trap Team'});
+  await fs.writeFile(path.join(root,'NFC/a.sky'),dump(211,12289,999));
+  await press('Down');assert.equal(calls.length,count);assert.match(manager.message,/changed since scanning/);
+ } finally {await fs.rm(root,{recursive:true,force:true});}
+});
 test('accessory compatibility and game-specific roles across all six console games',()=>{
  const item=figure(200),adventure=figure(300),trap=figure(211,12289),vehicle=figure(3224,16384),trophy=figure(3503,16384);
  assert.deepEqual([1,2,3,4,5,6].map(g=>accessories.available(item,g)),[true,true,true,true,true,true]);

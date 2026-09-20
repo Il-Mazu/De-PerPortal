@@ -20,6 +20,21 @@ test('ordinary defaults exclude gimmicks and duplicate UIDs',()=>{
  assert.equal(p.players[0].elements.Fire,null);
  assert.equal(m.core(figure(107,4614)),false);assert.equal(m.core(figure(9,4614)),false);
 });
+test('Trap Team elemental doors require matching Trap Masters',async()=>{
+ const regular=figure(16), trapMaster=figure(466,12288);
+ assert.deepEqual(m.candidates([regular,trapMaster],4,'Magic').map(f=>f.key),[trapMaster.key]);
+ assert.equal(m.elementalDoorFigure(regular,4,'Magic'),false);
+ assert.equal(m.elementalDoorFigure(trapMaster,4,'Magic'),true);
+
+ const {root,manager}=await setup(async()=>{});
+ try {
+  manager.figures=[regular,trapMaster];
+  manager.updateSession({pid:100,supported:true,focused:true,title:'Cemu Skylanders Trap Team'});
+  await assert.rejects(manager.select({player:0,target:'Magic',choice:{top:regular.key,bottom:null}}),/Trap Masters/);
+  await manager.select({player:0,target:'Magic',choice:{top:trapMaster.key,bottom:null}});
+  assert.equal(manager.profile.players[0].elements.Magic.top,trapMaster.key);
+ } finally {await fs.rm(root,{recursive:true,force:true});}
+});
 test('known regional IDs, game names, and unknown titles',()=>{
  assert.equal(m.detectGame('Cemu - [TitleId: 00050000-10139200]'),3);
  assert.equal(m.detectGame('Cemu - Skylanders Giants [EU]'),2);

@@ -17,7 +17,7 @@ function createOverlay(manager,mainWindow) {
     if(state.session.focused)preview=false;
     // Read the actual window position before state-driven sizing: native drags
     // do not reliably emit `moved` on every platform.
-    if(window.isVisible()) rememberPosition();
+    rememberPosition();
     const reminders=!dismissed && (preview || (state.session.supported && state.session.game && state.session.focused));
     const show=reminders || (notification && state.session.supported && state.session.game && state.session.focused);
     if(!show){window.hide();return;}
@@ -25,14 +25,20 @@ function createOverlay(manager,mainWindow) {
     const bounds=state.session.bounds;
     if(bounds && bounds.width>0 && bounds.height>0) reference=process.platform==='win32'?screen.screenToDipRect(null,bounds):bounds;
     const area=screen.getDisplayMatching(position?{x:position[0],y:position[1],width:window.getBounds().width,height:window.getBounds().height}:reference).workArea;
-    const width=Math.min(Math.ceil(480*scale),area.width),height=Math.ceil(((reminders?(state.game===3?94:62):0)+(notification?54:0))*scale);
+    const width=Math.min(Math.ceil(480*scale),area.width),height=Math.ceil(((reminders?([3,4].includes(state.game)?94:62):0)+(notification?54:0))*scale);
     const x=position?.[0] ?? Math.round(area.x+(area.width-width)/2);
     const y=position?.[1] ?? area.y+area.height-height-12;
     const nextBounds={x:Math.max(area.x,Math.min(x,area.x+area.width-width)),y:Math.max(area.y,Math.min(y,area.y+area.height-height)),width,height};
-    placing=true;
-    lastPlaced=[nextBounds.x,nextBounds.y];
-    window.setBounds(nextBounds);
-    placing=false;
+    const currentBounds=window.getBounds();
+    if(Object.keys(nextBounds).some(key=>nextBounds[key]!==currentBounds[key])) {
+      placing=true;
+      try {
+        window.setBounds(nextBounds);
+        // Window managers can adjust the requested coordinates. Compare
+        // subsequent drags against the actual placement, not the request.
+        lastPlaced=window.getPosition();
+      } finally {placing=false;}
+    }
     window.webContents.send('overlay-state',{game:state.game,elements:state.elements,perks:state.perks,reminders,notification});
     if(!window.isVisible())window.showInactive();
   }
@@ -40,13 +46,16 @@ function createOverlay(manager,mainWindow) {
   ipcMain.handle('overlay-ready',event=>{verify(event);ready=true;update();});
   ipcMain.handle('overlay-close',event=>{verify(event);dismissed=true;preview=false;update();});
   function rememberPosition() {
-    if(placing || !window.isVisible())return;
+    if(placing)return;
     const actual=window.getPosition();
     // Programmatic clamping must not replace the user's preferred position.
     if(lastPlaced && (actual[0]!==lastPlaced[0] || actual[1]!==lastPlaced[1]))position=actual;
   }
   window.on('move',rememberPosition);
   window.on('moved',rememberPosition);
+  // On Windows native dragging can finish as the overlay loses focus/hides.
+  // Capture the proposed bounds directly, before a state update can resize it.
+  window.on('will-move',(_event,bounds)=>{if(!placing)position=[bounds.x,bounds.y];});
   const notify=message=>{
     notification=message;clearTimeout(timer);update(manager.state());
     timer=setTimeout(()=>{notification=null;update(manager.state());},2500);

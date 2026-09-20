@@ -1,5 +1,7 @@
 # Accessory support and research
 
+Trap Team supports **Alt+Up / Alt+Down** to load the previous/next library trap in roster order. These shortcuts use the existing accessory validation and shared trap row; other games retain their normal accessory picker behavior.
+
 Scope: the six home-console games, running their Wii U versions in Cemu. Checked September 18, 2026. These rules describe the games; automated tests validate routing and filtering, not the games' execution of every reward.
 
 | Figure family | Offered in | Behavior |
@@ -37,6 +39,8 @@ The existing catalog derives from the [Dolphin figure catalog](https://github.co
 | 235 | 20481 / 20482 / 20483 | Bronze / Silver / Gold Imaginite Mystery Chest |
 | 235 | 20503 / 20505 | Blue chest: Cursed Tiki Temple / Lost Imaginite Mines |
 
-Rows 1–2 and 3–4 remain reserved for the two players, and row 5 for the sidekick. Accessories use dedicated rows: item/adventure/chest 6, trap 7, vehicle 8, trophy 9. The supported controller exposes 16 rows. Each accessory slot holds one figure; vehicles share one slot across land, sea and sky. Local SuperChargers story co-op uses one vehicle for both players (driver and gunner). Racing selects vehicles separately in-game; change the portal vehicle when prompted. The GUI explains compatible behavior using backend metadata, and the backend validates category, game, current dump header and duplicate UIDs before loading. No accessory hotkeys were added.
+Rows 1–2 and 3–4 remain reserved for the two players, and row 5 for the sidekick. Accessories use dedicated rows: item/adventure/chest 6, trap 7, vehicle 8, trophy 9. The supported controller exposes 16 rows. Each accessory slot holds one figure; vehicles share one slot across land, sea and sky. Local SuperChargers story co-op uses one vehicle for both players (driver and gunner). Racing selects vehicles separately in-game; change the portal vehicle when prompted. The GUI explains compatible behavior using backend metadata, and the backend validates category, game, current dump header and duplicate UIDs before loading. Trap Team also provides previous/next trap shortcuts.
+
+In Trap Team, the roster detects occupancy from checksum-valid active records; it does not automatically identify villains. Unreadable records remain unknown and can still be named manually. Names are stored in app settings per relative file path and figure identity, so copies sharing a UID can have separate names. Update names after in-game swaps, especially when contents cannot be verified. Detected occupant changes prompt renaming. The app never writes trap dumps or manages timers. Use **Rescan NFC library** if automatic refresh misses a change.
 
 Portal artwork is cosmetic and does not change Cemu's emulated portal hardware. See [portal artwork sources](../app/ui/portals/SOURCES.md).

@@ -41,12 +41,26 @@ class Manager extends EventEmitter {
     this.profile;
     this.publish();
   }
+  requestRescan() {
+    // Games write a trap in a small burst.  Coalesce those events and never
+    // scan halfway through our own portal operation.
+    clearTimeout(this.rescanTimer);
+    this.rescanTimer=setTimeout(async()=>{
+      if(this.busy) { this.rescanPending=true; return; }
+      try { await this.rescan(); } catch {};
+    },650);
+  }
+  async flushDeferredRescan() {
+    if(!this.rescanPending) return;
+    this.rescanPending=false;
+    try { await this.rescan(); } catch {}
+  }
   state() {
     const hasArt=this.figures.some(f=>f.art);
     return {game:this.game,detected:!!this.session.game,session:this.session,profile:this.profile,
       active:this.active,sidekick:this.sidekick,accessories:this.accessories,accessorySlots:accessories.slots,observed:this.observed,busy:this.busy,message:this.message,warnings:this.warnings,
       hasArt,
-      figures:this.figures.map(({path:_,uid:__,art,...f})=>({...f,accessory:accessories.describe(f,this.game),art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
+      figures:this.figures.map(({path:_,uid,art,...f})=>({...f,...(f.info?.kind==='Trap'?{trapLabel:this.config.trapLabels?.[JSON.stringify([f.key,uid,f.id,f.variant])] || null}:{}),accessory:accessories.describe(f,this.game),art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
       root:this.root,elements:model.elements,perks:model.perks,games:model.games};
   }
   publish() { this.emit('state',this.state()); }
@@ -73,8 +87,18 @@ class Manager extends EventEmitter {
     await fs.writeFile(path.join(dir,'settings.json.tmp'),JSON.stringify(this.config,null,2));
     await fs.rename(path.join(dir,'settings.json.tmp'),path.join(dir,'settings.json'));
   }
-  async select({player,target,choice,preset}) {
+  async select({player,target,choice,preset,name}) {
     if(this.busy) throw Error('Wait for the current swap.');
+    if(target==='trap-name') {
+      const f=this.figures.find(f=>f.key===choice?.top);
+      if(f?.info?.kind!=='Trap') throw Error('Choose a trap from your library.');
+      if(typeof name!=='string' || name.length>80) throw Error('Use a name of at most 80 characters.');
+      const key=JSON.stringify([f.key,f.uid,f.id,f.variant]);
+      const labels=this.config.trapLabels ||= {};
+      if(name.trim()) labels[key]={name:name.trim(),recordId:f.trap?.recordId ?? null};
+      else delete labels[key];
+      await this.save(); this.publish(); return;
+    }
     if(target==='active-favorite' || target==='favorite') {
       if(![0,1].includes(player)) throw Error('Invalid player.');
       const defaults=this.profile.players[player];
@@ -96,7 +120,7 @@ class Manager extends EventEmitter {
     } else {
       if(![0,1].includes(player) || !model.elements.includes(target)) throw Error('Invalid selection.');
       const selected=model.resolveChoice(choice,this.figures,this.game);
-      if(selected.length!==1 || !model.core(selected[0]) || selected[0].info.element!==target) throw Error('Element slots use ordinary Skylanders of the matching element.');
+      if(selected.length!==1 || !model.elementalDoorFigure(selected[0],this.game,target)) throw Error(this.game===4 ? 'Trap Team element slots use Trap Masters of the matching element.' : 'Element slots use ordinary Skylanders of the matching element.');
       this.profile.players[player].elements[target]=choice;
     }
     await this.save(); this.publish();
@@ -112,7 +136,7 @@ class Manager extends EventEmitter {
     // Hold the lock during async file validation as well as native writes.
     this.busy=true;
     try { return await this.performAction(data); }
-    finally { this.busy=false; this.publish(); }
+    finally { this.busy=false; this.publish(); await this.flushDeferredRescan(); }
   }
   async performAction({player=0,target='favorite',choice=null,slot=null}) {
     const game=this.game,pid=this.session.pid;
@@ -216,6 +240,21 @@ class Manager extends EventEmitter {
   }
   async hotkey({player,key}) {
     if(!this.session.game) return;
+    if(key==='Up' || key==='Down') {
+      if(this.game!==4 || player!==0 || this.busy) return;
+      const traps=this.figures.filter(f=>f.info?.kind==='Trap').sort((a,b)=>a.info.element.localeCompare(b.info.element)||a.info.name.localeCompare(b.info.name)||a.key.localeCompare(b.key));
+      if(!traps.length) {this.emit('notification','No traps in your NFC library.');return;}
+      const index=traps.findIndex(f=>f.key===this.accessories.trap?.top);
+      const next=index<0?(key==='Down'?0:traps.length-1):(index+(key==='Down'?1:-1)+traps.length)%traps.length;
+      const f=traps[next];
+      try {
+        await this.action({target:'accessory',slot:'trap',choice:{top:f.key,bottom:null}});
+        const saved=this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
+        const current=saved && f.trap?.state!=='empty' && (f.trap?.state!=='captured' || saved.recordId===null || saved.recordId===f.trap.recordId);
+        this.emit('notification',`Trap: ${current?saved.name:f.info.name}`);
+      } catch(e) {this.message=e.message;this.publish();this.emit('notification',e.message);}
+      return;
+    }
     if(key==='Left' || key==='Right') {
       if(![0,1].includes(player) || this.busy || this.switchingPreset) return;
       this.switchingPreset=true;

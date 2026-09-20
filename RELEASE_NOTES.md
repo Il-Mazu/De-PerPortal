@@ -1,18 +1,15 @@
-# Dè PerPortal 0.4.0
+# Dè PerPortal 0.5.0
 
-- Fixed the dragged shortcut overlay jumping back during figure changes. Position now survives focus changes and notifications, including near screen edges and on a second monitor.
-- Added GUI selection, activation, replacement and removal for magic items, adventure and battle pieces, traps, vehicles, racing trophies and Imaginite chests. Game-specific descriptions explain changed behavior in later titles.
-- Added the missing Imaginators adventure/chest catalog entries and playable Creation Crystal selection.
-- Simplified the portal and accessory panels, moved item explanations to hover text, and added the Skylanders header logo.
-- Added game-matched portal artwork and restrained element lighting for both active players, with reduced-motion support.
-- Clarified that SuperChargers story co-op shares one vehicle between the driver and gunner.
-- Serialized portal actions during validation to prevent overlapping GUI requests.
+- Added a Trap Team roster that detects whether a trap is occupied and lets players save a manual villain name per trap file. Names persist in app settings, and changed detectable occupants prompt players to update the name.
+- Added **Alt + Up / Down** to cycle through library traps in roster order and load the selected trap into the shared trap row. The shortcut appears in the overlay.
+- Fixed the shortcut overlay returning to its old position after game and figure updates, and added the Trap Team shortcut hint.
+- Retained all six game profiles, accessory choices, portal artwork, lighting, reduced-motion behavior, and existing shortcut controls.
 
 ## Validation
 
-17 unit/regression tests and the Electron interface suite pass. Coverage includes accessory row isolation, compatibility, changed dumps, duplicate UIDs, failed loads, concurrent requests, picker filtering, all six portal profiles, reduced motion and compact layouts. GUI activation tests use a mocked native controller; no live game is altered.
+21 unit/regression tests and the Electron interface suite pass. Coverage includes manual-name persistence, trap shortcut routing and validation, accessory row isolation, duplicate UIDs, failed loads, overlay positioning, picker filtering, all six game profiles, reduced motion and compact layouts. GUI activation tests use a mocked native controller; no live game is altered.
 
-Native Windows gameplay, in-game accessory effects and dragging over fullscreen Cemu still require testing on Windows. Research and artwork sources are recorded in `docs/FIGURE-SUPPORT.md` and `app/ui/portals/SOURCES.md`. This is a local development build, not a published release.
+GitHub Actions builds the Windows package and publishes its SHA-256 checksum. Native Windows gameplay, live shortcut capture, in-game accessory effects and dragging over fullscreen Cemu have not been tested in this Linux environment. The roster reports occupancy rather than automatically identifying villains; users enter names and update them after changing trap contents.
 
 ---
 

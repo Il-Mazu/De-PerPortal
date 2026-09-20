@@ -10,7 +10,7 @@ test('native drags survive figure updates, Cemu focus loss, notifications and di
  class BrowserWindow extends EventEmitter {
   constructor(options){super();window=this;this.bounds={x:0,y:0,width:options.width,height:options.height};this.visible=false;this.webContents=new EventEmitter();this.webContents.mainFrame={};this.webContents.setWindowOpenHandler=()=>{};this.webContents.send=()=>{};}
   setAlwaysOnTop(){} isDestroyed(){return false;} getBounds(){return {...this.bounds};} getPosition(){return [this.bounds.x,this.bounds.y];}
-  setBounds(b){this.bounds={...b};this.emit('move');} hide(){this.visible=false;} isVisible(){return this.visible;} showInactive(){this.visible=true;} loadFile(){} destroy(){this.emit('closed');}
+  setBounds(b){this.placements=(this.placements||0)+1;this.bounds={...b};this.emit('move');} hide(){this.visible=false;} isVisible(){return this.visible;} showInactive(){this.visible=true;} loadFile(){} destroy(){this.emit('closed');}
  }
  const handlers={};const ipcMain={handle:(key,fn)=>handlers[key]=fn,removeHandler:key=>delete handlers[key]};
  const screen=new EventEmitter();screen.getDisplayMatching=b=>({workArea:displays.find(d=>b.x>=d.x && b.x<d.x+d.width)||displays[0]});screen.screenToDipRect=(_,b)=>b;
@@ -23,7 +23,16 @@ test('native drags survive figure updates, Cemu focus loss, notifications and di
  // Reproduce native drag without `moved`; old implementation reset on publish.
  window.bounds.x=2300;window.bounds.y=200;
  manager.emit('state',state);assert.deepEqual(window.getPosition(),[2300,200]);
+ const placements=window.placements;
+ manager.emit('state',{...state,active:[{top:'another.sky'},null]});
+ assert.equal(window.placements,placements,'figure changes must not reposition the window');
  state={...state,session:{...state.session,focused:false}};manager.emit('state',state);assert.equal(window.visible,false);
+ // A native move may arrive after focus loss hid the overlay.
+ window.emit('will-move',{}, {x:2350,y:240});window.bounds.x=2350;window.bounds.y=240;
+ window.emit('move');
+ state={...state,game:4,session:{...state.session,game:4,focused:true}};manager.emit('state',state);
+ assert.deepEqual(window.getPosition(),[2350,240]);assert.equal(window.bounds.height,Math.ceil(94*.7));
+ window.bounds.x=2300;window.bounds.y=200;window.emit('moved');
  state={...state,game:2,session:{...state.session,game:2,focused:true}};manager.emit('state',state);assert.deepEqual(window.getPosition(),[2300,200]);
  manager.emit('notification','Player 1 · Preset 2');assert.deepEqual(window.getPosition(),[2300,200]);
  timeout();assert.deepEqual(window.getPosition(),[2300,200]);

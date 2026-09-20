@@ -46,9 +46,15 @@ const {installArt}=require('../app/artwork.cjs');
   assert.equal((await overlayFlags()).visible,false);
   await page.locator('#overlay').click();
   assert.equal((await overlayFlags()).visible,true);
+  await selectGame('4');
+  await overlay.locator('#traps').waitFor({state:'visible'});
+  assert.match(await overlay.locator('#traps').textContent(),/Alt \+ ↑ Previous/);
+  assert.match(await overlay.locator('#traps').textContent(),/Alt \+ ↓ Next/);
+  assert.deepEqual(await instance.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html')).getPosition()),movedPosition);
   await selectGame('5');
   await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===10);
   assert.equal(await overlay.locator('#perks').isVisible(),false);
+  assert.equal(await overlay.locator('#traps').isVisible(),false);
   await selectGame('3');
   await overlay.locator('#close').click();
   await page.locator('#favorite-0 .edit').click();
@@ -117,6 +123,21 @@ const {installArt}=require('../app/artwork.cjs');
   assert.equal(await page.locator('.picker-item').count(),2);
   await page.locator('#search').fill('sea');assert.equal(await page.locator('.picker-item').count(),1);
   await page.locator('#picker-close').click();
+  // Save a manual trap name through real IPC, then reload the renderer.
+  await selectGame('4');
+  await page.locator('.name-trap').click();
+  await page.locator('#trap-name').fill('My Gulper <test>');
+  await page.locator('#trap-name-save').click();
+  await page.locator('.villain-card span').filter({hasText:'My Gulper <test>'}).waitFor();
+  await page.reload();
+  await page.locator('.villain-card span').filter({hasText:'My Gulper <test>'}).waitFor();
+  assert.match(await page.locator('.villain-card').textContent(),/Contents unverified/);
+  await page.locator('.name-trap').click();
+  await page.locator('#trap-name').fill('');
+  await page.locator('#trap-name-save').click();
+  await page.locator('.villain-card span').filter({hasText:'Contents unknown'}).waitFor();
+  await selectGame('6');
+  assert.equal(await page.locator('#trapped-villains').isVisible(),false);
   // Mock only native actions for GUI interaction checks; manager behavior is tested separately.
   if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
     const fixture=await page.evaluate(()=>window.dePerPortal.state());
