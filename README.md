@@ -24,7 +24,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 
 ## Download and setup
 
-Download **De-PerPortal-0.5.2-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.5.3-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -67,7 +67,7 @@ Cemu opens the selected dump directly and saves progress to it. Only the explici
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
-## Items, traps and vehicles (v0.5.2)
+## Items, traps and vehicles (v0.5.3)
 
 In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping at either end. **Alt+Ctrl+0** locks in the selected villain by loading its trap into the shared trap slot. Previewing does not change the portal. Empty traps and names that no longer match a detected capture are excluded.
 
@@ -75,7 +75,7 @@ In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping a
 
 Selection notifications appear for 4.5 seconds, even when the element overlay is dismissed. Empty and unnamed unverified traps are grouped under **Other traps**. Expand that group to load them or manually name an unverified trap whose contents you know.
 
-In **Settings**, **Clear all traps · back up originals** unloads the shared trap slot, removes the active enemy from both redundant save areas, clears saved names for those files, and rescans. Originals are saved under **de-perportal-data/trap-backups/<timestamp>** with their library paths preserved. Unrecognized, damaged, or identity-changed dumps are skipped and listed in the status message. Restore a backup with Cemu closed if needed. This does not reset villain history or timers.
+In **Settings**, **Clear all traps · back up originals** unloads the shared trap slot, clears all saved villain records and history from both redundant trap saves, clears saved names for those files, and rescans. Originals are saved under **de-perportal-data/trap-backups/<timestamp>** with their library paths preserved. Unrecognized, damaged, or identity-changed dumps are skipped and listed in the status message. Restore a backup with Cemu closed if needed. This clears trap villain history and timers as well as the active villain. Named captures disappear from the detected list and remain available through Alt+↑/↓.
 
 Existing Trap Team profiles automatically replace ordinary Skylanders in the numbered element slots with matching Trap Masters from your library. Already selected Trap Masters and favorite presets are preserved. A slot stays unassigned when no unused matching Trap Master is available.
 

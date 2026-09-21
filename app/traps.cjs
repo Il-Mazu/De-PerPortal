@@ -49,16 +49,28 @@ function decode(bytes) {
 function clear(bytes) {
   if(decode(bytes).state==='unknown') throw Error('Unrecognized trap save; original left untouched.');
   const data=decrypt(bytes),out=Buffer.from(bytes);
+  const valid=[8,36].filter(block=>areaValid(data,block));
+  if(!valid.length) throw Error('Unrecognized trap save; original left untouched.');
   for(const block of [8,36]) {
-    // Require both redundant saves to be understood before modifying either.
-    if(!areaValid(data,block)) throw Error('Invalid backup save area; original left untouched.');
-    data.writeUInt16LE(0,block*16); // Active villain slot.
-    data.writeUInt16LE(0,(block+1)*16); // Active villain record.
+    // Each trap save has seven sectors of villain history followed by a
+    // redundant copy. Clearing only the active slot leaves prior villains
+    // available in Trap Team's villain vault.
+    // A trap can be mid-write with one stale/corrupt mirror. Rebuild that
+    // redundant header from the valid copy while clearing both data areas.
+    if(!valid.includes(block)) data.copy(data,block*16,valid[0]*16,valid[0]*16+16);
+    const changed=[block];
+    // Preserve the sector header at `block`; clear every data block after it,
+    // across all seven history sectors. Sector trailers hold NFC keys/access
+    // bits and are deliberately left untouched.
+    for(let b=block+1;b<block+28;b++) if(!trailers.has(b)) {
+      data.fill(0,b*16,b*16+16);
+      changed.push(b);
+    }
     const group=Buffer.concat([block+1,block+2,block+4].map(b=>data.subarray(b*16,b*16+16)));
     data.writeUInt16LE(crc16(group),block*16+12);
     data.writeUInt16LE(5,block*16+14);
     data.writeUInt16LE(crc16(data.subarray(block*16,block*16+16)),block*16+14);
-    for(const b of [block,block+1]) {
+    for(const b of changed) {
       const cipher=crypto.createCipheriv('aes-128-ecb',key(bytes,b),null);cipher.setAutoPadding(false);
       Buffer.concat([cipher.update(data.subarray(b*16,b*16+16)),cipher.final()]).copy(out,b*16);
     }

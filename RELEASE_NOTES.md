@@ -1,3 +1,25 @@
+# Dè PerPortal 0.5.3
+
+- Fixed **Clear all traps** to erase the entire villain history from both redundant trap saves, not just the currently selected villain. Original dumps are backed up before clearing.
+- Named captures now leave the detected villain section and remain available through **Alt+Up/Down**. Captures whose contents change reappear so they can be named again.
+
+## Validation
+
+The existing trap and interface checks were updated for full history clearing and hiding named captures. The GitHub release workflow runs the complete Windows build and test suite. Live Trap Team gameplay has not been tested.
+
+---
+
+# Dè PerPortal 0.5.3
+
+- Fixed **Clear all traps** to erase the entire villain history from both redundant trap saves, not just the currently selected villain. Original dumps are backed up before clearing.
+- Named captures now leave the detected villain section and remain available through **Alt+Up/Down**. Captures whose contents change reappear so they can be named again.
+
+## Validation
+
+The existing trap and interface checks were updated for full history clearing and hiding named captures. The GitHub release workflow runs the complete Windows build and test suite. Live Trap Team gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.2
 
 - Added **Clear all traps** in Settings. It unloads the active trap, backs up each recognized dump, clears the current villain from both redundant save areas, removes its saved name, and rescans. Unrecognized or changed dumps are skipped.

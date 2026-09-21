@@ -38,7 +38,7 @@ test('manual names persist per file, clear, and leave dumps unchanged',async()=>
 
 // Captured Life trap from https://nfc.toys/data-traps.html (Chompy Mage).
 const fixture=()=>Buffer.from(require('node:fs').readFileSync(require('node:path').join(__dirname,'fixtures/life-trap.hex'),'utf8').trim(),'hex');
-test('clear removes active villain from both real encrypted saves and preserves other blocks',()=>{
+test('clear removes all villain history from both real encrypted saves and preserves NFC trailers',()=>{
   const original=fixture(),clean=traps.clear(original),data=traps.decrypt(clean);
   assert.deepEqual(traps.decode(original),{state:'captured',recordId:1});
   assert.deepEqual(traps.decode(clean),{state:'empty'});
@@ -46,12 +46,18 @@ test('clear removes active villain from both real encrypted saves and preserves 
     assert.equal(traps.areaValid(data,block),true);
     assert.equal(data.readUInt16LE(block*16),0);
     assert.deepEqual(traps.decodeRecord(data,block),{state:'empty'});
+    for(let b=block+1;b<block+28;b++) {
+      if(b%4===3) assert.deepEqual(clean.subarray(b*16,b*16+16),original.subarray(b*16,b*16+16));
+      else assert.ok(data.subarray(b*16,b*16+16).every(byte=>byte===0),`block ${b} still has saved trap data`);
+    }
   }
-  for(let block=0;block<64;block++) if(![8,9,36,37].includes(block)) assert.deepEqual(clean.subarray(block*16,block*16+16),original.subarray(block*16,block*16+16));
+  assert.deepEqual(clean.subarray(0,8*16),original.subarray(0,8*16));
   assert.deepEqual(traps.clear(clean),clean);
   assert.throws(()=>traps.clear(Buffer.alloc(1024)),/Unrecognized/);
   const broken=fixture();broken[36*16]^=1;
-  assert.throws(()=>traps.clear(broken),/Invalid backup/);
+  const repaired=traps.clear(broken),repairedData=traps.decrypt(repaired);
+  assert.deepEqual(traps.decode(repaired),{state:'empty'});
+  assert.ok(traps.areaValid(repairedData,8)&&traps.areaValid(repairedData,36));
 });
 
 test('bulk clear unloads trap, backs up originals, removes names, rescans and skips unknown saves',async()=>{
