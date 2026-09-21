@@ -24,7 +24,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 
 ## Download and setup
 
-Download **De-PerPortal-0.5.7-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.5.8-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -67,11 +67,11 @@ Cemu opens the selected dump directly and saves progress to it. Trap dump editin
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
-## Items, traps and vehicles (v0.5.7)
+## Items, traps and vehicles (v0.5.8)
 
-In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping at either end. **Alt+Ctrl+0** locks in the selected villain by loading its trap into the shared trap slot. Previewing does not change the portal. Empty traps and names that no longer match a detected capture are excluded.
+In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping at either end. **Alt+Space** locks in the selected villain by loading its trap into the shared trap slot. Previewing does not change the portal. Named traps are reserved for the carousel; element shortcuts skip them and choose another unassigned trap of the same element. If none is available, the app reports that instead of reusing a named trap.
 
-**Alt+Q/W/E/R/Y/U/I/O/P/L** loads a trap for **Magic/Water/Tech/Fire/Earth/Life/Air/Undead/Light/Dark**, respectively. Each shortcut automatically picks a matching library trap, preferring empty saves, then sorting by filename. Missing elements show a notification. Number shortcuts still load Trap Masters; Swap Force keeps its perk shortcuts.
+**Alt+Q/W/E/R/Y/U/I/O/P/L** loads a trap for **Magic/Water/Tech/Fire/Earth/Life/Air/Undead/Light/Dark**, respectively. Each shortcut automatically picks a matching unassigned library trap, preferring empty saves, then sorting by filename. Named traps are held for the villain carousel. Missing or fully assigned elements show a notification. Number shortcuts still load Trap Masters; Swap Force keeps its perk shortcuts.
 
 Selection notifications appear for 4.5 seconds, even when the element overlay is dismissed. Empty and unnamed unverified traps are grouped under **Other traps**. Expand that group to load them or manually name an unverified trap whose contents you know.
 

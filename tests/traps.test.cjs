@@ -82,12 +82,19 @@ test('element shortcuts prefer empty traps and named cycling excludes stale labe
   const {Manager}=require('../app/manager.cjs');
   const m=new Manager('/unused',async()=>{});m.session={game:4,pid:1,supported:true};
   const f=(key,state,recordId)=>({key,uid:key,id:1,variant:1,info:{kind:'Trap',element:'Water',name:'Water trap'},trap:{state,recordId}});
-  m.figures=[f('a','captured',20),f('b','empty'),f('c','captured',23)];
-  m.config.trapLabels={};
-  for(const figure of m.figures)m.config.trapLabels[JSON.stringify([figure.key,figure.uid,1,1])]={name:figure.key,recordId:20};
-  const actions=[];m.action=async a=>actions.push(a);
+  const named=f('a','captured',20),empty=f('b','empty'),backup=f('c','captured',23);
+  m.figures=[named,empty,backup];
+  m.config.trapLabels={
+    [JSON.stringify([named.key,named.uid,1,1])]:{name:named.key,recordId:20},
+    [JSON.stringify([backup.key,backup.uid,1,1])]:{name:backup.key,recordId:20}
+  };
+  const actions=[],notices=[];m.on('notification',message=>notices.push(message));m.action=async a=>actions.push(a);
   await m.hotkey({player:0,key:'W'});assert.equal(actions[0].choice.top,'b');
+  m.figures=[named,backup];
+  await m.hotkey({player:0,key:'W'});assert.equal(actions[1].choice.top,'c');
+  m.figures=[named];
+  await m.hotkey({player:0,key:'W'});assert.equal(actions.length,2);assert.match(notices.at(-1),/No unassigned Water trap/);
   await m.hotkey({player:0,key:'Down'});assert.equal(m.selectedTrap,'a');
   await m.hotkey({player:0,key:'Down'});assert.equal(m.selectedTrap,'a');
-  await m.hotkey({player:1,key:'W'});assert.equal(actions.length,1);
+  await m.hotkey({player:1,key:'W'});assert.equal(actions.length,2);
 });

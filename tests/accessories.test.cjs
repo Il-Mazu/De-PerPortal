@@ -20,7 +20,7 @@ test('Trap Team previews named files, locks explicitly, wraps and validates dump
   await manager.select({target:'trap-name',choice:{top:'a.sky'},name:'Alpha'});
   await manager.select({target:'trap-name',choice:{top:'b.sky'},name:'Beta'});
   await press('Down');assert.equal(manager.selectedTrap,'a.sky');assert.equal(calls.length,0);
-  assert.match(notices.at(-1),/Alpha · Water · Alt\+Ctrl\+0/);
+  assert.match(notices.at(-1),/Alpha · Water · Alt\+Space/);
   await press('Down');assert.equal(manager.selectedTrap,'b.sky');
   await press('Down');assert.equal(manager.selectedTrap,'a.sky');
   await press('Up');assert.equal(manager.selectedTrap,'b.sky');

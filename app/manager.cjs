@@ -324,7 +324,7 @@ class Manager extends EventEmitter {
           const index=roster.findIndex(f=>f.key===this.selectedTrap);
           const next=index<0?(key==='Down'?0:roster.length-1):(index+(key==='Down'?1:-1)+roster.length)%roster.length;
           const f=roster[next];this.selectedTrap=f.key;
-          this.emit('notification',`${this.trapName(f)} · ${f.info.element} · Alt+Ctrl+0 to lock in`);
+          this.emit('notification',`${this.trapName(f)} · ${f.info.element} · Alt+Space to lock in`);
           return;
         }
         let f;
@@ -336,8 +336,8 @@ class Manager extends EventEmitter {
           if(current.state!==f.trap?.state || current.recordId!==f.trap?.recordId) throw Error('Trap contents changed. Rescan and name the current villain.');
         } else {
           const element=model.elements[trapKeys.indexOf(key)];
-          f=this.figures.filter(f=>f.info?.kind==='Trap' && f.info.element===element).sort((a,b)=>(a.trap?.state==='empty'?0:1)-(b.trap?.state==='empty'?0:1)||a.key.localeCompare(b.key))[0];
-          if(!f) throw Error(`No ${element} trap in your NFC library.`);
+          f=this.figures.filter(f=>f.info?.kind==='Trap' && f.info.element===element && !this.trapName(f)).sort((a,b)=>(a.trap?.state==='empty'?0:1)-(b.trap?.state==='empty'?0:1)||a.key.localeCompare(b.key))[0];
+          if(!f) throw Error(`No unassigned ${element} trap is available. Named traps stay in the Alt+Up/Down carousel.`);
         }
         await this.action({target:'accessory',slot:'trap',choice:{top:f.key,bottom:null}});
         this.emit('notification',`${key==='LockTrap'?'Locked in: ':''}${this.trapName(f)||f.info.name} · ${f.info.element}`);

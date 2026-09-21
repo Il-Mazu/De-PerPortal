@@ -1,6 +1,6 @@
 # Accessory support and research
 
-Trap Team supports **Alt+Up / Alt+Down** to preview named captured villains and **Alt+Ctrl+0** to load the selected trap. **Alt+Q/W/E/R/Y/U/I/O/P/L** loads Magic/Water/Tech/Fire/Earth/Life/Air/Undead/Light/Dark traps, preferring empty saves. These shortcuts use the existing accessory validation and shared trap row; other games retain their normal accessory picker behavior.
+Trap Team supports **Alt+Up / Alt+Down** to preview named captured villains and **Alt+Space** to load the selected trap. **Alt+Q/W/E/R/Y/U/I/O/P/L** loads Magic/Water/Tech/Fire/Earth/Life/Air/Undead/Light/Dark traps, preferring empty, unassigned saves. A currently named trap is reserved for the villain carousel; elemental shortcuts use a different unassigned trap of that element or report when none is available. These shortcuts use the existing accessory validation and shared trap row; other games retain their normal accessory picker behavior.
 
 Scope: the six home-console games, running their Wii U versions in Cemu. Checked September 18, 2026. These rules describe the games; automated tests validate routing and filtering, not the games' execution of every reward.
 

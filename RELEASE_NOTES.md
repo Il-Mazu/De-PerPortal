@@ -1,3 +1,14 @@
+# Dè PerPortal 0.5.8
+
+- Changed the Trap Team villain lock shortcut to **Alt+Space**.
+- Element shortcuts now skip named traps, reserving them for the **Alt+Up/Down** carousel. They select a different unassigned trap of the same element or report when no trap is available.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Live Trap Team gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.7
 
 - Replaced the destructive trap clear with **Reset trap detections**, which clears PerPortal's villain names and ignores the current decoded contents until a trap changes. It never edits the NFC dump.
