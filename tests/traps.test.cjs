@@ -35,3 +35,58 @@ test('manual names persist per file, clear, and leave dumps unchanged',async()=>
     assert.equal(manager.state().figures[0].trapLabel,null);
   } finally {await fs.rm(root,{recursive:true,force:true});}
 });
+
+// Captured Life trap from https://nfc.toys/data-traps.html (Chompy Mage).
+const fixture=()=>Buffer.from(require('node:fs').readFileSync(require('node:path').join(__dirname,'fixtures/life-trap.hex'),'utf8').trim(),'hex');
+test('clear removes active villain from both real encrypted saves and preserves other blocks',()=>{
+  const original=fixture(),clean=traps.clear(original),data=traps.decrypt(clean);
+  assert.deepEqual(traps.decode(original),{state:'captured',recordId:1});
+  assert.deepEqual(traps.decode(clean),{state:'empty'});
+  for(const block of [8,36]) {
+    assert.equal(traps.areaValid(data,block),true);
+    assert.equal(data.readUInt16LE(block*16),0);
+    assert.deepEqual(traps.decodeRecord(data,block),{state:'empty'});
+  }
+  for(let block=0;block<64;block++) if(![8,9,36,37].includes(block)) assert.deepEqual(clean.subarray(block*16,block*16+16),original.subarray(block*16,block*16+16));
+  assert.deepEqual(traps.clear(clean),clean);
+  assert.throws(()=>traps.clear(Buffer.alloc(1024)),/Unrecognized/);
+  const broken=fixture();broken[36*16]^=1;
+  assert.throws(()=>traps.clear(broken),/Invalid backup/);
+});
+
+test('bulk clear unloads trap, backs up originals, removes names, rescans and skips unknown saves',async()=>{
+  const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
+  const {Manager}=require('../app/manager.cjs');
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'clear-traps-')),calls=[];
+  try {
+    await fs.mkdir(path.join(root,'NFC'));
+    const original=fixture();await fs.writeFile(path.join(root,'NFC/life.sky'),original);
+    const unknown=Buffer.from(original);unknown.fill(0,128);await fs.writeFile(path.join(root,'NFC/unknown.sky'),unknown);
+    const manager=new Manager(root,async args=>calls.push(args));await manager.init();
+    await manager.select({target:'trap-name',choice:{top:'life.sky'},name:'Chompy Mage'});
+    manager.updateSession({pid:1,supported:true,title:'Skylanders Trap Team'});
+    await manager.clearTraps();
+    assert.deepEqual(calls,[['clear','7']]);
+    assert.equal(manager.figures.find(f=>f.key==='life.sky').trap.state,'empty');
+    assert.equal(manager.state().figures.find(f=>f.key==='life.sky').trapLabel,null);
+    assert.deepEqual(await fs.readFile(path.join(root,'NFC/unknown.sky')),unknown);
+    const base=path.join(root,'de-perportal-data/trap-backups'),[dir]=await fs.readdir(base);
+    assert.deepEqual(await fs.readFile(path.join(base,dir,'life.sky')),original);
+    assert.match(manager.message,/Cleared 1 traps/);assert.match(manager.message,/Skipped 1/);
+    assert.equal(manager.busy,false);
+  } finally {await fs.rm(root,{recursive:true,force:true});}
+});
+
+test('element shortcuts prefer empty traps and named cycling excludes stale labels',async()=>{
+  const {Manager}=require('../app/manager.cjs');
+  const m=new Manager('/unused',async()=>{});m.session={game:4,pid:1,supported:true};
+  const f=(key,state,recordId)=>({key,uid:key,id:1,variant:1,info:{kind:'Trap',element:'Water',name:'Water trap'},trap:{state,recordId}});
+  m.figures=[f('a','captured',20),f('b','empty'),f('c','captured',23)];
+  m.config.trapLabels={};
+  for(const figure of m.figures)m.config.trapLabels[JSON.stringify([figure.key,figure.uid,1,1])]={name:figure.key,recordId:20};
+  const actions=[];m.action=async a=>actions.push(a);
+  await m.hotkey({player:0,key:'W'});assert.equal(actions[0].choice.top,'b');
+  await m.hotkey({player:0,key:'Down'});assert.equal(m.selectedTrap,'a');
+  await m.hotkey({player:0,key:'Down'});assert.equal(m.selectedTrap,'a');
+  await m.hotkey({player:1,key:'W'});assert.equal(actions.length,1);
+});

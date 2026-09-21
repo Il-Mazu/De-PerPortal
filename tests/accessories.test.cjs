@@ -8,7 +8,7 @@ const accessories=require('../app/accessories.cjs');
 const {Manager}=require('../app/manager.cjs');
 function dump(id,variant=0,uid=id+1){const b=Buffer.alloc(1024);b.writeUInt32LE(uid);b.writeUInt16LE(id,16);b.writeUInt16LE(variant,28);return b;}
 function figure(id,variant=0){return {...model.identify(dump(id,variant)),key:`${id}-${variant}.sky`};}
-test('Trap Team arrow shortcuts cycle exact files, wrap, respect locks and game, and validate dumps',async()=>{
+test('Trap Team previews named files, locks explicitly, wraps and validates dumps',async()=>{
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'trap-hotkeys-')),calls=[];
  try {
   await fs.mkdir(path.join(root,'NFC'));
@@ -17,11 +17,14 @@ test('Trap Team arrow shortcuts cycle exact files, wrap, respect locks and game,
   const notices=[];manager.on('notification',message=>notices.push(message));
   manager.updateSession({pid:1,supported:true,focused:true,title:'Skylanders Trap Team'});
   const press=key=>manager.hotkey({player:0,key});
-  await press('Down');assert.equal(manager.accessories.trap.top,'a.sky');
-  assert.match(notices.at(-1),/^Trap 1\/2: Water Tiki · Water$/);
-  await press('Down');assert.equal(manager.accessories.trap.top,'b.sky');
-  await press('Down');assert.equal(manager.accessories.trap.top,'a.sky');
-  await press('Up');assert.equal(manager.accessories.trap.top,'b.sky');
+  await manager.select({target:'trap-name',choice:{top:'a.sky'},name:'Alpha'});
+  await manager.select({target:'trap-name',choice:{top:'b.sky'},name:'Beta'});
+  await press('Down');assert.equal(manager.selectedTrap,'a.sky');assert.equal(calls.length,0);
+  assert.match(notices.at(-1),/Alpha · Water · Alt\+Ctrl\+0/);
+  await press('Down');assert.equal(manager.selectedTrap,'b.sky');
+  await press('Down');assert.equal(manager.selectedTrap,'a.sky');
+  await press('Up');assert.equal(manager.selectedTrap,'b.sky');
+  assert.equal(calls.length,0);await press('LockTrap');assert.equal(manager.accessories.trap.top,'b.sky');
   assert.ok(calls.every(args=>args[0]==='load' && args[1]==='7'));
   const count=calls.length;manager.busy=true;await press('Up');manager.busy=false;
   await manager.hotkey({player:1,key:'Down'});assert.equal(calls.length,count);
@@ -31,7 +34,7 @@ test('Trap Team arrow shortcuts cycle exact files, wrap, respect locks and game,
   assert.equal(calls.length,count);
   manager.updateSession({pid:1,supported:true,title:'Skylanders Trap Team'});
   await fs.writeFile(path.join(root,'NFC/a.sky'),dump(211,12289,999));
-  await press('Down');assert.equal(calls.length,count);assert.match(manager.message,/changed since scanning/);
+  await press('Down');await press('LockTrap');assert.equal(calls.length,count);assert.match(manager.message,/changed since scanning/);
  } finally {await fs.rm(root,{recursive:true,force:true});}
 });
 test('accessory compatibility and game-specific roles across all six console games',()=>{

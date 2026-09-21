@@ -4,6 +4,8 @@ const path=require('node:path');
 const {EventEmitter}=require('node:events');
 const model=require('./model.cjs');
 const accessories=require('./accessories.cjs');
+const trapData=require('./traps.cjs');
+const trapKeys=['Q','W','E','R','Y','U','I','O','P','L'];
 
 class Manager extends EventEmitter {
   constructor(root,control) {
@@ -67,7 +69,7 @@ class Manager extends EventEmitter {
   publish() { this.emit('state',this.state()); }
   updateSession(s) {
     const next={pid:s.pid,supported:s.supported,focused:s.focused,game:model.detectGame(s.title||''),bounds:s.bounds||null};
-    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.accessories={}; this.labels={}; }
+    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.accessories={}; this.labels={}; this.selectedTrap=null; }
     const changed=JSON.stringify(next)!==JSON.stringify(this.session);
     const rowsChanged=JSON.stringify(s.rows||[])!==JSON.stringify(this.observed);
     this.observed=s.rows||[];
@@ -87,6 +89,40 @@ class Manager extends EventEmitter {
     const dir=path.join(this.root,'de-perportal-data'); await fs.mkdir(dir,{recursive:true});
     await fs.writeFile(path.join(dir,'settings.json.tmp'),JSON.stringify(this.config,null,2));
     await fs.rename(path.join(dir,'settings.json.tmp'),path.join(dir,'settings.json'));
+  }
+  trapName(f) {
+    const saved=this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
+    return saved && f.trap?.state!=='empty' && (f.trap?.state!=='captured' || saved.recordId===null || saved.recordId===f.trap.recordId)?saved.name:null;
+  }
+  async clearTraps() {
+    if(this.busy) throw Error('Wait for the current swap.');
+    this.busy=true;this.publish();
+    let cleared=0;const skipped=[];
+    const backup=path.join(this.root,'de-perportal-data','trap-backups',`${Date.now()}`);
+    try {
+      // Cemu retains loaded data and can overwrite edits: unload its trap first.
+      if(this.session.pid) {
+        if(!this.session.supported) throw Error('Close Cemu before clearing traps.');
+        await this.accessoryAction({target:'remove-accessory',slot:'trap'});
+      }
+      for(const f of this.figures.filter(f=>f.info?.kind==='Trap')) {
+        let bytes,now;
+        try {bytes=await fs.readFile(f.path);now=model.identify(bytes);} catch {skipped.push(f.key);continue;}
+        if(now.uid!==f.uid || now.id!==f.id || now.variant!==f.variant) {skipped.push(f.key);continue;}
+        let clean;
+        try {clean=trapData.clear(bytes);} catch {skipped.push(f.key);continue;}
+        const dest=path.join(backup,f.key);
+        await fs.mkdir(path.dirname(dest),{recursive:true});
+        await fs.writeFile(dest,bytes,{flag:'wx'});
+        await fs.writeFile(f.path+'.tmp',clean);
+        await fs.rename(f.path+'.tmp',f.path);
+        delete this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
+        cleared++;
+      }
+      this.selectedTrap=null;
+      await this.save();
+      this.message=`Cleared ${cleared} traps. Originals backed up in ${backup}.${skipped.length?` Skipped ${skipped.length} unrecognized or changed dumps: ${skipped.join(', ')}.`:''}`;
+    } finally {this.busy=false;await this.rescan();await this.flushDeferredRescan();}
   }
   async select({player,target,choice,preset,name}) {
     if(this.busy) throw Error('Wait for the current swap.');
@@ -241,18 +277,31 @@ class Manager extends EventEmitter {
   }
   async hotkey({player,key}) {
     if(!this.session.game) return;
-    if(key==='Up' || key==='Down') {
-      if(this.game!==4 || player!==0 || this.busy) return;
-      const traps=this.figures.filter(f=>f.info?.kind==='Trap').sort((a,b)=>a.info.element.localeCompare(b.info.element)||a.info.name.localeCompare(b.info.name)||a.key.localeCompare(b.key));
-      if(!traps.length) {this.emit('notification','No traps in your NFC library.');return;}
-      const index=traps.findIndex(f=>f.key===this.accessories.trap?.top);
-      const next=index<0?(key==='Down'?0:traps.length-1):(index+(key==='Down'?1:-1)+traps.length)%traps.length;
-      const f=traps[next];
+    if(this.game===4 && player===0 && !this.busy && (key==='Up' || key==='Down' || key==='LockTrap' || trapKeys.includes(key))) {
+      const roster=this.figures.filter(f=>f.info?.kind==='Trap' && this.trapName(f)).sort((a,b)=>this.trapName(a).localeCompare(this.trapName(b))||a.key.localeCompare(b.key));
       try {
+        if(key==='Up' || key==='Down') {
+          if(!roster.length) {this.emit('notification','Capture a villain and name it in the GUI first.');return;}
+          const index=roster.findIndex(f=>f.key===this.selectedTrap);
+          const next=index<0?(key==='Down'?0:roster.length-1):(index+(key==='Down'?1:-1)+roster.length)%roster.length;
+          const f=roster[next];this.selectedTrap=f.key;
+          this.emit('notification',`${this.trapName(f)} · ${f.info.element} · Alt+Ctrl+0 to lock in`);
+          return;
+        }
+        let f;
+        if(key==='LockTrap') {
+          f=roster.find(f=>f.key===this.selectedTrap);
+          if(!f) throw Error('Select a named villain with Alt+↑ / Alt+↓ first.');
+          // Re-read before loading so a changed capture cannot reuse a stale name.
+          const current=trapData.decode(await fs.readFile(f.path));
+          if(current.state!==f.trap?.state || current.recordId!==f.trap?.recordId) throw Error('Trap contents changed. Rescan and name the current villain.');
+        } else {
+          const element=model.elements[trapKeys.indexOf(key)];
+          f=this.figures.filter(f=>f.info?.kind==='Trap' && f.info.element===element).sort((a,b)=>(a.trap?.state==='empty'?0:1)-(b.trap?.state==='empty'?0:1)||a.key.localeCompare(b.key))[0];
+          if(!f) throw Error(`No ${element} trap in your NFC library.`);
+        }
         await this.action({target:'accessory',slot:'trap',choice:{top:f.key,bottom:null}});
-        const saved=this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
-        const current=saved && f.trap?.state!=='empty' && (f.trap?.state!=='captured' || saved.recordId===null || saved.recordId===f.trap.recordId);
-        this.emit('notification',`Trap ${next+1}/${traps.length}: ${current?saved.name:f.info.name} · ${f.info.element}${current?` · ${f.info.name}`:''}`);
+        this.emit('notification',`${key==='LockTrap'?'Locked in: ':''}${this.trapName(f)||f.info.name} · ${f.info.element}`);
       } catch(e) {this.message=e.message;this.publish();this.emit('notification',e.message);}
       return;
     }

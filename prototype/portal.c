@@ -165,10 +165,11 @@ static LRESULT CALLBACK keyboard(int code,WPARAM message,LPARAM data) {
             wchar_t s[512]; GetWindowTextW(main_window,s,512);
             BOOL game=StrStrIW(s,L"Skylander")!=NULL || StrStrIW(s,L"10142d00")!=NULL;
             BOOL trapGame=StrStrIW(s,L"Trap Team")!=NULL || StrStrIW(s,L"1017c600")!=NULL || StrStrIW(s,L"10181f00")!=NULL;
-            if((game || trapGame) && (k->flags & LLKHF_ALTDOWN) && !(GetAsyncKeyState(VK_CONTROL)&0x8000) && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key==VK_LEFT || key==VK_RIGHT || (trapGame && !(GetAsyncKeyState(VK_SHIFT)&0x8000) && (key==VK_UP || key==VK_DOWN)) || key=='T' || strchr("QWERYUIO",key))) {
+            BOOL lockTrap=trapGame && key=='0' && (GetAsyncKeyState(VK_CONTROL)&0x8000) && !(GetAsyncKeyState(VK_SHIFT)&0x8000);
+            if((game || trapGame) && (k->flags & LLKHF_ALTDOWN) && (lockTrap || (!(GetAsyncKeyState(VK_CONTROL)&0x8000) && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key==VK_LEFT || key==VK_RIGHT || (trapGame && !(GetAsyncKeyState(VK_SHIFT)&0x8000) && (key==VK_UP || key==VK_DOWN)) || key=='T' || strchr("QWERYUIO",key) || (trapGame && (key=='P' || key=='L')))))) {
                 if(!pressed[key]) {
                     char text[2]={(char)(key==VK_OEM_MINUS?'-':key),0};
-                    printf("{\"type\":\"hotkey\",\"player\":%d,\"key\":\"%s\"}\n",(GetAsyncKeyState(VK_SHIFT)&0x8000)?1:0,key==VK_LEFT?"Left":key==VK_RIGHT?"Right":key==VK_UP?"Up":key==VK_DOWN?"Down":text);
+                    printf("{\"type\":\"hotkey\",\"player\":%d,\"key\":\"%s\"}\n",(GetAsyncKeyState(VK_SHIFT)&0x8000)?1:0,lockTrap?"LockTrap":key==VK_LEFT?"Left":key==VK_RIGHT?"Right":key==VK_UP?"Up":key==VK_DOWN?"Down":text);
                     fflush(stdout); pressed[key]=1;
                 }
                 return 1;

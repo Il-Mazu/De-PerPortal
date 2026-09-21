@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('dePerPortal',{
   action:data=>ipcRenderer.invoke('action',data),
   select:data=>ipcRenderer.invoke('select',data),
   game:value=>ipcRenderer.invoke('game',value),
+  clearTraps:()=>ipcRenderer.invoke('clear-traps'),
   rescan:()=>ipcRenderer.invoke('rescan'),
   launch:()=>ipcRenderer.invoke('launch'),
   artwork:()=>ipcRenderer.invoke('artwork'),

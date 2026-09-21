@@ -1,6 +1,6 @@
 'use strict';
-// Trap saves use the normal Skylander redundant, encrypted data areas.  This
-// module deliberately has no write API: a bad or newer record is unknown.
+// Trap saves use the normal Skylander redundant, encrypted data areas.
+// Unknown or damaged save areas are never rewritten.
 const crypto=require('node:crypto');
 
 // The key derivation constant is 53 bytes, including its final space.
@@ -46,4 +46,23 @@ function decode(bytes) {
     return decodeRecord(data,block);
   } catch { return {state:'unknown'}; }
 }
-module.exports={crc16,decrypt,areaValid,decodeRecord,decode};
+function clear(bytes) {
+  if(decode(bytes).state==='unknown') throw Error('Unrecognized trap save; original left untouched.');
+  const data=decrypt(bytes),out=Buffer.from(bytes);
+  for(const block of [8,36]) {
+    // Require both redundant saves to be understood before modifying either.
+    if(!areaValid(data,block)) throw Error('Invalid backup save area; original left untouched.');
+    data.writeUInt16LE(0,block*16); // Active villain slot.
+    data.writeUInt16LE(0,(block+1)*16); // Active villain record.
+    const group=Buffer.concat([block+1,block+2,block+4].map(b=>data.subarray(b*16,b*16+16)));
+    data.writeUInt16LE(crc16(group),block*16+12);
+    data.writeUInt16LE(5,block*16+14);
+    data.writeUInt16LE(crc16(data.subarray(block*16,block*16+16)),block*16+14);
+    for(const b of [block,block+1]) {
+      const cipher=crypto.createCipheriv('aes-128-ecb',key(bytes,b),null);cipher.setAutoPadding(false);
+      Buffer.concat([cipher.update(data.subarray(b*16,b*16+16)),cipher.final()]).copy(out,b*16);
+    }
+  }
+  return out;
+}
+module.exports={crc16,decrypt,areaValid,decodeRecord,decode,clear};

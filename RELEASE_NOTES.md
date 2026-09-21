@@ -1,3 +1,16 @@
+# Dè PerPortal 0.5.2
+
+- Added **Clear all traps** in Settings. It unloads the active trap, backs up each recognized dump, clears the current villain from both redundant save areas, removes its saved name, and rescans. Unrecognized or changed dumps are skipped.
+- Added Trap Team element shortcuts: **Alt+Q/W/E/R/Y/U/I/O/P/L** selects Magic, Water, Tech, Fire, Earth, Life, Air, Undead, Light, or Dark traps, preferring empty traps.
+- **Alt+Up/Down** now previews named captured villains without changing the portal. **Alt+Ctrl+0** loads the selected trap. Overlay notifications identify the selection.
+- Removed shortcut and perk reminders from the overlay; it now displays element icons only.
+
+## Validation
+
+All 25 unit/regression tests and the Electron interface suite pass. The Windows portal controller builds locally. The clear action was tested against a captured encrypted trap fixture and verifies both redundant save checksums. Live Trap Team gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.1
 
 - Existing Trap Team element slots now migrate to matching Trap Masters while preserving valid Trap Master choices and favorite presets.

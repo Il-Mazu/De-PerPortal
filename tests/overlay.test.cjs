@@ -31,7 +31,7 @@ test('native drags survive figure updates, Cemu focus loss, notifications and di
  window.emit('will-move',{}, {x:2350,y:240});window.bounds.x=2350;window.bounds.y=240;
  window.emit('move');
  state={...state,game:4,session:{...state.session,game:4,focused:true}};manager.emit('state',state);
- assert.deepEqual(window.getPosition(),[2350,240]);assert.equal(window.bounds.height,Math.ceil(94*.7));
+ assert.deepEqual(window.getPosition(),[2350,240]);assert.equal(window.bounds.height,Math.ceil(62*.7));
  window.bounds.x=2300;window.bounds.y=200;window.emit('moved');
  state={...state,game:2,session:{...state.session,game:2,focused:true}};manager.emit('state',state);assert.deepEqual(window.getPosition(),[2300,200]);
  manager.emit('notification','Player 1 · Preset 2');assert.deepEqual(window.getPosition(),[2300,200]);

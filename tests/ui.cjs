@@ -22,9 +22,9 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('#overlay').click();
   const overlay=instance.windows().find(p=>p.url().endsWith('/overlay.html'));
   assert.ok(overlay);overlay.on('pageerror',e=>errors.push(e.message));
-  await overlay.waitForFunction(()=>document.querySelectorAll('#perks .entry').length===8);
+  await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===8);
   assert.equal(await overlay.locator('#elements .entry').count(),8);
-  assert.deepEqual(await overlay.locator('#perks .key').allTextContents(),['Q','W','E','R','Y','U','I','O']);
+  assert.equal(await overlay.locator('.key, #perks, #traps').count(),0);
   await overlay.waitForFunction(()=>[...document.images].every(img=>img.complete && img.naturalWidth>0));
   const overlayFlags=()=>instance.evaluate(({BrowserWindow})=>{
     const w=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html'));
@@ -47,14 +47,13 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('#overlay').click();
   assert.equal((await overlayFlags()).visible,true);
   await selectGame('4');
-  await overlay.locator('#traps').waitFor({state:'visible'});
-  assert.match(await overlay.locator('#traps').textContent(),/Alt \+ ↑ Previous/);
-  assert.match(await overlay.locator('#traps').textContent(),/Alt \+ ↓ Next/);
+  await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===10);
+  assert.equal(await overlay.locator('main').textContent().then(t=>t.includes('Alt')),false);
   assert.deepEqual(await instance.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html')).getPosition()),movedPosition);
   await selectGame('5');
   await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===10);
-  assert.equal(await overlay.locator('#perks').isVisible(),false);
-  assert.equal(await overlay.locator('#traps').isVisible(),false);
+  assert.equal(await overlay.locator('#perks').count(),0);
+  assert.equal(await overlay.locator('#traps').count(),0);
   await selectGame('3');
   await overlay.locator('#close').click();
   await page.locator('#favorite-0 .edit').click();
@@ -176,6 +175,20 @@ const {installArt}=require('../app/artwork.cjs');
     await page.setViewportSize({width:720,height:900});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     await page.screenshot({path:'out/de-perportal-compact.png',fullPage:true});
+  }
+  if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
+    const bytes=Buffer.from((await fs.readFile(path.join(__dirname,'fixtures/life-trap.hex'),'utf8')).trim(),'hex');
+    await fs.writeFile(path.join(root,'NFC/captured-life.sky'),bytes);
+    await page.locator('#settings').click();
+    await page.locator('#rescan').click();
+    await page.locator('#library-count').filter({hasText:'33 figures'}).waitFor();
+    await page.locator('#clear-traps').click();
+    await page.waitForFunction(()=>document.body.textContent.includes('Cleared 1 traps.'));
+    assert.equal(require('../app/traps.cjs').decode(await fs.readFile(path.join(root,'NFC/captured-life.sky'))).state,'empty');
+    const backupRoot=path.join(root,'de-perportal-data/trap-backups');
+    const [backup]=await fs.readdir(backupRoot);
+    assert.deepEqual(await fs.readFile(path.join(backupRoot,backup,'captured-life.sky')),bytes);
+    await page.locator('#settings-close').click();
   }
   assert.deepEqual(errors,[]);
   // Integration is opt-in and requires a Cemu session with empty portal rows.
