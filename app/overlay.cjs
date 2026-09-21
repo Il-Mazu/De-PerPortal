@@ -5,7 +5,7 @@ const scale=0.7;
 
 function createOverlay(manager,mainWindow) {
   let dismissed=false,preview=false,ready=false,lastState=manager.state(),position=null,notification=null,timer,placing=false,lastPlaced=null;
-  const window=new BrowserWindow({width:Math.ceil(480*scale),height:Math.ceil(62*scale),show:false,frame:false,transparent:true,
+  const window=new BrowserWindow({width:Math.ceil(640*scale),height:Math.ceil(62*scale),show:false,frame:false,transparent:true,
     resizable:false,movable:true,focusable:false,skipTaskbar:true,alwaysOnTop:true,hasShadow:false,
     webPreferences:{preload:path.join(__dirname,'overlay-preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,zoomFactor:scale}});
   window.setAlwaysOnTop(true,'screen-saver');
@@ -25,7 +25,7 @@ function createOverlay(manager,mainWindow) {
     const bounds=state.session.bounds;
     if(bounds && bounds.width>0 && bounds.height>0) reference=process.platform==='win32'?screen.screenToDipRect(null,bounds):bounds;
     const area=screen.getDisplayMatching(position?{x:position[0],y:position[1],width:window.getBounds().width,height:window.getBounds().height}:reference).workArea;
-    const width=Math.min(Math.ceil(480*scale),area.width),height=Math.ceil(((reminders?62:0)+(notification?54:0))*scale);
+    const width=Math.min(Math.ceil(640*scale),area.width),height=Math.ceil(((reminders?62:0)+(notification?54:0))*scale);
     const x=position?.[0] ?? Math.round(area.x+(area.width-width)/2);
     const y=position?.[1] ?? area.y+area.height-height-12;
     const nextBounds={x:Math.max(area.x,Math.min(x,area.x+area.width-width)),y:Math.max(area.y,Math.min(y,area.y+area.height-height)),width,height};

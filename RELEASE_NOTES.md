@@ -1,3 +1,13 @@
+# Dè PerPortal 0.6.0
+
+- The shortcut overlay now shows a compact key hint beside each element icon: the element number in all games, and **number/letter** in Trap Team, where the number loads that element's Trap Master and the letter selects a trap.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Live gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.8
 
 - Changed the Trap Team villain lock shortcut to **Alt+Space**.
