@@ -58,6 +58,7 @@ function clear(bytes) {
     // A trap can be mid-write with one stale/corrupt mirror. Rebuild that
     // redundant header from the valid copy while clearing both data areas.
     if(!valid.includes(block)) data.copy(data,block*16,valid[0]*16,valid[0]*16+16);
+    data.writeUInt16LE(0,block*16); // Reset the area's history counter too.
     const changed=[block];
     // Preserve the sector header at `block`; clear every data block after it,
     // across all seven history sectors. Sector trailers hold NFC keys/access

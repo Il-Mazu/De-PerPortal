@@ -1,3 +1,14 @@
+# Dè PerPortal 0.5.4
+
+- Reset each trap save's history counter along with all villain-history data when clearing traps.
+- Retains the 0.5.3 fixes: full villain-history clearing in both redundant saves and hiding named captures from the detected list while keeping them available through **Alt+Up/Down**.
+
+## Validation
+
+The Windows release workflow runs the complete build and test suite. Live Trap Team gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.3
 
 - Fixed **Clear all traps** to erase the entire villain history from both redundant trap saves, not just the currently selected villain. Original dumps are backed up before clearing.
