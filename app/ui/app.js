@@ -35,6 +35,8 @@ function render() {
   $('game').innerHTML=state.games.map((g,i)=>`<option value="${i+1}">${e(g)}</option>`).join('');
   $('game').value=state.game;$('game').disabled=state.detected || state.busy;
   $('auto-label').textContent=state.detected?'Detected':'Manual profile';
+  $('reset-trap-detections').disabled=state.busy || !state.figures.some(f=>f.info?.kind==='Trap');
+  $('restore-trap-backup').disabled=state.busy;
   $('launch').disabled=!!state.session.pid;
   const thump=state.figures.find(f=>f.id===107);
   $('thump-art').innerHTML=thump?.art?portrait(thump):'⚓';
@@ -123,14 +125,47 @@ function renderAccessories() {
     card.querySelector('.choose-accessory').onclick=()=>openPicker({target:'accessory',slot:card.dataset.slot});
     card.querySelector('.remove-accessory')?.addEventListener('click',()=>perform(()=>api.action({target:'remove-accessory',slot:card.dataset.slot})));
   }
+  const roster=$('trapped-villains'),traps=state.figures.filter(f=>f.info?.kind==='Trap').sort((a,b)=>a.info.element.localeCompare(b.info.element)||a.info.name.localeCompare(b.info.name)||a.key.localeCompare(b.key));
+  roster.hidden=state.game!==4;
+  if(state.game===4) {
+    const otherOpen=$('villain-roster').querySelector('details')?.open || false;
+    const hasVillain=f=>f.trap?.state!=='empty' && (f.trap?.state==='captured' || f.trapLabel);
+    const namedForShortcuts=f=>{
+      const saved=f.trapLabel,status=f.trap||{state:'unknown'};
+      return !!saved?.name && status.state!=='empty' && (status.state!=='captured' || saved.recordId===null || saved.recordId===status.recordId);
+    };
+    const card=f=>{
+      const status=f.trap||{state:'unknown'},saved=f.trapLabel;
+      const changed=saved && status.state==='captured' && saved.recordId!==null && saved.recordId!==status.recordId;
+      const label=status.appReset?'Ignored until contents change':status.state==='empty'?'Empty':changed?'Villain changed':saved?.name || (status.state==='captured'?'Villain detected':'Contents unknown');
+      const detail=status.appReset?'Existing contents ignored by PerPortal; dump unchanged':status.state==='empty'?'Empty trap':status.state==='captured'?'Villain detected':'Contents unverified';
+      const naming=status.state==='empty'?'':`<button class="name-trap" ${state.busy?'disabled':''}>${saved?'Edit name':status.state==='captured'?'Name villain':'Add name manually'}</button>`;
+      return `<article class="villain-entry" data-key="${e(f.key)}"><button class="villain-card" ${state.busy?'disabled':''}><span>${e(label)}</span><small>${e(f.info.name)} · ${e(f.info.element)}</small><small>${e(detail)}${saved?' · Manual name':''}</small><small>${e(f.key)}</small></button>${naming}${changed?'<small>Update the saved name after changing villains.</small>':''}</article>`;
+    };
+    const detected=traps.filter(f=>hasVillain(f)&&!namedForShortcuts(f));
+    const other=traps.filter(f=>!hasVillain(f)&&!namedForShortcuts(f));
+    $('villain-roster').innerHTML=(detected.map(card).join('') || '<p class="roster-empty">No unnamed captured villains. Named captures are ready with Alt+↑ / Alt+↓.</p>')+(other.length?`<details class="other-traps" ${otherOpen?'open':''}><summary>Other traps (${other.length}) · empty, ignored, or unverified</summary><p>Ignored traps keep their original dump bytes. If an unverified trap contains a villain you know, you can add its name manually.</p><div class="villain-roster">${other.map(card).join('')}</div></details>`:'');
+    for(const card of $('villain-roster').querySelectorAll('.villain-entry')) {
+      card.querySelector('.villain-card').onclick=()=>perform(()=>api.action({target:'accessory',slot:'trap',choice:{top:card.dataset.key,bottom:null}}));
+      const nameButton=card.querySelector('.name-trap');
+      if(nameButton)nameButton.onclick=()=>{
+        const f=figure(card.dataset.key),dialog=$('trap-name-dialog');
+        dialog.dataset.key=f.key;
+        $('trap-name-file').textContent=`${f.info.name} · ${f.key}`;
+        $('trap-name').value=f.trapLabel?.name || '';
+        dialog.showModal(); $('trap-name').focus();
+      };
+    }
+  }
 }
 function compatible(f) { return f.info && f.info.game<=state.game; }
 function core(f) { return f.info?.kind==='Skylander' && !/lightcore|elite/i.test(f.info.name) && (f.variant & 0x600)!==0x200; }
+function elementalDoorFigure(f,element) { return f.info?.element===element && (state.game===4 ? f.info.kind==='TrapMaster' && f.half==='whole' : core(f)); }
 function available() {
   const query=$('search').value.trim().toLowerCase();
   if(picking.target==='accessory')return state.figures.filter(f=>f.accessory?.slot===picking.slot && (!query || `${f.info.name} ${f.accessory.type} ${f.info.element} ${f.key}`.toLowerCase().includes(query)));
   if(pendingTop) return state.figures.filter(f=>compatible(f) && f.half==='bottom' && (!query || `${f.info.name} ${f.key}`.toLowerCase().includes(query))).sort((a,b)=>Number(b.id===pendingTop.id-1000 && b.variant===pendingTop.variant)-Number(a.id===pendingTop.id-1000 && a.variant===pendingTop.variant));
-  return state.figures.filter(f=>compatible(f) && f.half!=='bottom' && (!query || `${f.info.name} ${f.id} ${f.key}`.toLowerCase().includes(query)) && (picking.target==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei','Crystal'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4)) && (!state.elements.includes(picking.target) || (core(f) && f.info.element===picking.target)));
+  return state.figures.filter(f=>compatible(f) && f.half!=='bottom' && (!query || `${f.info.name} ${f.id} ${f.key}`.toLowerCase().includes(query)) && (picking.target==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei','Crystal'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4)) && (!state.elements.includes(picking.target) || elementalDoorFigure(f,picking.target)));
 }
 function openPicker(options) {
   if(options.target==='favorite') options={...options,preset:options.preset ?? state.profile.players[options.player].activeFavorite};
@@ -171,6 +206,17 @@ function renderPicker() {
 }
 $('change-top').onclick=()=>{pendingTop=null;$('half-controls').hidden=true;$('search').value='';renderPicker();$('search').focus();};
 $('picker-close').onclick=()=>$('picker').close();
+$('trap-name-cancel').onclick=()=>$('trap-name-dialog').close();
+$('trap-name-form').onsubmit=event=>{
+  event.preventDefault();
+  perform(async()=>{
+    const button=$('trap-name-save'); button.disabled=true;
+    try {
+      await api.select({target:'trap-name',choice:{top:$('trap-name-dialog').dataset.key},name:$('trap-name').value});
+      $('trap-name-dialog').close();
+    } finally {button.disabled=false;}
+  });
+};
 $('search').oninput=renderPicker;
 $('settings').onclick=()=>$('settings-dialog').showModal();
 $('overlay').onclick=()=>perform(()=>api.overlay());
@@ -178,6 +224,8 @@ $('settings-close').onclick=()=>$('settings-dialog').close();
 $('game').onchange=()=>perform(()=>api.game(Number($('game').value)));
 $('launch').onclick=()=>perform(()=>api.launch());
 $('enable').onclick=()=>perform(async()=>{await api.enable();toast('Cemu portal emulation enabled.');});
+$('reset-trap-detections').onclick=()=>perform(()=>api.resetTrapDetections());
+$('restore-trap-backup').onclick=()=>perform(()=>api.restoreTrapBackup());
 $('rescan').onclick=()=>perform(()=>api.rescan());
 $('art-folder').onclick=()=>perform(()=>api.artFolder());
 $('download-art').onclick=()=>perform(async()=>{const b=$('download-art');b.disabled=true;b.textContent='Downloading…';try{await api.artwork();}finally{b.disabled=false;b.textContent='Download character art · 50 MB';}});

@@ -22,9 +22,9 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('#overlay').click();
   const overlay=instance.windows().find(p=>p.url().endsWith('/overlay.html'));
   assert.ok(overlay);overlay.on('pageerror',e=>errors.push(e.message));
-  await overlay.waitForFunction(()=>document.querySelectorAll('#perks .entry').length===8);
+  await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===8);
   assert.equal(await overlay.locator('#elements .entry').count(),8);
-  assert.deepEqual(await overlay.locator('#perks .key').allTextContents(),['Q','W','E','R','Y','U','I','O']);
+  assert.equal(await overlay.locator('.key, #perks, #traps').count(),0);
   await overlay.waitForFunction(()=>[...document.images].every(img=>img.complete && img.naturalWidth>0));
   const overlayFlags=()=>instance.evaluate(({BrowserWindow})=>{
     const w=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html'));
@@ -46,9 +46,14 @@ const {installArt}=require('../app/artwork.cjs');
   assert.equal((await overlayFlags()).visible,false);
   await page.locator('#overlay').click();
   assert.equal((await overlayFlags()).visible,true);
+  await selectGame('4');
+  await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===10);
+  assert.equal(await overlay.locator('main').textContent().then(t=>t.includes('Alt')),false);
+  assert.deepEqual(await instance.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/overlay.html')).getPosition()),movedPosition);
   await selectGame('5');
   await overlay.waitForFunction(()=>document.querySelectorAll('#elements .entry').length===10);
-  assert.equal(await overlay.locator('#perks').isVisible(),false);
+  assert.equal(await overlay.locator('#perks').count(),0);
+  assert.equal(await overlay.locator('#traps').count(),0);
   await selectGame('3');
   await overlay.locator('#close').click();
   await page.locator('#favorite-0 .edit').click();
@@ -117,6 +122,21 @@ const {installArt}=require('../app/artwork.cjs');
   assert.equal(await page.locator('.picker-item').count(),2);
   await page.locator('#search').fill('sea');assert.equal(await page.locator('.picker-item').count(),1);
   await page.locator('#picker-close').click();
+  // Save a manual trap name through real IPC, then reload the renderer.
+  await selectGame('4');
+  assert.equal(await page.locator('.name-trap').isVisible(),false);
+  await page.locator('.other-traps summary').click();
+  await page.locator('.name-trap').click();
+  await page.locator('#trap-name').fill('My Gulper <test>');
+  await page.locator('#trap-name-save').click();
+  await page.locator('#villain-roster').getByText(/Named captures are ready/).waitFor();
+  assert.equal(await page.locator('#villain-roster .villain-entry').count(),0);
+  await page.reload();
+  await page.locator('#villain-roster').getByText(/Named captures are ready/).waitFor();
+  assert.equal(await page.locator('#villain-roster .villain-entry').count(),0);
+  assert.ok(Object.values(JSON.parse(await fs.readFile(path.join(root,'de-perportal-data/settings.json'))).trapLabels).some(label=>label.name==='My Gulper <test>'));
+  await selectGame('6');
+  assert.equal(await page.locator('#trapped-villains').isVisible(),false);
   // Mock only native actions for GUI interaction checks; manager behavior is tested separately.
   if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
     const fixture=await page.evaluate(()=>window.dePerPortal.state());
@@ -152,6 +172,18 @@ const {installArt}=require('../app/artwork.cjs');
     await page.setViewportSize({width:720,height:900});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     await page.screenshot({path:'out/de-perportal-compact.png',fullPage:true});
+  }
+  if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
+    const bytes=Buffer.from((await fs.readFile(path.join(__dirname,'fixtures/life-trap.hex'),'utf8')).trim(),'hex');
+    await fs.writeFile(path.join(root,'NFC/captured-life.sky'),bytes);
+    await page.locator('#settings').click();
+    await page.locator('#rescan').click();
+    await page.locator('#library-count').filter({hasText:'33 figures'}).waitFor();
+    await page.locator('#reset-trap-detections').click();
+    await page.waitForFunction(()=>document.body.textContent.includes('Trap detections and names reset in PerPortal.'));
+    assert.deepEqual(await fs.readFile(path.join(root,'NFC/captured-life.sky')),bytes);
+    assert.match(await page.locator('#villain-roster').textContent(),/Ignored until contents change/);
+    await page.locator('#settings-close').click();
   }
   assert.deepEqual(errors,[]);
   // Integration is opt-in and requires a Cemu session with empty portal rows.

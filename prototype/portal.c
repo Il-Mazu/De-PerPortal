@@ -24,6 +24,7 @@ static HWND loads[16], clears[16], edits[16];
 static int nl, nc, ne;
 static int watching, supported, multiple;
 static unsigned char pressed[256];
+static BOOL control_down;
 
 static void fail(const char *s) { fprintf(stderr, "%s\n", s); exit(1); }
 static BOOL tested_binary(void) {
@@ -158,16 +159,23 @@ static LRESULT CALLBACK keyboard(int code,WPARAM message,LPARAM data) {
     if(code==HC_ACTION) {
         KBDLLHOOKSTRUCT *k=(KBDLLHOOKSTRUCT*)data;
         DWORD key=k->vkCode;
+        if(key==VK_CONTROL || key==VK_LCONTROL || key==VK_RCONTROL) {
+            if(message==WM_KEYDOWN || message==WM_SYSKEYDOWN) control_down=TRUE;
+            if(message==WM_KEYUP || message==WM_SYSKEYUP) control_down=FALSE;
+        }
+        BOOL control=control_down || (GetAsyncKeyState(VK_CONTROL)&0x8000) || (GetAsyncKeyState(VK_LCONTROL)&0x8000) || (GetAsyncKeyState(VK_RCONTROL)&0x8000);
         if(key<256 && (message==WM_KEYUP || message==WM_SYSKEYUP)) {
             if(pressed[key]) { pressed[key]=0; return 1; }
         }
         if(key<256 && supported && GetForegroundWindow()==main_window && (message==WM_KEYDOWN || message==WM_SYSKEYDOWN)) {
             wchar_t s[512]; GetWindowTextW(main_window,s,512);
             BOOL game=StrStrIW(s,L"Skylander")!=NULL || StrStrIW(s,L"10142d00")!=NULL;
-            if(game && (k->flags & LLKHF_ALTDOWN) && !(GetAsyncKeyState(VK_CONTROL)&0x8000) && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key==VK_LEFT || key==VK_RIGHT || key=='T' || strchr("QWERYUIO",key))) {
+            BOOL trapGame=StrStrIW(s,L"Trap Team")!=NULL || StrStrIW(s,L"1017c600")!=NULL || StrStrIW(s,L"10181f00")!=NULL;
+            BOOL lockTrap=trapGame && key==VK_SPACE && !control && !(GetAsyncKeyState(VK_SHIFT)&0x8000);
+            if((game || trapGame) && (k->flags & LLKHF_ALTDOWN) && (lockTrap || (!control && ((key>='0' && key<='9') || key==VK_OEM_MINUS || key==VK_LEFT || key==VK_RIGHT || (trapGame && !(GetAsyncKeyState(VK_SHIFT)&0x8000) && (key==VK_UP || key==VK_DOWN)) || key=='T' || strchr("QWERYUIO",key) || (trapGame && (key=='P' || key=='L')))))) {
                 if(!pressed[key]) {
                     char text[2]={(char)(key==VK_OEM_MINUS?'-':key),0};
-                    printf("{\"type\":\"hotkey\",\"player\":%d,\"key\":\"%s\"}\n",(GetAsyncKeyState(VK_SHIFT)&0x8000)?1:0,key==VK_LEFT?"Left":key==VK_RIGHT?"Right":text);
+                    printf("{\"type\":\"hotkey\",\"player\":%d,\"key\":\"%s\"}\n",(GetAsyncKeyState(VK_SHIFT)&0x8000)?1:0,lockTrap?"LockTrap":key==VK_LEFT?"Left":key==VK_RIGHT?"Right":key==VK_UP?"Up":key==VK_DOWN?"Down":text);
                     fflush(stdout); pressed[key]=1;
                 }
                 return 1;

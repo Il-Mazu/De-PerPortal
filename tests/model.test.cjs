@@ -20,11 +20,56 @@ test('ordinary defaults exclude gimmicks and duplicate UIDs',()=>{
  assert.equal(p.players[0].elements.Fire,null);
  assert.equal(m.core(figure(107,4614)),false);assert.equal(m.core(figure(9,4614)),false);
 });
+test('Trap Team elemental doors require matching Trap Masters',async()=>{
+ const regular=figure(16), trapMaster=figure(466,12288);
+ assert.deepEqual(m.candidates([regular,trapMaster],4,'Magic').map(f=>f.key),[trapMaster.key]);
+ assert.equal(m.elementalDoorFigure(regular,4,'Magic'),false);
+ assert.equal(m.elementalDoorFigure(trapMaster,4,'Magic'),true);
+
+ const {root,manager}=await setup(async()=>{});
+ try {
+  manager.figures=[regular,trapMaster];
+  manager.updateSession({pid:100,supported:true,focused:true,title:'Cemu Skylanders Trap Team'});
+  await assert.rejects(manager.select({player:0,target:'Magic',choice:{top:regular.key,bottom:null}}),/Trap Masters/);
+  await manager.select({player:0,target:'Magic',choice:{top:trapMaster.key,bottom:null}});
+  assert.equal(manager.profile.players[0].elements.Magic.top,trapMaster.key);
+ } finally {await fs.rm(root,{recursive:true,force:true});}
+});
 test('known regional IDs, game names, and unknown titles',()=>{
  assert.equal(m.detectGame('Cemu - [TitleId: 00050000-10139200]'),3);
  assert.equal(m.detectGame('Cemu - Skylanders Giants [EU]'),2);
  assert.equal(m.detectGame('Cemu 2.0 experimental'),0);
  assert.equal(m.detectGame('Cemu - Mario Kart 8'),0);
+});
+test('saved Trap Team element slots migrate to masters and remain correct after restart',async()=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'trap-defaults-'));
+ try {
+  await fs.mkdir(path.join(root,'NFC'));await fs.mkdir(path.join(root,'de-perportal-data'));
+  const masters=[...new Map(require('../resources/catalog.json').filter(f=>f.kind==='TrapMaster').map(f=>[f.id,f])).values()];
+  const figures=[figure(16),figure(18),...masters.map(f=>figure(f.id,f.variant))];
+  for(const f of figures)await fs.writeFile(path.join(root,'NFC',f.key),bytes(f.id,f.variant));
+  // Use supported dump extensions while keeping every saved choice consistent.
+  for(const f of figures){await fs.rename(path.join(root,'NFC',f.key),path.join(root,'NFC',`${f.key}.sky`));f.key+='.sky';}
+  const legacy=m.newProfile(figures.filter(f=>f.info.kind!=='TrapMaster'),3);
+  const preserved=figures.find(f=>f.id===467);legacy.players[1].elements.Magic={top:preserved.key,bottom:null};
+  const favorite=legacy.players[0].favorite;
+  const ordinary=m.newProfile(figures,2);
+  await fs.writeFile(path.join(root,'de-perportal-data/settings.json'),JSON.stringify({game:4,profiles:{2:ordinary,4:legacy}}));
+  const calls=[];let manager=new Manager(root,async args=>calls.push(args));await manager.init();
+  for(const p of manager.profile.players) for(const element of m.elements) {
+   const f=manager.figures.find(f=>f.key===p.elements[element]?.top);
+   if(f){assert.equal(f.info.kind,'TrapMaster');assert.equal(f.info.element,element);}
+   else assert.equal(masters.some(f=>f.element===element) && element!=='Light' && element!=='Dark',false);
+  }
+  assert.equal(manager.profile.players[1].elements.Magic.top,preserved.key);
+  assert.deepEqual(manager.profile.players[0].favorite,favorite);
+  assert.deepEqual(manager.config.profiles[2],ordinary);
+  const corrected=JSON.parse(JSON.stringify(manager.profile));
+  manager=new Manager(root,async args=>calls.push(args));await manager.init();assert.deepEqual(manager.profile,corrected);
+  manager.updateSession({pid:1,supported:true,title:'Skylanders Trap Team'});
+  await manager.hotkey({player:0,key:'1'});
+  assert.equal(manager.figures.find(f=>f.path===calls.find(c=>c[0]==='load')[2]).info.kind,'TrapMaster');
+ } finally {await fs.rm(root,{recursive:true,force:true});}
 });
 test('Swap Force selections require actual matching halves; mixed bottoms are valid',()=>{
  const f=[figure(2000,8192),figure(1000,8192),figure(1001,8192)];

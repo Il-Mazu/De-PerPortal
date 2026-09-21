@@ -17,14 +17,14 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - **Two players, one portal:** separate character assignments and game profiles.
 - **Three saved defaults:** keep three presets per player, per game, and switch between them.
 - **Mix your Swap Force:** pick tops and bottoms visually, then swap movement bases with a shortcut.
-- **Keys within reach:** an in-game reminder overlay shows element and movement shortcuts.
+- **Keys within reach:** an in-game overlay shows element icons and selection notifications.
 - **Game-aware accessories:** activate magic items, adventures, traps, racing trophies, vehicles and Imaginite chests from the GUI.
 - **A portal for every adventure:** game-matched portal artwork and subtle lighting from both active Skylanders’ elements.
 - **A portable library:** scan nested NFC folders and add optional community character artwork.
 
 ## Download and setup
 
-Download **De-PerPortal-0.4.0-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.5.8-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -63,13 +63,25 @@ Click a character to load it; use **Edit** to change an assignment. For Swap For
 
 In Swap Force, fixed perk bases are Rocket (Boom Jet), Tornado (Doom Stone), Spring (Fire Kraken), Speed (Freeze Blade), Digging (Grilla Drilla), Portals (Hoot Loop), Sneak (Trap Shadow), and Climber (Spy Rise). A perk shortcut changes only the bottom when Dè PerPortal is already tracking a Swap Force top for that player; otherwise it loads that base's matching complete pair. Each perk needs matching top and bottom dumps in the NFC library.
 
-Cemu opens the selected dump directly and saves progress to it. Dè PerPortal does not rewrite dump bytes. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
+Cemu opens the selected dump directly and saves progress to it. Trap dump editing is disabled because the current clear operation can make trap toys unreadable. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
-## Items, traps and vehicles (v0.4.0)
+## Items, traps and vehicles (v0.5.8)
 
-The **On the portal** section offers the accessory categories available for your game. Click **Choose**, search your NFC library, then select a figure to activate it. Hover over a figure in the picker for its game-specific effect. **Change** replaces only that accessory; **Remove** leaves both players in place. No extra keyboard shortcuts are required.
+In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping at either end. **Alt+Space** locks in the selected villain by loading its trap into the shared trap slot. Previewing does not change the portal. Named traps are reserved for the carousel; element shortcuts skip them and choose another unassigned trap of the same element. If none is available, the app reports that instead of reusing a named trap.
+
+**Alt+Q/W/E/R/Y/U/I/O/P/L** loads a trap for **Magic/Water/Tech/Fire/Earth/Life/Air/Undead/Light/Dark**, respectively. Each shortcut automatically picks a matching unassigned library trap, preferring empty saves, then sorting by filename. Named traps are held for the villain carousel. Missing or fully assigned elements show a notification. Number shortcuts still load Trap Masters; Swap Force keeps its perk shortcuts.
+
+Selection notifications appear for 4.5 seconds, even when the element overlay is dismissed. Empty and unnamed unverified traps are grouped under **Other traps**. Expand that group to load them or manually name an unverified trap whose contents you know.
+
+In **Settings**, **Reset trap detections · keep dumps unchanged** clears PerPortal's saved names and ignores each trap's current contents until its detected villain changes. The operation changes metadata only; the game still sees the contents stored in each dump. A newly detected captured villain appears in the detected list with a **Name villain** button. **Restore latest trap backup** remains available for originals saved before older destructive clears; restart Cemu after restoring.
+
+Existing Trap Team profiles automatically replace ordinary Skylanders in the numbered element slots with matching Trap Masters from your library. Already selected Trap Masters and favorite presets are preserved. A slot stays unassigned when no unused matching Trap Master is available.
+
+The **On the portal** section offers the accessory categories available for your game. Click **Choose**, search your NFC library, then select a figure to activate it. Hover over a figure in the picker for its game-specific effect. **Change** replaces only that accessory; **Remove** leaves both players in place. The picker remains available alongside the optional Trap Team shortcuts.
+
+In Trap Team, **Trapped villains** shows **Villain detected**, **Empty**, or **Contents unknown** from readable save records. Click **Name villain** to save a manual name per trap file; **Edit name** changes it, and saving a blank name clears it. Names persist across restarts in app settings. Update names after in-game swaps; a detected occupant change prompts you to rename it. Unknown saves can still be named. Moving or renaming a file requires naming it again. Use **Rescan NFC library** if automatic refresh misses a change. Normal scans and naming leave trap dumps unchanged.
 
 SuperChargers story co-op uses one **Shared vehicle**: one player drives and the other attacks. Racing makes its vehicle selections in-game; change the vehicle when prompted. Older magic items become Academy treasures in SuperChargers and rewards in Imaginators. Adventure pieces only unlock their original levels in supported games. Vehicles and trophies remain useful in Imaginators Racing.
 
@@ -79,7 +91,7 @@ The portal illustration follows your game profile. Spyro's Adventure and Giants 
 
 ## Shortcut overlay
 
-The small shortcut overlay appears at the bottom center of Cemu's display while a supported game has focus. It shows official element icons and their keys, plus the eight movement icons in Swap Force. Hold Alt for Player 1 or Alt+Shift for Player 2. The × dismisses it for the current Dè PerPortal session; the toolbar's **Overlay** button reopens it (and lets you preview it without a game). Drag the reminder anywhere on the display; its position is retained for the current session across figure changes, focus changes and preset notifications. Moving it to another monitor is supported; disconnecting that monitor keeps the reminder within an available display. Preset arrow shortcuts skip empty slots and wrap around, with a brief player/preset notification on the same overlay layer, even when the reminder is dismissed. It does not take keyboard focus. Close Dè PerPortal to close the overlay too. Window-manager and exclusive-fullscreen behavior can vary; use windowed or borderless Cemu if your desktop hides it.
+The small shortcut overlay appears at the bottom center of Cemu's display while a supported game has focus. It shows only official element icons, without shortcut reminders or perk rows. The × dismisses it for the current Dè PerPortal session; the toolbar's **Overlay** button reopens it (and lets you preview it without a game). Drag the reminder anywhere on the display; its position is retained for the current session across figure changes, focus changes and preset notifications. Moving it to another monitor is supported; disconnecting that monitor keeps the reminder within an available display. Preset arrow shortcuts skip empty slots and wrap around, with a brief player/preset notification on the same overlay layer, even when the reminder is dismissed. It does not take keyboard focus. Close Dè PerPortal to close the overlay too. Window-manager and exclusive-fullscreen behavior can vary; use windowed or borderless Cemu if your desktop hides it.
 
 Icon artwork is sourced from Activision's official manuals; see `app/ui/icons/SOURCES.md` for provenance and ownership.
 

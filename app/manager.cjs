@@ -4,6 +4,10 @@ const path=require('node:path');
 const {EventEmitter}=require('node:events');
 const model=require('./model.cjs');
 const accessories=require('./accessories.cjs');
+const trapData=require('./traps.cjs');
+const trapKeys=['Q','W','E','R','Y','U','I','O','P','L'];
+const trapSignature=trap=>`${trap?.state||'unknown'}:${trap?.state==='captured'?trap.recordId:''}`;
+const trapIdentity=f=>JSON.stringify([f.key,f.uid,f.id,f.variant]);
 
 class Manager extends EventEmitter {
   constructor(root,control) {
@@ -38,21 +42,51 @@ class Manager extends EventEmitter {
     if(this.busy) throw Error('Wait for the current swap.');
     const result=await model.scan(path.join(this.root,'NFC'),this.config.artRoot || path.join(this.root,'de-perportal-data/art'));
     this.figures=result.figures; this.warnings=result.warnings;
+    let trapMetadataChanged=false;
+    if(!this.config.trapResets || typeof this.config.trapResets!=='object' || Array.isArray(this.config.trapResets)) this.config.trapResets={};
+    const resets=this.config.trapResets;
+    for(const f of this.figures.filter(f=>f.info?.kind==='Trap')) {
+      const identity=trapIdentity(f),baseline=resets[identity];
+      if(baseline!==undefined) {
+        if(baseline===trapSignature(f.trap)) f.trap={state:'empty',appReset:true};
+        else {
+          delete resets[identity];trapMetadataChanged=true;
+        }
+      }
+      const labels=this.config.trapLabels||{},label=labels[identity];
+      if(label && label.recordId!==null && (f.trap?.state!=='captured' || label.recordId!==f.trap.recordId)) { delete labels[identity];trapMetadataChanged=true; }
+    }
+    if(trapMetadataChanged) await this.save();
+    if(model.repairTrapTeamElements(this.config.profiles[4],this.figures)) await this.save();
     this.profile;
     this.publish();
+  }
+  requestRescan() {
+    // Games write a trap in a small burst.  Coalesce those events and never
+    // scan halfway through our own portal operation.
+    clearTimeout(this.rescanTimer);
+    this.rescanTimer=setTimeout(async()=>{
+      if(this.busy) { this.rescanPending=true; return; }
+      try { await this.rescan(); } catch {};
+    },650);
+  }
+  async flushDeferredRescan() {
+    if(!this.rescanPending) return;
+    this.rescanPending=false;
+    try { await this.rescan(); } catch {}
   }
   state() {
     const hasArt=this.figures.some(f=>f.art);
     return {game:this.game,detected:!!this.session.game,session:this.session,profile:this.profile,
       active:this.active,sidekick:this.sidekick,accessories:this.accessories,accessorySlots:accessories.slots,observed:this.observed,busy:this.busy,message:this.message,warnings:this.warnings,
       hasArt,
-      figures:this.figures.map(({path:_,uid:__,art,...f})=>({...f,accessory:accessories.describe(f,this.game),art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
+      figures:this.figures.map(({path:_,uid,art,...f})=>({...f,...(f.info?.kind==='Trap'?{trapLabel:this.config.trapLabels?.[JSON.stringify([f.key,uid,f.id,f.variant])] || null}:{}),accessory:accessories.describe(f,this.game),art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
       root:this.root,elements:model.elements,perks:model.perks,games:model.games};
   }
   publish() { this.emit('state',this.state()); }
   updateSession(s) {
     const next={pid:s.pid,supported:s.supported,focused:s.focused,game:model.detectGame(s.title||''),bounds:s.bounds||null};
-    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.accessories={}; this.labels={}; }
+    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.accessories={}; this.labels={}; this.selectedTrap=null; }
     const changed=JSON.stringify(next)!==JSON.stringify(this.session);
     const rowsChanged=JSON.stringify(s.rows||[])!==JSON.stringify(this.observed);
     this.observed=s.rows||[];
@@ -73,8 +107,74 @@ class Manager extends EventEmitter {
     await fs.writeFile(path.join(dir,'settings.json.tmp'),JSON.stringify(this.config,null,2));
     await fs.rename(path.join(dir,'settings.json.tmp'),path.join(dir,'settings.json'));
   }
-  async select({player,target,choice,preset}) {
+  trapName(f) {
+    const saved=this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
+    return saved && f.trap?.state!=='empty' && (f.trap?.state!=='captured' || saved.recordId===null || saved.recordId===f.trap.recordId)?saved.name:null;
+  }
+  async resetTrapDetections() {
+    if(this.busy) throw Error('Wait for the current operation.');
+    this.busy=true;this.publish();
+    try {
+      const resets=this.config.trapResets={};
+      this.config.trapLabels={};this.selectedTrap=null;
+      for(const f of this.figures.filter(f=>f.info?.kind==='Trap')) {
+        try {
+          const bytes=await fs.readFile(f.path),current=model.identify(bytes);
+          if(current.uid!==f.uid || current.id!==f.id || current.variant!==f.variant) continue;
+          resets[trapIdentity(f)]=trapSignature(trapData.decode(bytes));
+        } catch {}
+      }
+      await this.save();this.message='Trap detections and names reset in PerPortal. NFC dumps were not changed.';
+    } finally {this.busy=false;await this.rescan();}
+  }
+  async restoreLatestTrapBackup() {
+    if(this.busy) throw Error('Wait for the current operation.');
+    const backupRoot=path.join(this.root,'de-perportal-data','trap-backups');
+    const folders=(await fs.readdir(backupRoot,{withFileTypes:true}).catch(e=>e.code==='ENOENT'?[]:Promise.reject(e)))
+      .filter(entry=>entry.isDirectory() && /^\d+$/.test(entry.name)).map(entry=>entry.name).sort((a,b)=>Number(b)-Number(a));
+    if(!folders.length) throw Error('No trap backup was found.');
+    this.busy=true;this.publish();
+    let restored=0;
+    const before=path.join(backupRoot,`before-restore-${Date.now()}`),nfcRoot=path.resolve(this.root,'NFC');
+    try {
+      const sourceRoot=path.join(backupRoot,folders[0]);
+      const walk=async(dir='')=>{
+        for(const entry of await fs.readdir(path.join(sourceRoot,dir),{withFileTypes:true})) {
+          const rel=path.join(dir,entry.name);
+          if(entry.isDirectory()) {await walk(rel);continue;}
+          if(!entry.isFile()) continue;
+          const bytes=await fs.readFile(path.join(sourceRoot,rel));
+          let figure;try {figure=model.identify(bytes);} catch {continue;}
+          if(figure.info?.kind!=='Trap') continue;
+          const destination=path.resolve(nfcRoot,...rel.split(path.sep));
+          const relative=path.relative(nfcRoot,destination);
+          if(relative==='..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw Error('Invalid trap backup path.');
+          try {
+            const current=await fs.readFile(destination),saved=path.join(before,relative);
+            await fs.mkdir(path.dirname(saved),{recursive:true});await fs.writeFile(saved,current,{flag:'wx'});
+          } catch(e) {if(e.code!=='ENOENT') throw e;}
+          await fs.mkdir(path.dirname(destination),{recursive:true});
+          const temp=`${destination}.restore-${Date.now()}`;
+          await fs.writeFile(temp,bytes);await fs.rename(temp,destination);restored++;
+        }
+      };
+      await walk();
+      if(!restored) throw Error('The latest trap backup contains no valid trap dumps.');
+      this.message=`Restored ${restored} trap dumps from ${folders[0]}. Restart Cemu before using them. Current files backed up in ${before}.`;
+    } finally {this.busy=false;await this.rescan();}
+  }
+  async select({player,target,choice,preset,name}) {
     if(this.busy) throw Error('Wait for the current swap.');
+    if(target==='trap-name') {
+      const f=this.figures.find(f=>f.key===choice?.top);
+      if(f?.info?.kind!=='Trap') throw Error('Choose a trap from your library.');
+      if(typeof name!=='string' || name.length>80) throw Error('Use a name of at most 80 characters.');
+      const key=JSON.stringify([f.key,f.uid,f.id,f.variant]);
+      const labels=this.config.trapLabels ||= {};
+      if(name.trim()) labels[key]={name:name.trim(),recordId:f.trap?.recordId ?? null};
+      else delete labels[key];
+      await this.save(); this.publish(); return;
+    }
     if(target==='active-favorite' || target==='favorite') {
       if(![0,1].includes(player)) throw Error('Invalid player.');
       const defaults=this.profile.players[player];
@@ -96,7 +196,7 @@ class Manager extends EventEmitter {
     } else {
       if(![0,1].includes(player) || !model.elements.includes(target)) throw Error('Invalid selection.');
       const selected=model.resolveChoice(choice,this.figures,this.game);
-      if(selected.length!==1 || !model.core(selected[0]) || selected[0].info.element!==target) throw Error('Element slots use ordinary Skylanders of the matching element.');
+      if(selected.length!==1 || !model.elementalDoorFigure(selected[0],this.game,target)) throw Error(this.game===4 ? 'Trap Team element slots use Trap Masters of the matching element.' : 'Element slots use ordinary Skylanders of the matching element.');
       this.profile.players[player].elements[target]=choice;
     }
     await this.save(); this.publish();
@@ -112,7 +212,7 @@ class Manager extends EventEmitter {
     // Hold the lock during async file validation as well as native writes.
     this.busy=true;
     try { return await this.performAction(data); }
-    finally { this.busy=false; this.publish(); }
+    finally { this.busy=false; this.publish(); await this.flushDeferredRescan(); }
   }
   async performAction({player=0,target='favorite',choice=null,slot=null}) {
     const game=this.game,pid=this.session.pid;
@@ -216,6 +316,34 @@ class Manager extends EventEmitter {
   }
   async hotkey({player,key}) {
     if(!this.session.game) return;
+    if(this.game===4 && player===0 && !this.busy && (key==='Up' || key==='Down' || key==='LockTrap' || trapKeys.includes(key))) {
+      const roster=this.figures.filter(f=>f.info?.kind==='Trap' && this.trapName(f)).sort((a,b)=>this.trapName(a).localeCompare(this.trapName(b))||a.key.localeCompare(b.key));
+      try {
+        if(key==='Up' || key==='Down') {
+          if(!roster.length) {this.emit('notification','Capture a villain and name it in the GUI first.');return;}
+          const index=roster.findIndex(f=>f.key===this.selectedTrap);
+          const next=index<0?(key==='Down'?0:roster.length-1):(index+(key==='Down'?1:-1)+roster.length)%roster.length;
+          const f=roster[next];this.selectedTrap=f.key;
+          this.emit('notification',`${this.trapName(f)} · ${f.info.element} · Alt+Space to lock in`);
+          return;
+        }
+        let f;
+        if(key==='LockTrap') {
+          f=roster.find(f=>f.key===this.selectedTrap);
+          if(!f) throw Error('Select a named villain with Alt+↑ / Alt+↓ first.');
+          // Re-read before loading so a changed capture cannot reuse a stale name.
+          const current=trapData.decode(await fs.readFile(f.path));
+          if(current.state!==f.trap?.state || current.recordId!==f.trap?.recordId) throw Error('Trap contents changed. Rescan and name the current villain.');
+        } else {
+          const element=model.elements[trapKeys.indexOf(key)];
+          f=this.figures.filter(f=>f.info?.kind==='Trap' && f.info.element===element && !this.trapName(f)).sort((a,b)=>(a.trap?.state==='empty'?0:1)-(b.trap?.state==='empty'?0:1)||a.key.localeCompare(b.key))[0];
+          if(!f) throw Error(`No unassigned ${element} trap is available. Named traps stay in the Alt+Up/Down carousel.`);
+        }
+        await this.action({target:'accessory',slot:'trap',choice:{top:f.key,bottom:null}});
+        this.emit('notification',`${key==='LockTrap'?'Locked in: ':''}${this.trapName(f)||f.info.name} · ${f.info.element}`);
+      } catch(e) {this.message=e.message;this.publish();this.emit('notification',e.message);}
+      return;
+    }
     if(key==='Left' || key==='Right') {
       if(![0,1].includes(player) || this.busy || this.switchingPreset) return;
       this.switchingPreset=true;

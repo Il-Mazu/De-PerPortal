@@ -1,6 +1,7 @@
 'use strict';
 const {app,BrowserWindow,ipcMain,protocol,net,dialog}=require('electron');
 const fs=require('node:fs/promises');
+const fsWatch=require('node:fs');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {spawn,execFile}=require('node:child_process');
@@ -10,7 +11,23 @@ const exec=promisify(execFile);
 const root=process.env.DE_PERPORTAL_HOME || (app.isPackaged?path.dirname(process.execPath):path.resolve(__dirname,'..'));
 const helper=app.isPackaged?path.join(process.resourcesPath,'portal-control.exe'):path.join(__dirname,'../out/De-PerPortal-Probe.exe');
 const native=(args,options={})=>process.platform==='win32'?{file:helper,args,options}:{file:'wine',args:[helper,...args],options};
-let manager,win,watcher,overlay;
+let manager,win,watcher,libraryWatcher,overlay;
+async function watchLibrary(root,onChange) {
+  const watchers=[];
+  const seen=new Set();
+  async function add(dir) {
+    if(seen.has(dir)) return; seen.add(dir);
+    try {
+      watchers.push(fsWatch.watch(dir,async(_event,name)=>{
+        onChange();
+        if(name) { try { if((await fs.stat(path.join(dir,name))).isDirectory()) await add(path.join(dir,name)); } catch {} }
+      }));
+      for(const entry of await fs.readdir(dir,{withFileTypes:true})) if(entry.isDirectory()&&!entry.isSymbolicLink()) await add(path.join(dir,entry.name));
+    } catch {}
+  }
+  await add(root);
+  return {close:()=>watchers.forEach(w=>w.close())};
+}
 protocol.registerSchemesAsPrivileged([{scheme:'art',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
 if(!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -23,6 +40,9 @@ else {
       catch(e) { throw Error((e.stderr||e.message).trim().split('\n').slice(-1)[0]); }
     });
     await manager.init();
+    // fs.watch is intentionally only a convenience: the Settings rescan is
+    // still available on filesystems that do not report directory changes.
+    try { libraryWatcher=await watchLibrary(path.join(root,'NFC'),()=>manager.requestRescan()); } catch {}
     protocol.handle('art',async request=>{
       const key=decodeURIComponent(new URL(request.url).pathname.slice(1));
       const figure=manager.figures.find(f=>f.key===key);
@@ -38,7 +58,7 @@ else {
     win.on('closed',()=>overlay.destroy());
     manager.on('state',state=>{if(!win.isDestroyed()) win.webContents.send('state',state);});
     for(const [channel,handler] of Object.entries({
-      state:()=>manager.state(), action:data=>manager.action(data),select:data=>manager.select(data),game:g=>manager.setGame(g),rescan:()=>manager.rescan(),
+      state:()=>manager.state(), action:data=>manager.action(data),select:data=>manager.select(data),game:g=>manager.setGame(g),rescan:()=>manager.rescan(),'reset-trap-detections':()=>manager.resetTrapDetections(),'restore-trap-backup':()=>manager.restoreLatestTrapBackup(),
       'overlay-show':()=>overlay.show(),
       enable:()=>manager.control(['enable']),
       launch:async()=>{
@@ -64,5 +84,5 @@ else {
     watcher.on('exit',()=>{manager.session={pid:0,supported:false,game:0,focused:false};manager.message='Portal monitor stopped. Restart Dè PerPortal to reconnect.';manager.publish();});
   }).catch(e=>{dialog.showErrorBox('Dè PerPortal could not start',e.message);app.quit();});
   app.on('window-all-closed',()=>app.quit());
-  app.on('before-quit',()=>watcher?.kill());
+  app.on('before-quit',()=>{watcher?.kill();libraryWatcher?.close();});
 }

@@ -2,6 +2,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const catalog = require('../resources/catalog.json');
+const traps=require('./traps.cjs');
 const elements = ['Magic','Water','Tech','Fire','Earth','Life','Air','Undead','Light','Dark'];
 const games = ["Spyro’s Adventure",'Giants','Swap Force','Trap Team','SuperChargers','Imaginators'];
 const perks = [
@@ -33,7 +34,11 @@ async function scan(root, artRoot) {
       if (dumps && /\.(sky|bin|dump|dmp)$/i.test(file)) {
         try {
           if ((await fs.stat(file)).size!==1024) throw Error('Not a 1024-byte dump');
-          const figure=identify(await fs.readFile(file));
+          const bytes=await fs.readFile(file);
+          const figure=identify(bytes);
+          // Trap decoding is advisory only.  A corrupt save must not make the
+          // otherwise usable accessory disappear from the library.
+          if(figure.info?.kind==='Trap') figure.trap=traps.decode(bytes);
           figures.push({...figure,path:file,key:path.relative(root,file).split(path.sep).join('/')});
           if(!figure.info) warnings.push(`Unknown figure ${figure.id}:${figure.variant} in ${entry.name}`);
         } catch(e) { warnings.push(`${entry.name}: ${e.message}`); }
@@ -66,9 +71,12 @@ function core(f) {
   // LightCore/Elite variants are omitted from automatic ordinary teams too.
   return f?.info?.kind==='Skylander' && f.half==='whole' && !/lightcore|elite/i.test(f.info.name) && (f.variant & 0x600)!==0x200;
 }
+function elementalDoorFigure(f,game,element) {
+  return f?.info?.element===element && (game===4 ? f.info.kind==='TrapMaster' && f.half==='whole' : core(f));
+}
 function playable(f,game) { return compatible(f,game) && ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei','Crystal'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4); }
 function candidates(figures,game,element=null,kind='player') {
-  return figures.filter(f=>compatible(f,game) && (kind==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : playable(f,game)) && (!element || (f.info.element===element && core(f))));
+  return figures.filter(f=>compatible(f,game) && (kind==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : playable(f,game)) && (!element || elementalDoorFigure(f,game,element)));
 }
 function choice(f,figures) {
   if(!f) return null;
@@ -120,4 +128,24 @@ function resolveChoice(selected,figures,game) {
   if(top.half==='whole' && selected.bottom) throw Error('A whole figure cannot have a bottom half.');
   return top.half==='top'?[top,bottom]:[top];
 }
-module.exports={elements,games,perks,identify,scan,detectGame,compatible,core,playable,candidates,choice,perkChoice,normalizeDefaults,newProfile,resolveChoice};
+function repairTrapTeamElements(profile,figures) {
+  if(!profile || !figures.length)return false;
+  const used=new Set(),pending=[];
+  for(const player of profile.players) for(const element of elements) {
+    const selected=player.elements[element],f=figures.find(f=>f.key===selected?.top);
+    if(!selected?.bottom && elementalDoorFigure(f,4,element)) used.add(f.uid);
+    else pending.push({player,element});
+  }
+  let changed=false;
+  const sorted=[...figures].sort((a,b)=>a.id-b.id || a.variant-b.variant || a.key.localeCompare(b.key));
+  for(const {player,element} of pending) {
+    const f=candidates(sorted,4,element).find(f=>!used.has(f.uid));
+    const selected=choice(f,figures);
+    if(f)used.add(f.uid);
+    if(JSON.stringify(player.elements[element] || null)!==JSON.stringify(selected)) {
+      player.elements[element]=selected;changed=true;
+    }
+  }
+  return changed;
+}
+module.exports={elements,games,perks,identify,scan,detectGame,compatible,core,elementalDoorFigure,playable,candidates,choice,perkChoice,normalizeDefaults,newProfile,resolveChoice,repairTrapTeamElements};
