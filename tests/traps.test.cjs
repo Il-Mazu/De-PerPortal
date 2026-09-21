@@ -73,7 +73,7 @@ test('bulk trap clearing refuses to modify dumps while the save format is unreso
     assert.deepEqual(calls,[]);
     assert.deepEqual(await fs.readFile(path.join(root,'NFC/life.sky')),original);
     assert.deepEqual(await fs.readFile(path.join(root,'NFC/unknown.sky')),unknown);
-    assert.equal(await fs.readdir(path.join(root,'de-perportal-data')).then(entries=>entries.includes('trap-backups')),false);
+    await assert.rejects(fs.access(path.join(root,'de-perportal-data/trap-backups')),{code:'ENOENT'});
     assert.equal(manager.busy,false);
   } finally {await fs.rm(root,{recursive:true,force:true});}
 });

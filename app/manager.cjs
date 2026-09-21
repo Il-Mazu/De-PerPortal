@@ -4,6 +4,7 @@ const path=require('node:path');
 const {EventEmitter}=require('node:events');
 const model=require('./model.cjs');
 const accessories=require('./accessories.cjs');
+const trapData=require('./traps.cjs');
 const trapKeys=['Q','W','E','R','Y','U','I','O','P','L'];
 
 class Manager extends EventEmitter {
