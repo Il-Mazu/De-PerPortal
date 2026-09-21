@@ -46,31 +46,4 @@ function decode(bytes) {
     return decodeRecord(data,block);
   } catch { return {state:'unknown'}; }
 }
-function clear(bytes) {
-  if(decode(bytes).state==='unknown') throw Error('Unrecognized trap save; original left untouched.');
-  const data=decrypt(bytes),out=Buffer.from(bytes);
-  const valid=[8,36].filter(block=>areaValid(data,block));
-  if(!valid.length) throw Error('Unrecognized trap save; original left untouched.');
-  for(const block of [8,36]) {
-    // Villains occupy one data block per sector, six entries per copy.
-    // Keep the surrounding game-owned blocks intact: Trap Team also stores
-    // structure and timer state there, and zeroing those blocks corrupts toys.
-    if(!valid.includes(block)) data.copy(data,block*16,valid[0]*16,valid[0]*16+16);
-    const changed=[block];
-    for(let i=0;i<6;i++) {
-      const record=block+1+i*4;
-      data.fill(0,record*16,record*16+16);
-      changed.push(record);
-    }
-    const group=Buffer.concat([block+1,block+2,block+4].map(b=>data.subarray(b*16,b*16+16)));
-    data.writeUInt16LE(crc16(group),block*16+12);
-    data.writeUInt16LE(5,block*16+14);
-    data.writeUInt16LE(crc16(data.subarray(block*16,block*16+16)),block*16+14);
-    for(const b of changed) {
-      const cipher=crypto.createCipheriv('aes-128-ecb',key(bytes,b),null);cipher.setAutoPadding(false);
-      Buffer.concat([cipher.update(data.subarray(b*16,b*16+16)),cipher.final()]).copy(out,b*16);
-    }
-  }
-  return out;
-}
-module.exports={crc16,decrypt,areaValid,decodeRecord,decode,clear};
+module.exports={crc16,decrypt,areaValid,decodeRecord,decode};

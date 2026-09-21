@@ -1,3 +1,15 @@
+# Dè PerPortal 0.5.7
+
+- Replaced the destructive trap clear with **Reset trap detections**, which clears PerPortal's villain names and ignores the current decoded contents until a trap changes. It never edits the NFC dump.
+- When a trap's detected villain changes after reset, it reappears in the detected list and can be named.
+- Removed the unverified raw trap-save rewrite code.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Live Trap Team gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.6
 
 - Disabled trap clearing after reports that it made traps unreadable. It remains disabled until the save format can be changed safely.

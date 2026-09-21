@@ -6,6 +6,8 @@ const model=require('./model.cjs');
 const accessories=require('./accessories.cjs');
 const trapData=require('./traps.cjs');
 const trapKeys=['Q','W','E','R','Y','U','I','O','P','L'];
+const trapSignature=trap=>`${trap?.state||'unknown'}:${trap?.state==='captured'?trap.recordId:''}`;
+const trapIdentity=f=>JSON.stringify([f.key,f.uid,f.id,f.variant]);
 
 class Manager extends EventEmitter {
   constructor(root,control) {
@@ -40,6 +42,21 @@ class Manager extends EventEmitter {
     if(this.busy) throw Error('Wait for the current swap.');
     const result=await model.scan(path.join(this.root,'NFC'),this.config.artRoot || path.join(this.root,'de-perportal-data/art'));
     this.figures=result.figures; this.warnings=result.warnings;
+    let trapMetadataChanged=false;
+    if(!this.config.trapResets || typeof this.config.trapResets!=='object' || Array.isArray(this.config.trapResets)) this.config.trapResets={};
+    const resets=this.config.trapResets;
+    for(const f of this.figures.filter(f=>f.info?.kind==='Trap')) {
+      const identity=trapIdentity(f),baseline=resets[identity];
+      if(baseline!==undefined) {
+        if(baseline===trapSignature(f.trap)) f.trap={state:'empty',appReset:true};
+        else {
+          delete resets[identity];trapMetadataChanged=true;
+        }
+      }
+      const labels=this.config.trapLabels||{},label=labels[identity];
+      if(label && label.recordId!==null && (f.trap?.state!=='captured' || label.recordId!==f.trap.recordId)) { delete labels[identity];trapMetadataChanged=true; }
+    }
+    if(trapMetadataChanged) await this.save();
     if(model.repairTrapTeamElements(this.config.profiles[4],this.figures)) await this.save();
     this.profile;
     this.publish();
@@ -94,8 +111,21 @@ class Manager extends EventEmitter {
     const saved=this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
     return saved && f.trap?.state!=='empty' && (f.trap?.state!=='captured' || saved.recordId===null || saved.recordId===f.trap.recordId)?saved.name:null;
   }
-  async clearTraps() {
-    throw Error('Trap clearing is disabled because it can make trap dumps unreadable. Restore a backup to recover the original dumps.');
+  async resetTrapDetections() {
+    if(this.busy) throw Error('Wait for the current operation.');
+    this.busy=true;this.publish();
+    try {
+      const resets=this.config.trapResets={};
+      this.config.trapLabels={};this.selectedTrap=null;
+      for(const f of this.figures.filter(f=>f.info?.kind==='Trap')) {
+        try {
+          const bytes=await fs.readFile(f.path),current=model.identify(bytes);
+          if(current.uid!==f.uid || current.id!==f.id || current.variant!==f.variant) continue;
+          resets[trapIdentity(f)]=trapSignature(trapData.decode(bytes));
+        } catch {}
+      }
+      await this.save();this.message='Trap detections and names reset in PerPortal. NFC dumps were not changed.';
+    } finally {this.busy=false;await this.rescan();}
   }
   async restoreLatestTrapBackup() {
     if(this.busy) throw Error('Wait for the current operation.');

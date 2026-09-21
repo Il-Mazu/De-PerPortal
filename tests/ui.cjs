@@ -179,8 +179,10 @@ const {installArt}=require('../app/artwork.cjs');
     await page.locator('#settings').click();
     await page.locator('#rescan').click();
     await page.locator('#library-count').filter({hasText:'33 figures'}).waitFor();
-    assert.equal(await page.locator('#clear-traps').isDisabled(),true);
+    await page.locator('#reset-trap-detections').click();
+    await page.waitForFunction(()=>document.body.textContent.includes('Trap detections and names reset in PerPortal.'));
     assert.deepEqual(await fs.readFile(path.join(root,'NFC/captured-life.sky')),bytes);
+    assert.match(await page.locator('#villain-roster').textContent(),/Ignored until contents change/);
     await page.locator('#settings-close').click();
   }
   assert.deepEqual(errors,[]);
