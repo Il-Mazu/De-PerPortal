@@ -24,7 +24,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 
 ## Download and setup
 
-Download **De-PerPortal-0.5.5-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download **De-PerPortal-0.5.6-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -63,11 +63,11 @@ Click a character to load it; use **Edit** to change an assignment. For Swap For
 
 In Swap Force, fixed perk bases are Rocket (Boom Jet), Tornado (Doom Stone), Spring (Fire Kraken), Speed (Freeze Blade), Digging (Grilla Drilla), Portals (Hoot Loop), Sneak (Trap Shadow), and Climber (Spy Rise). A perk shortcut changes only the bottom when Dè PerPortal is already tracking a Swap Force top for that player; otherwise it loads that base's matching complete pair. Each perk needs matching top and bottom dumps in the NFC library.
 
-Cemu opens the selected dump directly and saves progress to it. Only the explicit **Clear all traps** action edits dump bytes, after backing up the originals. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
+Cemu opens the selected dump directly and saves progress to it. Trap dump editing is disabled because the current clear operation can make trap toys unreadable. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
-## Items, traps and vehicles (v0.5.5)
+## Items, traps and vehicles (v0.5.6)
 
 In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping at either end. **Alt+Ctrl+0** locks in the selected villain by loading its trap into the shared trap slot. Previewing does not change the portal. Empty traps and names that no longer match a detected capture are excluded.
 
@@ -75,13 +75,13 @@ In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping a
 
 Selection notifications appear for 4.5 seconds, even when the element overlay is dismissed. Empty and unnamed unverified traps are grouped under **Other traps**. Expand that group to load them or manually name an unverified trap whose contents you know.
 
-In **Settings**, **Clear all traps · back up originals** unloads the shared trap slot, clears all villain-record blocks from both redundant trap saves while preserving other trap data, clears saved names for those files, and rescans. Originals are saved under **de-perportal-data/trap-backups/<timestamp>** with their library paths preserved. Unrecognized, damaged, or identity-changed dumps are skipped and listed in the status message. Restore a backup with Cemu closed if needed. This removes saved villains while preserving trap structure and timer blocks. Named captures disappear from the detected list and remain available through Alt+↑/↓. Use **Restore latest trap backup** with Cemu closed to recover files changed by v0.5.4.
+In **Settings**, trap clearing is temporarily disabled: earlier versions changed trap dumps in a way that can make them unreadable. **Restore latest trap backup** restores the newest originals saved under **de-perportal-data/trap-backups/<timestamp>**. The restore button remains available while Cemu is detected; restart Cemu after restoring so it reloads the files. Named captures disappear from the detected list and remain available through Alt+↑/↓.
 
 Existing Trap Team profiles automatically replace ordinary Skylanders in the numbered element slots with matching Trap Masters from your library. Already selected Trap Masters and favorite presets are preserved. A slot stays unassigned when no unused matching Trap Master is available.
 
 The **On the portal** section offers the accessory categories available for your game. Click **Choose**, search your NFC library, then select a figure to activate it. Hover over a figure in the picker for its game-specific effect. **Change** replaces only that accessory; **Remove** leaves both players in place. The picker remains available alongside the optional Trap Team shortcuts.
 
-In Trap Team, **Trapped villains** shows **Villain detected**, **Empty**, or **Contents unknown** from readable save records. Click **Name villain** to save a manual name per trap file; **Edit name** changes it, and saving a blank name clears it. Names persist across restarts in app settings. Update names after in-game swaps; a detected occupant change prompts you to rename it. Unknown saves can still be named. Moving or renaming a file requires naming it again. Use **Rescan NFC library** if automatic refresh misses a change. Only **Clear all traps** edits trap dumps; normal scans and naming leave them unchanged.
+In Trap Team, **Trapped villains** shows **Villain detected**, **Empty**, or **Contents unknown** from readable save records. Click **Name villain** to save a manual name per trap file; **Edit name** changes it, and saving a blank name clears it. Names persist across restarts in app settings. Update names after in-game swaps; a detected occupant change prompts you to rename it. Unknown saves can still be named. Moving or renaming a file requires naming it again. Use **Rescan NFC library** if automatic refresh misses a change. Normal scans and naming leave trap dumps unchanged.
 
 SuperChargers story co-op uses one **Shared vehicle**: one player drives and the other attacks. Racing makes its vehicle selections in-game; change the vehicle when prompted. Older magic items become Academy treasures in SuperChargers and rewards in Imaginators. Adventure pieces only unlock their original levels in supported games. Vehicles and trophies remain useful in Imaginators Racing.
 

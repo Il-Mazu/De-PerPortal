@@ -60,7 +60,7 @@ test('clear removes all villain history from both real encrypted saves and prese
   assert.ok(traps.areaValid(repairedData,8)&&traps.areaValid(repairedData,36));
 });
 
-test('bulk clear unloads trap, backs up originals, removes names, rescans and skips unknown saves',async()=>{
+test('bulk trap clearing refuses to modify dumps while the save format is unresolved',async()=>{
   const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
   const {Manager}=require('../app/manager.cjs');
   const root=await fs.mkdtemp(path.join(os.tmpdir(),'clear-traps-')),calls=[];
@@ -69,17 +69,30 @@ test('bulk clear unloads trap, backs up originals, removes names, rescans and sk
     const original=fixture();await fs.writeFile(path.join(root,'NFC/life.sky'),original);
     const unknown=Buffer.from(original);unknown.fill(0,128);await fs.writeFile(path.join(root,'NFC/unknown.sky'),unknown);
     const manager=new Manager(root,async args=>calls.push(args));await manager.init();
-    await manager.select({target:'trap-name',choice:{top:'life.sky'},name:'Chompy Mage'});
-    manager.updateSession({pid:1,supported:true,title:'Skylanders Trap Team'});
-    await manager.clearTraps();
-    assert.deepEqual(calls,[['clear','7']]);
-    assert.equal(manager.figures.find(f=>f.key==='life.sky').trap.state,'empty');
-    assert.equal(manager.state().figures.find(f=>f.key==='life.sky').trapLabel,null);
+    await assert.rejects(manager.clearTraps(),/disabled/);
+    assert.deepEqual(calls,[]);
+    assert.deepEqual(await fs.readFile(path.join(root,'NFC/life.sky')),original);
     assert.deepEqual(await fs.readFile(path.join(root,'NFC/unknown.sky')),unknown);
-    const base=path.join(root,'de-perportal-data/trap-backups'),[dir]=await fs.readdir(base);
-    assert.deepEqual(await fs.readFile(path.join(base,dir,'life.sky')),original);
-    assert.match(manager.message,/Cleared 1 traps/);assert.match(manager.message,/Skipped 1/);
+    assert.equal(await fs.readdir(path.join(root,'de-perportal-data')).then(entries=>entries.includes('trap-backups')),false);
     assert.equal(manager.busy,false);
+  } finally {await fs.rm(root,{recursive:true,force:true});}
+});
+
+test('latest trap backup restores originals even when Cemu is detected',async()=>{
+  const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
+  const {Manager}=require('../app/manager.cjs');
+  const root=await fs.mkdtemp(path.join(os.tmpdir(),'restore-traps-'));
+  try {
+    const original=fixture(),damaged=Buffer.from(original);damaged.fill(0,128,576);
+    await fs.mkdir(path.join(root,'NFC'),{recursive:true});
+    await fs.mkdir(path.join(root,'de-perportal-data/trap-backups/1720000000000'),{recursive:true});
+    await fs.writeFile(path.join(root,'NFC/life.sky'),damaged);
+    await fs.writeFile(path.join(root,'de-perportal-data/trap-backups/1720000000000/life.sky'),original);
+    const manager=new Manager(root,async()=>{});await manager.init();
+    manager.updateSession({pid:123,supported:true,title:'Skylanders Trap Team'});
+    await manager.restoreLatestTrapBackup();
+    assert.deepEqual(await fs.readFile(path.join(root,'NFC/life.sky')),original);
+    assert.match(manager.message,/Restart Cemu/);
   } finally {await fs.rm(root,{recursive:true,force:true});}
 });
 

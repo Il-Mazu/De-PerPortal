@@ -1,3 +1,15 @@
+# Dè PerPortal 0.5.6
+
+- Disabled trap clearing after reports that it made traps unreadable. It remains disabled until the save format can be changed safely.
+- Made **Restore latest trap backup** clickable while Cemu is detected; restored files are backed up before replacement, and Cemu should be restarted to reload them.
+- The 0.5.5 clear fix was not safe for all trap dumps. Use this release's restore action to recover backups made before clearing.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Live Trap Team gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.5
 
 - Corrected **Clear all traps** to erase only the six villain-record slots in each redundant save, preserving the trap data needed for the game to recognize the toy.

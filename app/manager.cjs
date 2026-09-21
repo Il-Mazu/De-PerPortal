@@ -4,7 +4,6 @@ const path=require('node:path');
 const {EventEmitter}=require('node:events');
 const model=require('./model.cjs');
 const accessories=require('./accessories.cjs');
-const trapData=require('./traps.cjs');
 const trapKeys=['Q','W','E','R','Y','U','I','O','P','L'];
 
 class Manager extends EventEmitter {
@@ -95,38 +94,10 @@ class Manager extends EventEmitter {
     return saved && f.trap?.state!=='empty' && (f.trap?.state!=='captured' || saved.recordId===null || saved.recordId===f.trap.recordId)?saved.name:null;
   }
   async clearTraps() {
-    if(this.busy) throw Error('Wait for the current swap.');
-    this.busy=true;this.publish();
-    let cleared=0;const skipped=[];
-    const backup=path.join(this.root,'de-perportal-data','trap-backups',`${Date.now()}`);
-    try {
-      // Cemu retains loaded data and can overwrite edits: unload its trap first.
-      if(this.session.pid) {
-        if(!this.session.supported) throw Error('Close Cemu before clearing traps.');
-        await this.accessoryAction({target:'remove-accessory',slot:'trap'});
-      }
-      for(const f of this.figures.filter(f=>f.info?.kind==='Trap')) {
-        let bytes,now;
-        try {bytes=await fs.readFile(f.path);now=model.identify(bytes);} catch {skipped.push(f.key);continue;}
-        if(now.uid!==f.uid || now.id!==f.id || now.variant!==f.variant) {skipped.push(f.key);continue;}
-        let clean;
-        try {clean=trapData.clear(bytes);} catch {skipped.push(f.key);continue;}
-        const dest=path.join(backup,f.key);
-        await fs.mkdir(path.dirname(dest),{recursive:true});
-        await fs.writeFile(dest,bytes,{flag:'wx'});
-        await fs.writeFile(f.path+'.tmp',clean);
-        await fs.rename(f.path+'.tmp',f.path);
-        delete this.config.trapLabels?.[JSON.stringify([f.key,f.uid,f.id,f.variant])];
-        cleared++;
-      }
-      this.selectedTrap=null;
-      await this.save();
-      this.message=`Cleared ${cleared} traps. Originals backed up in ${backup}.${skipped.length?` Skipped ${skipped.length} unrecognized or changed dumps: ${skipped.join(', ')}.`:''}`;
-    } finally {this.busy=false;await this.rescan();await this.flushDeferredRescan();}
+    throw Error('Trap clearing is disabled because it can make trap dumps unreadable. Restore a backup to recover the original dumps.');
   }
   async restoreLatestTrapBackup() {
     if(this.busy) throw Error('Wait for the current operation.');
-    if(this.session.pid) throw Error('Close Cemu before restoring trap backups.');
     const backupRoot=path.join(this.root,'de-perportal-data','trap-backups');
     const folders=(await fs.readdir(backupRoot,{withFileTypes:true}).catch(e=>e.code==='ENOENT'?[]:Promise.reject(e)))
       .filter(entry=>entry.isDirectory() && /^\d+$/.test(entry.name)).map(entry=>entry.name).sort((a,b)=>Number(b)-Number(a));
@@ -158,7 +129,7 @@ class Manager extends EventEmitter {
       };
       await walk();
       if(!restored) throw Error('The latest trap backup contains no valid trap dumps.');
-      this.message=`Restored ${restored} trap dumps from ${folders[0]}. Current files backed up in ${before}.`;
+      this.message=`Restored ${restored} trap dumps from ${folders[0]}. Restart Cemu before using them. Current files backed up in ${before}.`;
     } finally {this.busy=false;await this.rescan();}
   }
   async select({player,target,choice,preset,name}) {

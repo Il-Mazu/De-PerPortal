@@ -35,8 +35,9 @@ function render() {
   $('game').innerHTML=state.games.map((g,i)=>`<option value="${i+1}">${e(g)}</option>`).join('');
   $('game').value=state.game;$('game').disabled=state.detected || state.busy;
   $('auto-label').textContent=state.detected?'Detected':'Manual profile';
-  $('clear-traps').disabled=state.busy || !state.figures.some(f=>f.info?.kind==='Trap');
-  $('restore-trap-backup').disabled=state.busy || !!state.session.pid;
+  $('clear-traps').disabled=true;
+  $('clear-traps').title='Temporarily disabled: clearing can make trap dumps unreadable.';
+  $('restore-trap-backup').disabled=state.busy;
   $('launch').disabled=!!state.session.pid;
   const thump=state.figures.find(f=>f.id===107);
   $('thump-art').innerHTML=thump?.art?portrait(thump):'⚓';

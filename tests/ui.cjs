@@ -179,12 +179,8 @@ const {installArt}=require('../app/artwork.cjs');
     await page.locator('#settings').click();
     await page.locator('#rescan').click();
     await page.locator('#library-count').filter({hasText:'33 figures'}).waitFor();
-    await page.locator('#clear-traps').click();
-    await page.waitForFunction(()=>document.body.textContent.includes('Cleared 1 traps.'));
-    assert.equal(require('../app/traps.cjs').decode(await fs.readFile(path.join(root,'NFC/captured-life.sky'))).state,'empty');
-    const backupRoot=path.join(root,'de-perportal-data/trap-backups');
-    const [backup]=await fs.readdir(backupRoot);
-    assert.deepEqual(await fs.readFile(path.join(backupRoot,backup,'captured-life.sky')),bytes);
+    assert.equal(await page.locator('#clear-traps').isDisabled(),true);
+    assert.deepEqual(await fs.readFile(path.join(root,'NFC/captured-life.sky')),bytes);
     await page.locator('#settings-close').click();
   }
   assert.deepEqual(errors,[]);
