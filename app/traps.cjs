@@ -52,20 +52,15 @@ function clear(bytes) {
   const valid=[8,36].filter(block=>areaValid(data,block));
   if(!valid.length) throw Error('Unrecognized trap save; original left untouched.');
   for(const block of [8,36]) {
-    // Each trap save has seven sectors of villain history followed by a
-    // redundant copy. Clearing only the active slot leaves prior villains
-    // available in Trap Team's villain vault.
-    // A trap can be mid-write with one stale/corrupt mirror. Rebuild that
-    // redundant header from the valid copy while clearing both data areas.
+    // Villains occupy one data block per sector, six entries per copy.
+    // Keep the surrounding game-owned blocks intact: Trap Team also stores
+    // structure and timer state there, and zeroing those blocks corrupts toys.
     if(!valid.includes(block)) data.copy(data,block*16,valid[0]*16,valid[0]*16+16);
-    data.writeUInt16LE(0,block*16); // Reset the area's history counter too.
     const changed=[block];
-    // Preserve the sector header at `block`; clear every data block after it,
-    // across all seven history sectors. Sector trailers hold NFC keys/access
-    // bits and are deliberately left untouched.
-    for(let b=block+1;b<block+28;b++) if(!trailers.has(b)) {
-      data.fill(0,b*16,b*16+16);
-      changed.push(b);
+    for(let i=0;i<6;i++) {
+      const record=block+1+i*4;
+      data.fill(0,record*16,record*16+16);
+      changed.push(record);
     }
     const group=Buffer.concat([block+1,block+2,block+4].map(b=>data.subarray(b*16,b*16+16)));
     data.writeUInt16LE(crc16(group),block*16+12);

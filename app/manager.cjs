@@ -124,6 +124,43 @@ class Manager extends EventEmitter {
       this.message=`Cleared ${cleared} traps. Originals backed up in ${backup}.${skipped.length?` Skipped ${skipped.length} unrecognized or changed dumps: ${skipped.join(', ')}.`:''}`;
     } finally {this.busy=false;await this.rescan();await this.flushDeferredRescan();}
   }
+  async restoreLatestTrapBackup() {
+    if(this.busy) throw Error('Wait for the current operation.');
+    if(this.session.pid) throw Error('Close Cemu before restoring trap backups.');
+    const backupRoot=path.join(this.root,'de-perportal-data','trap-backups');
+    const folders=(await fs.readdir(backupRoot,{withFileTypes:true}).catch(e=>e.code==='ENOENT'?[]:Promise.reject(e)))
+      .filter(entry=>entry.isDirectory() && /^\d+$/.test(entry.name)).map(entry=>entry.name).sort((a,b)=>Number(b)-Number(a));
+    if(!folders.length) throw Error('No trap backup was found.');
+    this.busy=true;this.publish();
+    let restored=0;
+    const before=path.join(backupRoot,`before-restore-${Date.now()}`),nfcRoot=path.resolve(this.root,'NFC');
+    try {
+      const sourceRoot=path.join(backupRoot,folders[0]);
+      const walk=async(dir='')=>{
+        for(const entry of await fs.readdir(path.join(sourceRoot,dir),{withFileTypes:true})) {
+          const rel=path.join(dir,entry.name);
+          if(entry.isDirectory()) {await walk(rel);continue;}
+          if(!entry.isFile()) continue;
+          const bytes=await fs.readFile(path.join(sourceRoot,rel));
+          let figure;try {figure=model.identify(bytes);} catch {continue;}
+          if(figure.info?.kind!=='Trap') continue;
+          const destination=path.resolve(nfcRoot,...rel.split(path.sep));
+          const relative=path.relative(nfcRoot,destination);
+          if(relative==='..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw Error('Invalid trap backup path.');
+          try {
+            const current=await fs.readFile(destination),saved=path.join(before,relative);
+            await fs.mkdir(path.dirname(saved),{recursive:true});await fs.writeFile(saved,current,{flag:'wx'});
+          } catch(e) {if(e.code!=='ENOENT') throw e;}
+          await fs.mkdir(path.dirname(destination),{recursive:true});
+          const temp=`${destination}.restore-${Date.now()}`;
+          await fs.writeFile(temp,bytes);await fs.rename(temp,destination);restored++;
+        }
+      };
+      await walk();
+      if(!restored) throw Error('The latest trap backup contains no valid trap dumps.');
+      this.message=`Restored ${restored} trap dumps from ${folders[0]}. Current files backed up in ${before}.`;
+    } finally {this.busy=false;await this.rescan();}
+  }
   async select({player,target,choice,preset,name}) {
     if(this.busy) throw Error('Wait for the current swap.');
     if(target==='trap-name') {

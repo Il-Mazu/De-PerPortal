@@ -58,7 +58,7 @@ else {
     win.on('closed',()=>overlay.destroy());
     manager.on('state',state=>{if(!win.isDestroyed()) win.webContents.send('state',state);});
     for(const [channel,handler] of Object.entries({
-      state:()=>manager.state(), action:data=>manager.action(data),select:data=>manager.select(data),game:g=>manager.setGame(g),rescan:()=>manager.rescan(),'clear-traps':()=>manager.clearTraps(),
+      state:()=>manager.state(), action:data=>manager.action(data),select:data=>manager.select(data),game:g=>manager.setGame(g),rescan:()=>manager.rescan(),'clear-traps':()=>manager.clearTraps(),'restore-trap-backup':()=>manager.restoreLatestTrapBackup(),
       'overlay-show':()=>overlay.show(),
       enable:()=>manager.control(['enable']),
       launch:async()=>{

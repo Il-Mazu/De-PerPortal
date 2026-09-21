@@ -44,13 +44,13 @@ test('clear removes all villain history from both real encrypted saves and prese
   assert.deepEqual(traps.decode(clean),{state:'empty'});
   for(const block of [8,36]) {
     assert.equal(traps.areaValid(data,block),true);
-    assert.equal(data.readUInt16LE(block*16),0);
     assert.deepEqual(traps.decodeRecord(data,block),{state:'empty'});
-    for(let b=block+1;b<block+28;b++) {
-      if(b%4===3) assert.deepEqual(clean.subarray(b*16,b*16+16),original.subarray(b*16,b*16+16));
-      else assert.ok(data.subarray(b*16,b*16+16).every(byte=>byte===0),`block ${b} still has saved trap data`);
+    for(let i=0;i<6;i++) {
+      const record=block+1+i*4;
+      assert.ok(data.subarray(record*16,record*16+16).every(byte=>byte===0),`block ${record} still has a villain record`);
     }
   }
+  for(let block=0;block<64;block++) if(![8,9,13,17,21,25,29,36,37,41,45,49,53,57].includes(block)) assert.deepEqual(clean.subarray(block*16,block*16+16),original.subarray(block*16,block*16+16));
   assert.deepEqual(clean.subarray(0,8*16),original.subarray(0,8*16));
   assert.deepEqual(traps.clear(clean),clean);
   assert.throws(()=>traps.clear(Buffer.alloc(1024)),/Unrecognized/);

@@ -1,3 +1,16 @@
+# Dè PerPortal 0.5.5
+
+- Corrected **Clear all traps** to erase only the six villain-record slots in each redundant save, preserving the trap data needed for the game to recognize the toy.
+- Added **Restore latest trap backup** in Settings. Close Cemu, install this update, then use it to recover the original trap files backed up by the 0.5.4 clear. The 0.5.4 release was withdrawn.
+- Hardened **Alt+Ctrl+0** trap lock-in detection, including the numeric keypad.
+- Named captures stay available through **Alt+Up/Down** and remain hidden from the detected list.
+
+## Validation
+
+The Windows portal controller builds locally. The Windows release workflow runs the full unit suite and packages the release. Live Trap Team gameplay has not been tested.
+
+---
+
 # Dè PerPortal 0.5.4
 
 - Reset each trap save's history counter along with all villain-history data when clearing traps.

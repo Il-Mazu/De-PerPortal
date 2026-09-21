@@ -36,6 +36,7 @@ function render() {
   $('game').value=state.game;$('game').disabled=state.detected || state.busy;
   $('auto-label').textContent=state.detected?'Detected':'Manual profile';
   $('clear-traps').disabled=state.busy || !state.figures.some(f=>f.info?.kind==='Trap');
+  $('restore-trap-backup').disabled=state.busy || !!state.session.pid;
   $('launch').disabled=!!state.session.pid;
   const thump=state.figures.find(f=>f.id===107);
   $('thump-art').innerHTML=thump?.art?portrait(thump):'⚓';
@@ -224,6 +225,7 @@ $('game').onchange=()=>perform(()=>api.game(Number($('game').value)));
 $('launch').onclick=()=>perform(()=>api.launch());
 $('enable').onclick=()=>perform(async()=>{await api.enable();toast('Cemu portal emulation enabled.');});
 $('clear-traps').onclick=()=>perform(()=>api.clearTraps());
+$('restore-trap-backup').onclick=()=>perform(()=>api.restoreTrapBackup());
 $('rescan').onclick=()=>perform(()=>api.rescan());
 $('art-folder').onclick=()=>perform(()=>api.artFolder());
 $('download-art').onclick=()=>perform(async()=>{const b=$('download-art');b.disabled=true;b.textContent='Downloading…';try{await api.artwork();}finally{b.disabled=false;b.textContent='Download character art · 50 MB';}});
