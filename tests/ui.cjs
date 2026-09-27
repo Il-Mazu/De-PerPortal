@@ -103,6 +103,11 @@ const {installArt}=require('../app/artwork.cjs');
   assert.equal(await page.locator('.picker-item').count(),2); // no Giant Thumpback in ordinary Water choices
   await page.locator('#picker-close').click();
   await page.locator('#settings').click();await page.locator('#settings-close').click();
+  // Skylander list shows the current game's poster.
+  await page.locator('#posters').click();
+  await page.waitForFunction(()=>document.getElementById('poster-img').naturalWidth>0);
+  assert.match(await page.locator('#poster-title').textContent(),/Skylander list/);
+  await page.locator('#poster-close').click();
   await page.locator('#tab-0').click();
   await selectGame('2');
   assert.equal(await page.locator('#perks-section').isVisible(),false);

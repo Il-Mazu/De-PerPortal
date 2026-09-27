@@ -265,6 +265,40 @@ $('trap-name-form').onsubmit=event=>{
 };
 $('search').oninput=renderPicker;
 $('settings').onclick=()=>$('settings-dialog').showModal();
+// Activision's character poster for the current game, in posters/<game>.jpg.
+function openPoster() {
+  $('poster-title').textContent=`Skylander list · ${state.games[state.game-1]}`;
+  $('poster-view').classList.remove('zoomed');$('poster-zoom').hidden=false;$('poster-missing').hidden=true;
+  $('poster-img').alt=`${state.games[state.game-1]} Skylander poster`;
+  $('poster-img').src=`posters/${state.game}.jpg`;
+  $('poster-dialog').showModal();$('poster-zoom').focus();
+}
+$('poster-img').onerror=()=>{$('poster-zoom').hidden=true;$('poster-missing').hidden=false;};
+function zoomPoster(x=.5,y=.5) {
+  const view=$('poster-view'),zoomed=view.classList.toggle('zoomed');
+  $('poster-zoom').setAttribute('aria-label',zoomed?'Zoom out':'Zoom in');
+  // Keep the clicked spot under the pointer.
+  if(zoomed) {view.scrollLeft=x*view.scrollWidth-view.clientWidth/2;view.scrollTop=y*view.scrollHeight-view.clientHeight/2;}
+}
+let drag=null;
+$('poster-view').onpointerdown=event=>{if($('poster-view').classList.contains('zoomed'))drag={x:event.clientX,y:event.clientY,moved:false};};
+$('poster-view').onpointermove=event=>{
+  if(!drag || !event.buttons)return;
+  const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+  if(Math.abs(dx)+Math.abs(dy)>4)drag.moved=true;
+  $('poster-view').scrollBy(-dx,-dy);drag.x=event.clientX;drag.y=event.clientY;
+};
+$('poster-zoom').onclick=event=>{
+  if(drag?.moved){drag=null;return;}
+  drag=null;
+  // Map the click onto the letterboxed picture. Keyboard and controller
+  // clicks have no pointer position; zoom on the centre.
+  const img=$('poster-img'),r=img.getBoundingClientRect(),scale=Math.min(r.width/img.naturalWidth,r.height/img.naturalHeight);
+  const w=img.naturalWidth*scale,h=img.naturalHeight*scale,x=(event.clientX-r.left-(r.width-w)/2)/w,y=(event.clientY-r.top-(r.height-h)/2)/h;
+  event.detail && !$('poster-view').classList.contains('zoomed')?zoomPoster(Math.min(1,Math.max(0,x)),Math.min(1,Math.max(0,y))):zoomPoster();
+};
+$('posters').onclick=openPoster;
+$('poster-close').onclick=()=>$('poster-dialog').close();
 $('to-game').onclick=()=>perform(()=>api.toGame());
 $('overlay').onclick=()=>perform(()=>api.overlay());
 $('settings-close').onclick=()=>$('settings-dialog').close();
@@ -314,7 +348,12 @@ setInterval(()=>{
   document.body.classList.add('pad');
   $('to-game-key').textContent=Pad.labels[input.family].B;
   const pressed=input.pressed,dialog=document.querySelector('dialog[open]');
-  for(const direction of ['UP','DOWN','LEFT','RIGHT']) if(pressed.has(direction)) moveFocus(direction);
+  // A zoomed poster pans with the stick instead of moving focus.
+  const panning=dialog?.id==='poster-dialog' && $('poster-view').classList.contains('zoomed');
+  for(const direction of ['UP','DOWN','LEFT','RIGHT']) if(pressed.has(direction)) {
+    if(panning) $('poster-view').scrollBy(...{UP:[0,-160],DOWN:[0,160],LEFT:[-160,0],RIGHT:[160,0]}[direction]);
+    else moveFocus(direction);
+  }
   if(pressed.has('A')) activate(focusables().includes(document.activeElement)?document.activeElement:null);
   // B backs out: first out of a dialog, then out of the GUI to the game.
   if(pressed.has('B')) dialog?dialog.close():perform(()=>api.toGame());

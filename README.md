@@ -13,6 +13,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - Swap Force top and bottom selection.
 - An in-game shortcut overlay and selection notifications.
 - A controller quick swap dial (hold L3 + R3) and a controller-navigable GUI.
+- A zoomable Skylander list: Activision's character poster for each game.
 - Items, traps, vehicles, trophies, and Creation Crystals for supported games.
 - Nested NFC folders and optional community character artwork.
 

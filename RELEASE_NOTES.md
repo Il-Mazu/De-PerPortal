@@ -1,5 +1,6 @@
 # Dè PerPortal 0.7.1
 
+- **New:** **Skylander list** in the toolbar shows Activision's poster of every Skylander in the current game. Click (or press **A / ✕**) to zoom in on a spot and again to zoom out; drag, scroll or use the stick to look around while zoomed.
 - **Fixed:** the game kept responding to the controller while the quick swap dial was open. Cemu is now frozen while the dial is open, and resumes once every button and stick is released after a choice, so the game never sees the confirming press. If Dè PerPortal closes unexpectedly, Cemu resumes on its own (at the latest after one minute).
 - **Fixed:** there was no visible way to leave the GUI with a controller. **B / ○** now returns to Cemu when no dialog is open (it still closes dialogs first), and a new **Back to game** button in the toolbar shows which controller button to press. **View / Create** and the 5-second **L3 + R3** hold still work.
 
