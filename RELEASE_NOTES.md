@@ -1,3 +1,17 @@
+# Dè PerPortal 1.0.0
+
+The first stable release: two-player portal control for Cemu, playable end to end with a controller.
+
+- **New:** **Skylander list** in the toolbar shows Activision's poster of every Skylander in the current game. Click (or press **A / ✕**) to zoom in on a spot and again to zoom out; drag, scroll or use the stick to look around while zoomed.
+- **Fixed:** the game kept responding to the controller while the quick swap dial was open. Cemu is now frozen while the dial is open, and resumes once every button and stick is released after a choice, so the game never sees the confirming press. If Dè PerPortal closes unexpectedly, Cemu resumes on its own (at the latest after one minute).
+- **Fixed:** there was no visible way to leave the GUI with a controller. **B / ○** now returns to Cemu when no dialog is open (it still closes dialogs first), and a new **Back to game** button in the toolbar shows which controller button to press. **View / Create** and the 5-second **L3 + R3** hold still work.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. 0.7.0's controller features were confirmed on Windows. The new features were tested with simulated gamepads, and freezing Cemu was tested under Wine; it has not yet been tried on Windows with a live game.
+
+---
+
 # Dè PerPortal 0.7.0
 
 - **Fixed:** switching to a different trap (or any accessory) when one is already active now always clears the portal row first before loading the new figure, matching the behaviour of player-figure swaps. Previously the load could be silently ignored in some cases, leaving the old trap in place.

@@ -210,3 +210,16 @@ body.busy .stage button,body.busy .element-card button,body.busy .perk-card butt
 @media(max-width:760px){.topbar{flex-wrap:wrap;padding:12px 16px}.toolbar{flex-wrap:wrap}.toolbar kbd{display:none}main{padding:18px 16px 0}.stage{height:700px}.favorite{top:420px;width:46%}.portal{bottom:340px;max-width:100%}.portal-light,.motes{bottom:490px}.element-aura{bottom:480px}.accessories{grid-template-columns:1fr}.gamebar>div{flex-wrap:wrap}.tag{display:none}.accessory-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.element-footnote{flex-direction:column;gap:4px}}
 /* Controller navigation: always show where focus is. */
 body.pad :focus{outline:3px solid var(--gilt-hi);outline-offset:3px;box-shadow:0 0 18px var(--gilt)}
+/* The pad button hint only matters while a controller is in use. */
+body:not(.pad) #to-game-key{display:none}
+/* Skylander list: the poster fits the dialog, and zooms to 2.5x for reading names. */
+#poster-dialog{width:min(1400px,96vw)}
+.poster-view{max-height:72vh;overflow:auto;border-radius:12px;background:#0a0f33b3}
+#poster-zoom{display:block;width:100%;padding:0;border:0;border-radius:0;background:none;box-shadow:none;cursor:zoom-in}
+#poster-zoom:hover:not(:disabled){filter:none;transform:none}
+/* Fitted, the whole poster shows; zoomed, it is 2.5x the view's width. */
+#poster-img{display:block;width:100%;height:72vh;object-fit:contain}
+.poster-view.zoomed #poster-zoom{width:250%;cursor:grab}.poster-view.zoomed #poster-img{height:auto}
+.poster-view.zoomed:active #poster-zoom{cursor:grabbing}
+#poster-missing{padding:40px 16px;text-align:center;color:var(--muted)}
+.poster-hint{margin-top:10px;font-size:12px;color:var(--muted)}

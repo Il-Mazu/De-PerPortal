@@ -192,10 +192,40 @@ static int watch(void) {
     if(!timer) fail("Could not start session monitor.");
     MSG msg;
     while(GetMessageW(&msg,NULL,0,0)>0) {
-        if(msg.message==WM_TIMER) session();
+        if(msg.message==WM_TIMER) {
+            /* A frozen Cemu cannot answer window queries; keep the last session. */
+            HANDLE frozen=OpenEventW(SYNCHRONIZE,FALSE,L"Local\\DePerPortalFrozen");
+            if(frozen) CloseHandle(frozen); else session();
+        }
         TranslateMessage(&msg); DispatchMessageW(&msg);
     }
     UnhookWindowsHookEx(hook); return 0;
+}
+/* Freeze Cemu while the quick swap dial is open, so the game ignores the
+   controller. Resumes when stdin closes (the app releases or exits) or after
+   a minute as a safety net. The app spawns this detached so a crash cannot
+   leave Cemu suspended. */
+static DWORD WINAPI wait_stdin(LPVOID unused) {
+    char b[64]; DWORD n; (void)unused;
+    while(ReadFile(GetStdHandle(STD_INPUT_HANDLE),b,sizeof b,&n,NULL) && n) {}
+    return 0;
+}
+static int freeze(void) {
+    typedef LONG (NTAPI *nt_process)(HANDLE);
+    HMODULE ntdll=GetModuleHandleW(L"ntdll.dll");
+    nt_process suspend=(nt_process)(void(*)(void))GetProcAddress(ntdll,"NtSuspendProcess");
+    nt_process resume=(nt_process)(void(*)(void))GetProcAddress(ntdll,"NtResumeProcess");
+    EnumWindows(find_main,0); if(!main_window) fail("Start Cemu first.");
+    HANDLE process=OpenProcess(PROCESS_SUSPEND_RESUME,FALSE,pid);
+    if(!suspend || !resume || !process) fail("Cannot pause Cemu.");
+    /* Tells the watcher to skip window checks, which would time out. */
+    HANDLE marker=CreateEventW(NULL,TRUE,TRUE,L"Local\\DePerPortalFrozen");
+    if(suspend(process)<0) fail("Cannot pause Cemu.");
+    HANDLE waiter=CreateThread(NULL,0,wait_stdin,NULL,0,NULL);
+    if(waiter) WaitForSingleObject(waiter,60000);
+    resume(process);
+    if(marker) CloseHandle(marker);
+    return 0;
 }
 int main(int argc,char **argv) {
     /* Obtain Unicode arguments even when the Windows ANSI code page is not UTF-8. */
@@ -210,6 +240,7 @@ int main(int argc,char **argv) {
     }
     LocalFree(wide_argv);
     if(argc==2 && !strcmp(argv[1],"watch")) return watch();
+    if(argc==2 && !strcmp(argv[1],"freeze")) return freeze();
     HANDLE mutex=CreateMutexW(NULL,TRUE,L"Local\\DePerPortalProbe");
     if(!mutex || GetLastError()==ERROR_ALREADY_EXISTS) fail("Another portal operation is running.");
     if(argc<2 || (strcmp(argv[1],"inspect") && strcmp(argv[1],"enable") && strcmp(argv[1],"load") && strcmp(argv[1],"clear")))
