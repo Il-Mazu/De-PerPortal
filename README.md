@@ -1,30 +1,24 @@
-<p align="center">
-  <img src="docs/assets/skylanders-banner.jpg" alt="Skylanders SuperChargers — heroes ready for adventure" width="100%">
-</p>
+# Dè PerPortal
 
-<h1 align="center">Dè PerPortal</h1>
-<p align="center">
-  <a href="https://github.com/Il-Mazu/De-PerPortal/releases/latest">Download for Windows</a> ·
-  <a href="#download-and-setup">Get started</a> ·
-  <a href="#controls">Controls</a> ·
-  <a href="https://github.com/Il-Mazu/De-PerPortal/issues">Report an issue</a>
-</p>
+A portable Windows companion for the Cemu Skylanders portal. Choose figures for two players, save a default for each game, and switch characters with keyboard shortcuts or a controller.
 
-A portable Windows companion for the Cemu Skylanders portal. Choose figures for two players, save a default for each game, and switch characters with keyboard shortcuts.
+[Download for Windows](https://github.com/Il-Mazu/De-PerPortal/releases/latest)
 
-## Made for your next adventure
+![Skylanders SuperChargers artwork](docs/assets/skylanders-banner.jpg)
 
-- **Two players, one portal:** separate character assignments and game profiles.
-- **Three saved defaults:** keep three presets per player, per game, and switch between them.
-- **Mix your Swap Force:** pick tops and bottoms visually, then swap movement bases with a shortcut.
-- **Keys within reach:** an in-game overlay shows element icons and selection notifications.
-- **Game-aware accessories:** activate magic items, adventures, traps, racing trophies, vehicles and Imaginite chests from the GUI.
-- **A portal for every adventure:** game-matched portal artwork and subtle lighting from both active Skylanders’ elements.
-- **A portable library:** scan nested NFC folders and add optional community character artwork.
+## Features
+
+- Separate character assignments and profiles for two players.
+- Three presets per player and game, with keyboard shortcuts.
+- Swap Force top and bottom selection.
+- An in-game shortcut overlay and selection notifications.
+- A controller quick swap dial (hold L3 + R3) and a controller-navigable GUI.
+- Items, traps, vehicles, trophies, and Creation Crystals for supported games.
+- Nested NFC folders and optional community character artwork.
 
 ## Download and setup
 
-Download **De-PerPortal-0.5.8-windows-x64.zip** from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
+Download the Windows ZIP from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
 
@@ -62,7 +56,7 @@ Hold **L3 + R3** (press both sticks) for 2 seconds while a Skylanders game runs 
 
 Keep holding for 5 seconds to bring up the full Dè PerPortal window. Move with the stick or d-pad, select with **A / ✕**, close dialogs with **B / ○**, and return to Cemu with **View / Create** or another 5-second hold. Xbox (XInput, including controllers mapped by Parsec or Steam) and PlayStation controllers are supported; Cemu still receives the controller input while the dial is open.
 
-## Pick, save, and swap
+## Character selection and presets
 
 Each player can save up to three default presets per game. Use the **1 / 2 / 3** buttons below the default card to select the active preset; an empty slot opens the character picker. **Edit** changes the selected preset. Selecting a preset does not change the portal: click the default card or press **Alt+0** (Player 1) / **Alt+Shift+0** (Player 2) to load it. Existing defaults become preset 1, and the active preset is remembered between sessions.
 
@@ -129,6 +123,6 @@ Tests use temporary figure copies. Native Windows gameplay and fullscreen behavi
 
 ## Credits
 
-Dè PerPortal is an unofficial community project and is not affiliated with Activision. The banner is downloaded from [Activision’s Skylanders SuperChargers page](https://www.activision.com/games/skylanders/skylanders-superchargers); see [artwork sources](docs/assets/SOURCES.md). Skylanders imagery remains © Activision Publishing, Inc. and is not covered by the code license.
+Dè PerPortal is an unofficial community project and is not affiliated with Activision. Skylanders imagery remains © Activision Publishing, Inc. and is not covered by the code license. See [artwork sources](docs/assets/SOURCES.md).
 
 Code is licensed under GPL-2.0-or-later; see LICENSE and resources/CATALOG-LICENSE.txt. Optional character cards come from the Emulanders community artwork pack. The supplied portal image and Skylanders artwork belong to their respective owners.
