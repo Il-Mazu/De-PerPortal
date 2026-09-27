@@ -1,4 +1,6 @@
-# Dè PerPortal 0.7.1
+# Dè PerPortal 1.0.0
+
+The first stable release: two-player portal control for Cemu, playable end to end with a controller.
 
 - **New:** **Skylander list** in the toolbar shows Activision's poster of every Skylander in the current game. Click (or press **A / ✕**) to zoom in on a spot and again to zoom out; drag, scroll or use the stick to look around while zoomed.
 - **Fixed:** the game kept responding to the controller while the quick swap dial was open. Cemu is now frozen while the dial is open, and resumes once every button and stick is released after a choice, so the game never sees the confirming press. If Dè PerPortal closes unexpectedly, Cemu resumes on its own (at the latest after one minute).
@@ -6,7 +8,7 @@
 
 ## Validation
 
-The Windows release workflow runs the build, full unit suite, and packaging. Tested with simulated gamepads; 0.7.0's controller features were confirmed on Windows.
+The Windows release workflow runs the build, full unit suite, and packaging. 0.7.0's controller features were confirmed on Windows. The new features were tested with simulated gamepads, and freezing Cemu was tested under Wine; it has not yet been tried on Windows with a live game.
 
 ---
 
