@@ -1,3 +1,5 @@
+<p align="center"><img src="app/ui/logo.png" alt="Skylanders Dè PerPortal" width="560"></p>
+
 # Dè PerPortal
 
 A portable Windows companion for the Cemu Skylanders portal. Choose figures for two players, save a default for each game, and switch characters with keyboard shortcuts or a controller.
@@ -22,6 +24,8 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 Download the Windows ZIP from [Releases](https://github.com/Il-Mazu/De-PerPortal/releases), extract **all** its contents beside your Cemu executable, and run **Dè PerPortal.exe**. Node.js and developer tools are not required.
 
 Put your figure dumps in an **NFC** folder beside Dè PerPortal. Subfolders are supported. Settings and optional artwork are stored in **de-perportal-data**; keep that folder when updating.
+
+Dè PerPortal checks GitHub for a newer release each time it starts. If one is available, it downloads it, checks it against the release's SHA-256 checksum, replaces its own files and restarts. Your NFC folder and de-perportal-data are left untouched. If GitHub can't be reached, the app just starts.
 
 **Updating from v0.2.0?** Keep your existing `skyportal-data` folder beside the executable. On first launch, its settings and artwork are copied into `de-perportal-data`; the original stays available as a backup. Future updates use `de-perportal-data`.
 

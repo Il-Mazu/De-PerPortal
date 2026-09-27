@@ -1,0 +1,24 @@
+/* Splash: the logo rises over a Portal of Power whose gilt rim fills as the update downloads. */
+@font-face{font-family:Nunito;src:url(fonts/nunito.woff2) format('woff2');font-weight:200 1000;font-display:block}
+:root{color-scheme:dark;--night:#0c1238;--gilt:#f6c64f;--gilt-hi:#fff1b8;--gilt-lo:#9a6415;--parchment:#f7e6bd;--muted:#aab4e2;--portal:#8fdcff}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{display:grid;place-items:center;color:var(--parchment);font:600 14px/1.4 Nunito,system-ui,sans-serif;user-select:none;-webkit-app-region:drag;
+  background:radial-gradient(ellipse 55% 40% at 50% 62%,#5a8cff33,transparent 70%),linear-gradient(180deg,#141b55 0,#2b2470 45%,#1a1d5a 75%,var(--night) 100%);
+  border:1.5px solid transparent;border-image:linear-gradient(165deg,var(--gilt-hi),var(--gilt) 30%,var(--gilt-lo) 55%,#e7b347 80%,var(--gilt-hi)) 1}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:url(textures/dusk-clouds.jpg) 0 0/900px 450px repeat-x;mix-blend-mode:screen;opacity:.4;
+  mask:linear-gradient(#000,transparent 80%);animation:drift 120s linear infinite}
+@keyframes drift{to{background-position-x:1800px}}
+main{display:flex;flex-direction:column;align-items:center;width:100%;padding:0 40px}
+.logo{position:relative;z-index:1;width:440px;max-width:100%;filter:drop-shadow(0 14px 18px #000a);animation:float 4s ease-in-out infinite alternate}
+@keyframes float{from{translate:0 4px}to{translate:0 -6px}}
+.portal{width:400px;max-width:100%;margin-top:-6px;overflow:visible;filter:drop-shadow(0 0 14px #8fdcff55)}
+.portal ellipse{fill:none;stroke-linecap:round}
+.portal .base{stroke:#0a0f33;stroke-width:9;fill:#8fdcff14}
+/* Checking: a spark circles the rim. Downloading: the rim fills with gold. */
+.portal .fill{stroke:var(--gilt);stroke-width:5;stroke-dasharray:14 86;animation:orbit 1.6s linear infinite;filter:drop-shadow(0 0 5px var(--gilt))}
+@keyframes orbit{to{stroke-dashoffset:-100}}
+.portal .fill.progress{animation:none;stroke-dasharray:100 100;transition:stroke-dashoffset .3s}
+#status{margin:22px 0 0;min-height:1.4em;max-width:52ch;text-align:center;text-shadow:0 1px 0 #000a}
+.version{position:fixed;right:16px;bottom:12px;font-size:12px;color:var(--muted)}
+@media(prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}

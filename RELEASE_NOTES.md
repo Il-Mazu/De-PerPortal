@@ -1,3 +1,15 @@
+# Dè PerPortal 1.1.0
+
+- **New:** automatic updates. At startup Dè PerPortal checks GitHub for a newer release, downloads it, verifies its SHA-256 checksum, installs it over the app files and restarts. NFC dumps and de-perportal-data are never touched. Offline or on any error, the app starts as usual.
+- **New:** a splash screen with the new Dè PerPortal logo while the update check runs; the portal ring under the logo fills as an update downloads.
+- **New:** the official Dè PerPortal logo in the window header, the README, and as the app and window icon.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. The splash screen and version checks were tested locally; the first real self-update will happen when a release newer than 1.1.0 is published.
+
+---
+
 # Dè PerPortal 1.0.0
 
 The first stable release: two-player portal control for Cemu, playable end to end with a controller.
