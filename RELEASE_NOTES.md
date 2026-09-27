@@ -1,3 +1,14 @@
+# Dè PerPortal 1.1.1
+
+- **Fixed:** Dè PerPortal could show **Unsupported Cemu** and keep **Launch Cemu** disabled after Cemu closed. Any window whose title started with "Cemu" (such as an Explorer folder or a browser tab) was treated as Cemu. Only a running program whose executable name starts with "Cemu" counts now, and a second Cemu no longer marks the first one unsupported until it restarts.
+- **Fixed:** the splash screen's loading ring stood still when Windows animation effects are turned off. It now pulses in place instead.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Cemu detection was tested under Wine with look-alike windows. This is the first release that 1.1.0 installs through the automatic updater.
+
+---
+
 # Dè PerPortal 1.1.0
 
 - **New:** automatic updates. At startup Dè PerPortal checks GitHub for a newer release, downloads it, verifies its SHA-256 checksum, installs it over the app files and restarts. NFC dumps and de-perportal-data are never touched. Offline or on any error, the app starts as usual.

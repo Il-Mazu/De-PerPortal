@@ -55,12 +55,25 @@ static void title(HWND w, wchar_t *s) {
     DWORD_PTR result; s[0]=0;
     SendMessageTimeoutW(w,WM_GETTEXT,512,(LPARAM)s,SMTO_ABORTIFHUNG,1000,&result);
 }
+/* A running process whose executable name starts with "Cemu". Titles alone
+   also match Explorer folders or browser tabs named "Cemu". */
+static BOOL cemu_process(DWORD p) {
+    HANDLE process=OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION,FALSE,p);
+    if(!process) return FALSE;
+    wchar_t exe[MAX_PATH]; DWORD length=MAX_PATH,code=0;
+    BOOL ok=QueryFullProcessImageNameW(process,0,exe,&length) && GetExitCodeProcess(process,&code) && code==STILL_ACTIVE;
+    CloseHandle(process);
+    return ok && StrCmpNIW(PathFindFileNameW(exe),L"Cemu",4)==0;
+}
 static BOOL CALLBACK find_main(HWND w, LPARAM unused) {
-    wchar_t s[512]; (void)unused; title(w,s);
-    if (wcsstr(s,L"Cemu")==s && GetWindow(w,GW_OWNER)==NULL) {
-        if (main_window) { if(watching) { multiple=1; return TRUE; } fail("Multiple Cemu windows: close other instances."); }
-        main_window=w; GetWindowThreadProcessId(w,&pid);
-    }
+    wchar_t s[512]; DWORD p; (void)unused;
+    if (GetWindow(w,GW_OWNER)!=NULL || !IsWindowVisible(w)) return TRUE;
+    title(w,s);
+    if (wcsstr(s,L"Cemu")!=s) return TRUE;
+    GetWindowThreadProcessId(w,&p);
+    if (!cemu_process(p) || (main_window && p==pid)) return TRUE;
+    if (main_window) { if(watching) { multiple=1; return TRUE; } fail("Multiple Cemu windows: close other instances."); }
+    main_window=w; pid=p;
     return TRUE;
 }
 static BOOL CALLBACK find_windows(HWND w, LPARAM unused) {
@@ -140,8 +153,11 @@ static void json_string(const wchar_t *s) {
 static void session(void) {
     DWORD old_pid=pid;
     main_window=NULL; pid=0; multiple=0; EnumWindows(find_main,0);
-    if(pid!=old_pid) supported=pid?tested_binary():0;
-    if(multiple) supported=0;
+    /* The executable hash is checked once per Cemu process; a second Cemu only
+       blocks shortcuts while it is open. */
+    static int verified;
+    if(pid!=old_pid) verified=pid?tested_binary():0;
+    supported=verified && !multiple;
     wchar_t s[512]=L""; if(main_window) title(main_window,s);
     printf("{\"type\":\"session\",\"pid\":%lu,\"supported\":%s,\"focused\":%s,\"title\":",(unsigned long)pid,supported?"true":"false",main_window && GetForegroundWindow()==main_window?"true":"false");
     json_string(s);
