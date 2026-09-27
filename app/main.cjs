@@ -11,7 +11,7 @@ const exec=promisify(execFile);
 const root=process.env.DE_PERPORTAL_HOME || (app.isPackaged?path.dirname(process.execPath):path.resolve(__dirname,'..'));
 const helper=app.isPackaged?path.join(process.resourcesPath,'portal-control.exe'):path.join(__dirname,'../out/De-PerPortal-Probe.exe');
 const native=(args,options={})=>process.platform==='win32'?{file:helper,args,options}:{file:'wine',args:[helper,...args],options};
-let manager,win,watcher,libraryWatcher,overlay;
+let manager,win,watcher,libraryWatcher,overlay,radial;
 async function watchLibrary(root,onChange) {
   const watchers=[];
   const seen=new Set();
@@ -28,6 +28,9 @@ async function watchLibrary(root,onChange) {
   await add(root);
   return {close:()=>watchers.forEach(w=>w.close())};
 }
+// Chromium can read Xbox pads through Windows.Gaming.Input, which only reports
+// to the focused app. XInput and raw HID keep working while Cemu has focus.
+app.commandLine.appendSwitch('disable-features','EnableWindowsGamingInputDataFetcher');
 protocol.registerSchemesAsPrivileged([{scheme:'art',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
 if(!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -55,11 +58,13 @@ else {
     win.webContents.on('will-navigate',event=>event.preventDefault());
     win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));
     overlay=require('./overlay.cjs').createOverlay(manager,win);
-    win.on('closed',()=>overlay.destroy());
+    radial=require('./radial.cjs').createRadial(manager,win);
+    win.on('closed',()=>{overlay.destroy();radial.destroy();});
     manager.on('state',state=>{if(!win.isDestroyed()) win.webContents.send('state',state);});
     for(const [channel,handler] of Object.entries({
       state:()=>manager.state(), action:data=>manager.action(data),select:data=>manager.select(data),game:g=>manager.setGame(g),rescan:()=>manager.rescan(),'reset-trap-detections':()=>manager.resetTrapDetections(),'restore-trap-backup':()=>manager.restoreLatestTrapBackup(),
       'overlay-show':()=>overlay.show(),
+      'to-game':()=>win.minimize(),
       enable:()=>manager.control(['enable']),
       launch:async()=>{
         if(manager.session.pid) throw Error('Cemu is already running.');

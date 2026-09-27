@@ -25,7 +25,8 @@ function createOverlay(manager,mainWindow) {
     const bounds=state.session.bounds;
     if(bounds && bounds.width>0 && bounds.height>0) reference=process.platform==='win32'?screen.screenToDipRect(null,bounds):bounds;
     const area=screen.getDisplayMatching(position?{x:position[0],y:position[1],width:window.getBounds().width,height:window.getBounds().height}:reference).workArea;
-    const width=Math.min(Math.ceil(640*scale),area.width),height=Math.ceil(((reminders?62:0)+(notification?54:0))*scale);
+    // SuperChargers adds the three vehicle shortcuts beside the elements.
+    const width=Math.min(Math.ceil((reminders && state.game===5?820:640)*scale),area.width),height=Math.ceil(((reminders?62:0)+(notification?54:0))*scale);
     const x=position?.[0] ?? Math.round(area.x+(area.width-width)/2);
     const y=position?.[1] ?? area.y+area.height-height-12;
     const nextBounds={x:Math.max(area.x,Math.min(x,area.x+area.width-width)),y:Math.max(area.y,Math.min(y,area.y+area.height-height)),width,height};
@@ -39,7 +40,8 @@ function createOverlay(manager,mainWindow) {
         lastPlaced=window.getPosition();
       } finally {placing=false;}
     }
-    window.webContents.send('overlay-state',{game:state.game,elements:state.elements,perks:state.perks,reminders,notification});
+    const vehicle=state.figures?.find(f=>f.key===state.accessories?.vehicle?.top)?.accessory?.type?.split(' ')[0] || null;
+    window.webContents.send('overlay-state',{game:state.game,elements:state.elements,perks:state.perks,vehicle,reminders,notification});
     if(!window.isVisible())window.showInactive();
     // Swaps briefly focus Cemu's portal/file dialogs. Only count down while
     // the notification is visible over the focused game; resume after a hide.

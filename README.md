@@ -1,6 +1,6 @@
 # Dè PerPortal
 
-A portable Windows companion for the Cemu Skylanders portal. Choose figures for two players, save a default for each game, and switch characters with keyboard shortcuts.
+A portable Windows companion for the Cemu Skylanders portal. Choose figures for two players, save a default for each game, and switch characters with keyboard shortcuts or a controller.
 
 [Download for Windows](https://github.com/Il-Mazu/De-PerPortal/releases/latest)
 
@@ -12,6 +12,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - Three presets per player and game, with keyboard shortcuts.
 - Swap Force top and bottom selection.
 - An in-game shortcut overlay and selection notifications.
+- A controller quick swap dial (hold L3 + R3) and a controller-navigable GUI.
 - Items, traps, vehicles, trophies, and Creation Crystals for supported games.
 - Nested NFC folders and optional community character artwork.
 
@@ -45,8 +46,15 @@ The build currently requires Cemu's English interface. In Settings, enable the C
 | Alt + Shift + 1–9 / minus | Load Player 2's assigned element |
 | Alt + Q / W / E / R / Y / U / I / O | Swap Force perk base for Player 1 |
 | Alt + Shift + Q / W / E / R / Y / U / I / O | Swap Force perk base for Player 2 |
+| Alt + Q / W / E | SuperChargers: load the assigned Sky / Land / Sea vehicle |
 
 Shortcuts work while a Skylanders game is running and Cemu has focus. The element order is Magic, Water, Tech, Fire, Earth, Life, Air, Undead, Light, Dark. Thumpling requires the Giants sidekick dump; the Trap Team playable mini is a separate edition.
+
+### Playing with a controller
+
+Hold **L3 + R3** (press both sticks) for 2 seconds while a Skylanders game runs to open the quick swap dial over Cemu. Point a stick at an element and press **A / ✕** to load that player's element Skylander, just like its keyboard shortcut. **LB / RB (L1 / R1)** switch between Player 1, Player 2 and, in Swap Force, Trap Team and SuperChargers, a tab with that game's perk bases, traps or vehicles. **B / ○** closes the dial.
+
+Keep holding for 5 seconds to bring up the full Dè PerPortal window. Move with the stick or d-pad, select with **A / ✕**, close dialogs with **B / ○**, and return to Cemu with **View / Create** or another 5-second hold. Xbox (XInput, including controllers mapped by Parsec or Steam) and PlayStation controllers are supported; Cemu still receives the controller input while the dial is open.
 
 ## Character selection and presets
 
@@ -76,7 +84,7 @@ The **On the portal** section offers the accessory categories available for your
 
 In Trap Team, **Trapped villains** shows **Villain detected**, **Empty**, or **Contents unknown** from readable save records. Click **Name villain** to save a manual name per trap file; **Edit name** changes it, and saving a blank name clears it. Names persist across restarts in app settings. Update names after in-game swaps; a detected occupant change prompts you to rename it. Unknown saves can still be named. Moving or renaming a file requires naming it again. Use **Rescan NFC library** if automatic refresh misses a change. Normal scans and naming leave trap dumps unchanged.
 
-SuperChargers story co-op uses one **Shared vehicle**: one player drives and the other attacks. Racing makes its vehicle selections in-game; change the vehicle when prompted. Older magic items become Academy treasures in SuperChargers and rewards in Imaginators. Adventure pieces only unlock their original levels in supported games. Vehicles and trophies remain useful in Imaginators Racing.
+SuperChargers story co-op uses one shared vehicle: one player drives and the other attacks. **Alt+Q / W / E** loads your **Sky / Land / Sea** vehicle into the shared slot (with or without Shift, since the vehicle is shared). Choose each one under **Vehicle shortcuts** with **Edit**; until you do, the first vehicle of that type in your library is used. **Remove** in the section header takes the current vehicle off the portal. The overlay shows the three vehicle shortcuts beside the elements and highlights the type on the portal. Racing makes its vehicle selections in-game; change the vehicle when prompted. Older magic items become Academy treasures in SuperChargers and rewards in Imaginators. Adventure pieces only unlock their original levels in supported games. Vehicles and trophies remain useful in Imaginators Racing.
 
 Creation Crystals are playable figures in Imaginators: choose one from a player's Skylander picker or save it as a default. Imaginators adventure pieces and Imaginite chests appear with items. The app uses the dumps already in your NFC folder and does not reset their progress or remaining rewards. See [figure support and research](docs/FIGURE-SUPPORT.md).
 

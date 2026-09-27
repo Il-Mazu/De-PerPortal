@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'">
+  <title>Dè PerPortal quick swap</title><link rel="stylesheet" href="radial.css">
+</head>
+<body>
+  <main id="dial" hidden aria-label="Quick swap">
+    <div id="ring" class="ring"></div>
+    <div class="core" aria-live="polite">
+      <div class="tabs"><span id="l1" class="hint"></span><span id="tab-title"></span><span id="r1" class="hint"></span></div>
+      <div id="dots" class="dots"></div>
+      <strong id="label"></strong>
+      <span id="detail"></span>
+      <div id="hints" class="hints"></div>
+      <span id="keep-holding">Keep holding to open Dè PerPortal</span>
+    </div>
+  </main>
+  <script src="pad.js"></script>
+  <script src="radial.js"></script>
+</body>
+</html>

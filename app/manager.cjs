@@ -36,6 +36,7 @@ class Manager extends EventEmitter {
     try { const c=JSON.parse(await fs.readFile(path.join(this.root,'de-perportal-data/settings.json'),'utf8'));
       if(c && Number.isInteger(c.game) && c.game>=1 && c.game<=6 && c.profiles && typeof c.profiles==='object') this.config=c;
     } catch(e) { if(e.code!=='ENOENT') this.message='Could not read saved settings; using defaults.'; }
+    this.selectedTrap=this.config.trapSelections?.[this.game] ?? null;
     await this.rescan();
   }
   async rescan() {
@@ -79,14 +80,23 @@ class Manager extends EventEmitter {
     const hasArt=this.figures.some(f=>f.art);
     return {game:this.game,detected:!!this.session.game,session:this.session,profile:this.profile,
       active:this.active,sidekick:this.sidekick,accessories:this.accessories,accessorySlots:accessories.slots,observed:this.observed,busy:this.busy,message:this.message,warnings:this.warnings,
-      hasArt,
+      hasArt,vehicleShortcuts:this.vehicleShortcuts(),vehicleKeys:accessories.vehicleKeys,
       figures:this.figures.map(({path:_,uid,art,...f})=>({...f,...(f.info?.kind==='Trap'?{trapLabel:this.config.trapLabels?.[JSON.stringify([f.key,uid,f.id,f.variant])] || null}:{}),accessory:accessories.describe(f,this.game),art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
       root:this.root,elements:model.elements,perks:model.perks,games:model.games};
+  }
+  vehicleShortcuts() {
+    // An assigned vehicle wins; otherwise the first of that type by name.
+    const saved=this.config.profiles[5]?.vehicles || {};
+    return Object.fromEntries(Object.values(accessories.vehicleKeys).map(type=>{
+      const fleet=this.figures.filter(f=>accessories.available(f,5,'vehicle') && accessories.vehicleType(f)===type).sort((a,b)=>a.info.name.localeCompare(b.info.name)||a.key.localeCompare(b.key));
+      const assigned=fleet.find(f=>f.key===saved[type]?.top);
+      return [type,{key:(assigned || fleet[0])?.key || null,assigned:!!assigned}];
+    }));
   }
   publish() { this.emit('state',this.state()); }
   updateSession(s) {
     const next={pid:s.pid,supported:s.supported,focused:s.focused,game:model.detectGame(s.title||''),bounds:s.bounds||null};
-    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.accessories={}; this.labels={}; this.selectedTrap=null; }
+    if(next.pid!==this.session.pid) { this.active=[null,null]; this.sidekick=null; this.accessories={}; this.labels={}; this.selectedTrap=this.config.trapSelections?.[next.game || this.config.game] ?? null; }
     const changed=JSON.stringify(next)!==JSON.stringify(this.session);
     const rowsChanged=JSON.stringify(s.rows||[])!==JSON.stringify(this.observed);
     this.observed=s.rows||[];
@@ -116,7 +126,7 @@ class Manager extends EventEmitter {
     this.busy=true;this.publish();
     try {
       const resets=this.config.trapResets={};
-      this.config.trapLabels={};this.selectedTrap=null;
+      this.config.trapLabels={};this.config.trapSelections={};this.selectedTrap=null;
       for(const f of this.figures.filter(f=>f.info?.kind==='Trap')) {
         try {
           const bytes=await fs.readFile(f.path),current=model.identify(bytes);
@@ -175,6 +185,14 @@ class Manager extends EventEmitter {
       else delete labels[key];
       await this.save(); this.publish(); return;
     }
+    if(target==='vehicle-shortcut') {
+      if(this.game!==5) throw Error('Vehicle shortcuts are available only in SuperChargers.');
+      const type=Object.values(accessories.vehicleKeys).find(t=>t===choice?.type);
+      const f=this.figures.find(f=>f.key===choice?.top);
+      if(!type || !accessories.available(f,this.game,'vehicle') || accessories.vehicleType(f)!==type) throw Error('Choose a vehicle of the matching type.');
+      (this.profile.vehicles ||= {})[type]={top:f.key,bottom:null};
+      await this.save(); this.publish(); return;
+    }
     if(target==='active-favorite' || target==='favorite') {
       if(![0,1].includes(player)) throw Error('Invalid player.');
       const defaults=this.profile.players[player];
@@ -205,7 +223,7 @@ class Manager extends EventEmitter {
     if(this.busy) throw Error('Wait for the current swap.');
     if(this.session.game) throw Error('The running game selects its own profile.');
     if(!Number.isInteger(game)||game<1||game>6) throw Error('Invalid game.');
-    this.config.game=game; this.profile; await this.save(); this.publish();
+    this.config.game=game; this.selectedTrap=this.config.trapSelections?.[game] ?? null; this.profile; await this.save(); this.publish();
   }
   async action(data) {
     if(this.busy) throw Error('A portal swap is already in progress.');
@@ -305,12 +323,18 @@ class Manager extends EventEmitter {
     this.busy=true;this.message=removing?'Removing accessory…':'Activating accessory…';this.publish();
     try {
       if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
-      const output=await this.control(removing?['clear',row]:['load',row,f.path]);
-      const label=typeof output==='string' && output.match(/Row (\d+): .* -> (.*)/);
-      if(label)this.labels[Number(label[1])]=label[2].trim();
+      // Always clear the row first so that replacing an existing accessory works
+      // correctly, matching the behaviour of the player-figure swap logic.
+      await this.control(['clear',row]);
+      delete this.accessories[slot];
       if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
-      if(removing)delete this.accessories[slot];
-      else this.accessories[slot]={top:f.key,bottom:null};
+      if(!removing) {
+        const output=await this.control(['load',row,f.path]);
+        const label=typeof output==='string' && output.match(/Row (\d+): .* -> (.*)/);
+        if(label)this.labels[Number(label[1])]=label[2].trim();
+        if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
+        this.accessories[slot]={top:f.key,bottom:null};
+      }
       this.message=removing?'Accessory removed.':`${f.info.name} is on the portal.`;
     } catch(e) { this.message=`Accessory swap stopped: ${e.message} Check Cemu before retrying.`;throw e; }
   }
@@ -324,6 +348,8 @@ class Manager extends EventEmitter {
           const index=roster.findIndex(f=>f.key===this.selectedTrap);
           const next=index<0?(key==='Down'?0:roster.length-1):(index+(key==='Down'?1:-1)+roster.length)%roster.length;
           const f=roster[next];this.selectedTrap=f.key;
+          this.config.trapSelections??={};this.config.trapSelections[this.game]=f.key;
+          this.save().catch(()=>{});
           this.emit('notification',`${this.trapName(f)} · ${f.info.element} · Alt+Space to lock in`);
           return;
         }
@@ -341,6 +367,17 @@ class Manager extends EventEmitter {
         }
         await this.action({target:'accessory',slot:'trap',choice:{top:f.key,bottom:null}});
         this.emit('notification',`${key==='LockTrap'?'Locked in: ':''}${this.trapName(f)||f.info.name} · ${f.info.element}`);
+      } catch(e) {this.message=e.message;this.publish();this.emit('notification',e.message);}
+      return;
+    }
+    if(this.game===5 && accessories.vehicleKeys[key]) {
+      // The story vehicle is shared, so both players' shortcuts use the same slot.
+      if(this.busy) return;
+      const type=accessories.vehicleKeys[key],f=this.figures.find(f=>f.key===this.vehicleShortcuts()[type].key);
+      try {
+        if(!f) throw Error(`No ${type} vehicle in your NFC library.`);
+        await this.action({target:'accessory',slot:'vehicle',choice:{top:f.key,bottom:null}});
+        this.emit('notification',`${type} vehicle: ${f.info.name}`);
       } catch(e) {this.message=e.message;this.publish();this.emit('notification',e.message);}
       return;
     }
@@ -368,4 +405,4 @@ class Manager extends EventEmitter {
     try { await this.action({player,target}); } catch(e) { this.message=e.message; this.publish(); }
   }
 }
-module.exports={Manager};
+module.exports={Manager,trapKeys};

@@ -12,7 +12,10 @@ const {installArt}=require('../app/artwork.cjs');
  try {await installArt(root,await fs.readFile('out/artwork-pack.zip'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const instance=await electron.launch({args:[path.resolve('.'),'--no-sandbox',...(process.platform==='linux'?['--ozone-platform=x11']:[]),`--user-data-dir=${path.join(root,'electron-data')}`],env:{...process.env,DE_PERPORTAL_HOME:root}});
  try {
-  const page=await instance.firstWindow();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  // The overlay and quick swap windows can load first; wait for the main one.
+  let page;while(!(page=instance.windows().find(w=>w.url().endsWith('/index.html'))))await new Promise(r=>setTimeout(r,100));
+  await page.emulateMedia({reducedMotion:'reduce'}); // floating figures never become "stable" for clicks
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const selectGame=async value=>{await page.selectOption('#game',value);await page.waitForFunction(game=>document.body.dataset.game===game,value);};
   await page.locator('#library-count').filter({hasText:'32 figures'}).waitFor();
   await selectGame('3');
@@ -106,7 +109,7 @@ const {installArt}=require('../app/artwork.cjs');
   await selectGame('3');
   await page.screenshot({path:'out/de-perportal-ui.png',fullPage:true});
   // Per-game artwork and accessory filtering use the actual renderer and model state.
-  for(const [game,src,slots] of [['1','portal.png',1],['2','portal.png',1],['3','portals/swap-force.png',1],['4','portals/trap-team.png',2],['5','portals/superchargers.png',4],['6','portals/swap-force.png',4]]) {
+  for(const [game,src,slots] of [['1','portal.png',1],['2','portal.png',1],['3','portals/swap-force.png',1],['4','portals/trap-team.png',2],['5','portals/superchargers.png',3],['6','portals/swap-force.png',4]]) {
     await selectGame(game);
     assert.equal(await page.locator('.portal').getAttribute('src'),src);
     assert.equal(await page.locator('.accessory-card').count(),slots);
@@ -120,9 +123,10 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('#player-0 .active-card').click();await page.locator('#search').fill('Fire Reactor');
   assert.equal(await page.locator('.picker-item').count(),1);await page.locator('#picker-close').click();
   await selectGame('5');
-  await page.locator('[data-slot="vehicle"] .choose-accessory').click();
-  assert.equal(await page.locator('.picker-item').count(),2);
-  await page.locator('#search').fill('sea');assert.equal(await page.locator('.picker-item').count(),1);
+  // SuperChargers vehicles live in Vehicle shortcuts; each picker lists only its type.
+  await page.locator('#vehicles [data-type="Sea"] .edit').click();
+  assert.equal(await page.locator('.picker-item[data-key="3222-16384.sky"]').count(),1);
+  assert.equal(await page.locator('.picker-item').count(),1);
   await page.locator('#picker-close').click();
   // Save a manual trap name through real IPC, then reload the renderer.
   await selectGame('4');
@@ -143,7 +147,7 @@ const {installArt}=require('../app/artwork.cjs');
   if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
     const fixture=await page.evaluate(()=>window.dePerPortal.state());
     fixture.active=[{top:'16-0.sky',bottom:null},{top:'9-0.sky',bottom:null}];
-    fixture.session={pid:1,supported:true,game:5,focused:false};
+    fixture.game=5;fixture.session={pid:1,supported:true,game:5,focused:false};
     await instance.evaluate(({ipcMain,BrowserWindow},fixture)=>{
       globalThis.uiActions=[];globalThis.uiFixture=fixture;
       const main=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/index.html'));
@@ -159,16 +163,16 @@ const {installArt}=require('../app/artwork.cjs');
     assert.equal(await page.locator('#player-0').getAttribute('data-element'),'Magic');
     assert.equal(await page.locator('#player-1').getAttribute('data-element'),'Fire');
     assert.equal(await page.locator('.element-aura.is-active').count(),2);
-    await page.locator('[data-slot="vehicle"] .choose-accessory').click();
-    await page.locator('.picker-item[data-key="3224-16384.sky"]').click();
-    await page.locator('[data-slot="vehicle"] h3').filter({hasText:'Hot Streak'}).waitFor();
+    await page.locator('#vehicles [data-type="Land"] .element-load').click();
+    await page.locator('#remove-vehicle').filter({hasText:'Remove Hot Streak'}).waitFor();
     assert.equal(await page.locator('#player-0 .active-name').textContent(),'Spyro');
     await page.locator('[data-slot="trap"] .choose-accessory').click();await page.locator('.picker-item').click();
     await page.locator('[data-slot="trap"] h3').filter({hasText:'Water Tiki'}).waitFor();
     await page.screenshot({path:'out/de-perportal-elements-and-items.png',fullPage:true});
-    await page.locator('[data-slot="vehicle"] .remove-accessory').click();
-    await page.locator('[data-slot="vehicle"] h3').filter({hasText:'Nothing placed'}).waitFor();
+    await page.locator('#remove-vehicle').click();
+    await page.locator('#remove-vehicle').waitFor({state:'hidden'});
     assert.deepEqual(await instance.evaluate(()=>globalThis.uiActions.map(a=>[a.target,a.slot])),[['accessory','vehicle'],['accessory','trap'],['remove-accessory','vehicle']]);
+    assert.equal(await instance.evaluate(()=>globalThis.uiActions[0].choice.top),'3224-16384.sky');
     await page.emulateMedia({reducedMotion:'reduce'});
     assert.equal(await page.locator('.aura-one').evaluate(el=>getComputedStyle(el).animationName),'none');
     await page.setViewportSize({width:720,height:900});
