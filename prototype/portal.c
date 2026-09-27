@@ -243,6 +243,21 @@ static int freeze(void) {
     if(marker) CloseHandle(marker);
     return 0;
 }
+/* Bring a Dè PerPortal window in front of fullscreen Cemu. Windows only lets
+   the app that received the last input take focus, and a controller press
+   does not count, so borrow the foreground thread's input state. */
+static int focus_window(const char *arg) {
+    char *end; unsigned long long value=strtoull(arg,&end,10);
+    HWND w=(HWND)(ULONG_PTR)value;
+    if(*end || !IsWindow(w)) fail("Invalid window.");
+    HWND fg=GetForegroundWindow();
+    DWORD fg_thread=fg?GetWindowThreadProcessId(fg,NULL):0,me=GetCurrentThreadId();
+    BOOL attached=fg_thread && fg_thread!=me && AttachThreadInput(me,fg_thread,TRUE);
+    if(IsIconic(w)) ShowWindow(w,SW_RESTORE);
+    BringWindowToTop(w); SetForegroundWindow(w);
+    if(attached) AttachThreadInput(me,fg_thread,FALSE);
+    return GetForegroundWindow()==w?0:1;
+}
 int main(int argc,char **argv) {
     /* Obtain Unicode arguments even when the Windows ANSI code page is not UTF-8. */
     int wide_argc; LPWSTR *wide_argv=CommandLineToArgvW(GetCommandLineW(),&wide_argc);
@@ -257,6 +272,7 @@ int main(int argc,char **argv) {
     LocalFree(wide_argv);
     if(argc==2 && !strcmp(argv[1],"watch")) return watch();
     if(argc==2 && !strcmp(argv[1],"freeze")) return freeze();
+    if(argc==3 && !strcmp(argv[1],"focus")) return focus_window(argv[2]);
     HANDLE mutex=CreateMutexW(NULL,TRUE,L"Local\\DePerPortalProbe");
     if(!mutex || GetLastError()==ERROR_ALREADY_EXISTS) fail("Another portal operation is running.");
     if(argc<2 || (strcmp(argv[1],"inspect") && strcmp(argv[1],"enable") && strcmp(argv[1],"load") && strcmp(argv[1],"clear")))

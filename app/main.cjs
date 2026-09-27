@@ -70,7 +70,12 @@ else {
       child.stdin.on('error',()=>{});
       return ()=>{child.stdin.end();return done;};
     };
-    radial=require('./radial.cjs').createRadial(manager,win,freeze);
+    // Hands the GUI real focus over fullscreen Cemu (Windows only).
+    const raise=()=>new Promise(resolve=>{
+      const command=native(['focus',String(win.getNativeWindowHandle().readBigUInt64LE())]);
+      execFile(command.file,command.args,{windowsHide:true,timeout:5000},()=>resolve());
+    });
+    radial=require('./radial.cjs').createRadial(manager,win,freeze,process.platform==='win32'?raise:null);
     win.on('closed',()=>{overlay.destroy();radial.destroy();});
     manager.on('state',state=>{if(!win.isDestroyed()) win.webContents.send('state',state);});
     for(const [channel,handler] of Object.entries({

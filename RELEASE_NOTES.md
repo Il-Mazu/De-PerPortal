@@ -1,3 +1,13 @@
+# Dè PerPortal 1.1.3
+
+- **Fixed:** holding **L3 + R3** for 5 seconds did not bring up the Dè PerPortal window while Cemu was fullscreen. Windows refuses focus to an app that did not receive the last input, and a controller press does not count. The portal helper now hands the window real focus, and the window stays on top of Cemu until you return to the game.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Taking focus from another window was tested under Wine; fullscreen Cemu on Windows has not been tested yet.
+
+---
+
 # Dè PerPortal 1.1.2
 
 - **Fixed:** automatic updates failed with **Update skipped: ENOENT … chmod …\app.asar**. Electron treats `app.asar` as a folder, so writing the new copy failed. The updater now writes the new files with plain file access.

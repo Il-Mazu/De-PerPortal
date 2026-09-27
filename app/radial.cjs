@@ -25,7 +25,7 @@ function tabs(manager) {
   return list;
 }
 
-function createRadial(manager,mainWindow,freeze) {
+function createRadial(manager,mainWindow,freeze,raise) {
   let open=false,release=null;
   const window=new BrowserWindow({width:size,height:size,show:false,frame:false,transparent:true,resizable:false,movable:false,focusable:false,
     skipTaskbar:true,alwaysOnTop:true,hasShadow:false,
@@ -55,10 +55,11 @@ function createRadial(manager,mainWindow,freeze) {
   function toggleGui() {
     hide();
     if(mainWindow.isFocused() && !mainWindow.isMinimized()) {mainWindow.minimize();return;}
-    // Windows refuses focus to background apps; briefly going topmost lets the
-    // GUI come forward over Cemu.
+    // Windows refuses focus to background apps, and fullscreen Cemu covers any
+    // window that is not in front. Stay topmost until the GUI is left, and let
+    // the helper hand it real focus so the controller can drive it.
     if(mainWindow.isMinimized())mainWindow.restore();
-    mainWindow.show();mainWindow.setAlwaysOnTop(true);mainWindow.focus();mainWindow.setAlwaysOnTop(false);
+    mainWindow.show();mainWindow.setAlwaysOnTop(true);mainWindow.focus();raise?.();
   }
   async function pick({tab,index,alt}) {
     const t=tabs(manager)[tab],item=t?.items?.[index];
@@ -76,6 +77,8 @@ function createRadial(manager,mainWindow,freeze) {
   for(const [channel,handler] of Object.entries(handlers)) ipcMain.handle(channel,(event,arg)=>{verify(event);return handler(arg);});
   manager.on('state',send);
   mainWindow.on('focus',hide);
+  const notOnTop=()=>mainWindow.setAlwaysOnTop(false);
+  mainWindow.on('blur',notOnTop);mainWindow.on('minimize',notOnTop);
   window.loadFile(path.join(__dirname,'ui/radial.html'));
   window.on('closed',()=>{release?.();manager.off('state',send);for(const channel in handlers)ipcMain.removeHandler(channel);});
   return {destroy(){if(!window.isDestroyed())window.destroy();}};
