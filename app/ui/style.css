@@ -21,7 +21,7 @@ body::before{background-size:1400px 700px;opacity:.45;animation:drift 240s linea
 body::after{background-size:2200px 1100px;background-position:400px -260px;opacity:.3;animation:drift 420s linear infinite reverse;mask:linear-gradient(transparent 20%,#000 60%,transparent)}
 @keyframes drift{to{background-position-x:2800px}}
 h1,h2,h3,p{margin:0}
-h1,h2,.brand span{font-family:var(--display);font-weight:400;letter-spacing:.4px;background:linear-gradient(180deg,var(--gilt-hi) 10%,var(--gilt) 55%,#d98d1d 90%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3b1d02) drop-shadow(0 3px 6px #0008)}
+h1,h2{font-family:var(--display);font-weight:400;letter-spacing:.4px;background:linear-gradient(180deg,var(--gilt-hi) 10%,var(--gilt) 55%,#d98d1d 90%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #3b1d02) drop-shadow(0 3px 6px #0008)}
 h1{font-size:34px;line-height:1}h2{font-size:24px}h3{font-family:var(--display);font-weight:400;font-size:18px;color:var(--parchment)}
 kbd{font:800 10.5px/1 Nunito,sans-serif;color:#3b2604;background:linear-gradient(180deg,#fff3c4,#e9b84a);border-radius:5px;padding:3px 6px;box-shadow:0 2px 0 #7a4c0e,inset 0 1px 0 #fff8;white-space:nowrap}
 
@@ -42,8 +42,7 @@ select{font-weight:800;padding-right:30px}option{background:#18215a}
 /* Header */
 .topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px 32px;
   background:linear-gradient(180deg,#0b1034f2,#131a4ed9);border-bottom:2px solid transparent;border-image:var(--rim) 1;box-shadow:0 8px 24px #0006;backdrop-filter:blur(6px)}
-.brand{display:flex;align-items:center;gap:14px}.brand img{display:block;width:112px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 8px #0009)}
-.brand span{font-size:26px}
+.brand img{display:block;height:64px;width:auto;filter:drop-shadow(0 4px 8px #0009)}
 .toolbar{display:flex;align-items:center;gap:10px}.toolbar button{display:flex;align-items:center;gap:9px;height:40px}
 #thump-art{display:none}
 

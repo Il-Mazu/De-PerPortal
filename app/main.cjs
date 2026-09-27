@@ -36,6 +36,9 @@ if(!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance',()=>{if(win){win.restore();win.focus();}});
   app.whenReady().then(async()=>{
+    // Update before anything else starts, so no app file is in use.
+    const updater=require('./updater.cjs'),splash=updater.splash();
+    if(await updater.run(root,splash)) return;
     manager=new Manager(root,async args=>{
       if(process.platform!=='win32' && args[0]==='load') args=[...args.slice(0,2),(await exec('winepath',['-w',args[2]])).stdout.trim()];
       const command=native(args);
@@ -52,7 +55,7 @@ else {
       if(!figure?.art) return new Response('',{status:404});
       return net.fetch(pathToFileURL(figure.art).toString());
     });
-    win=new BrowserWindow({width:1280,height:900,minWidth:980,minHeight:760,backgroundColor:'#0b1016',title:'Dè PerPortal',autoHideMenuBar:true,
+    win=new BrowserWindow({width:1280,height:900,minWidth:980,minHeight:760,backgroundColor:'#0b1016',title:'Dè PerPortal',autoHideMenuBar:true,show:false,icon:path.join(__dirname,'ui/icon.png'),
       webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
     win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
     win.webContents.on('will-navigate',event=>event.preventDefault());
@@ -90,6 +93,7 @@ else {
       return handler(arg);
     });
     await win.loadFile(path.join(__dirname,'ui/index.html'));
+    win.show();splash.destroy();
     const command=native(['watch']);
     watcher=spawn(command.file,command.args,{windowsHide:true,env:{...process.env,WINEDEBUG:'-all'},stdio:['ignore','pipe','pipe']});
     let pending='';
