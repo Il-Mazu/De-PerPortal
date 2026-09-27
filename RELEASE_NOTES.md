@@ -1,3 +1,17 @@
+# Dè PerPortal 0.7.0
+
+- **Fixed:** switching to a different trap (or any accessory) when one is already active now always clears the portal row first before loading the new figure, matching the behaviour of player-figure swaps. Previously the load could be silently ignored in some cases, leaving the old trap in place.
+- **New:** SuperChargers vehicle shortcuts. **Alt+Q / W / E** loads your Sky / Land / Sea vehicle into the shared vehicle slot. Pick which vehicle each shortcut uses in the new **Vehicle shortcuts** section of the GUI; unassigned shortcuts use the first vehicle of that type in your library. The overlay shows the three vehicle shortcuts beside the elements and highlights the active type.
+- **New:** controller quick swap. Hold **L3 + R3** for 2 seconds in game to open a radial menu over Cemu. Point either stick (or use the d-pad) at an element and press **A / ✕** to load that player's element Skylander. **LB/RB (L1/R1)** switch between Player 1, Player 2 and the game's own tab: perk bases in Swap Force (**A / ✕** for Player 1, **X / □** for Player 2), named villains and element traps in Trap Team, and Sky/Land/Sea vehicles in SuperChargers. **B / ○** closes the menu. Button labels follow the controller that opened it (PlayStation or Xbox).
+- **New:** hold **L3 + R3** for 5 seconds to bring up the Dè PerPortal window. The whole window works with a controller: stick or d-pad moves between controls, **A / ✕** selects, **B / ○** closes dialogs, **LB/RB** switch player tabs, and **View / Create** (or another 5-second hold) returns to Cemu.
+- **New:** the villain carousel selection (Alt+↑ / Alt+↓) is now saved per game profile to `settings.json` and restored when the app or Cemu restarts. Resetting trap detections clears the saved position.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Controller input was tested with simulated gamepads only; live Windows play with Xbox and PlayStation controllers and live Trap Team gameplay have not been tested.
+
+---
+
 # Dè PerPortal 0.6.0
 
 - The shortcut overlay now shows a compact key hint beside each element icon: the element number in all games, and **number/letter** in Trap Team, where the number loads that element's Trap Master and the letter selects a trap.

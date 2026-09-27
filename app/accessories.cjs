@@ -11,6 +11,9 @@ const battles=new Set([208,209,304,3302,3303]);
 const effects={200:'Rains anvils on enemies.',201:'Reveals buried treasure.',202:'Restores health.',203:'Summons swords that attack nearby enemies.',204:'Slows surrounding enemies.',205:'Boosts defense.',206:'Boosts movement speed.',207:'Summons Sparx to fight alongside you.',230:'Strikes and stuns enemies.',231:'Adds gold from defeated enemies.',232:'Bombards enemies with rockets.',233:'Strikes enemies with lightning.',3200:'Adds hammer blows to your attacks.',3201:'Rewards diamonds for defeated enemies.',3202:'Provides a healing sheep disguise.',3203:'Distracts enemies with dancing.'};
 const sea=new Set([3222,3231,3237,3238,3239]);
 const sky=new Set([3220,3228,3232,3233,3236,3241]);
+// SuperChargers shortcuts: Alt+Q/W/E load a Sky/Land/Sea vehicle.
+const vehicleKeys={Q:'Sky',W:'Land',E:'Sea'};
+const vehicleType=f=>f?.info?.kind==='Vehicle'?sea.has(f.id)?'Sea':sky.has(f.id)?'Sky':'Land':null;
 function category(f) {
   if(f?.info?.kind==='Item') return 'item';
   return {Trap:'trap',Vehicle:'vehicle',Trophy:'trophy'}[f?.info?.kind] || null;
@@ -23,7 +26,7 @@ function describe(f,game) {
   const slot=category(f),id=f.id;
   let type,effect;
   if(slot==='vehicle') {
-    type=`${sea.has(id)?'Sea':sky.has(id)?'Sky':'Land'} vehicle`;
+    type=`${vehicleType(f)} vehicle`;
     effect=game===5?'Shared by both players in story co-op: one drives, one attacks. Also usable in races.':'Use in Racing mode; vehicles do not enter the story campaign.';
   } else if(slot==='trap') {
     type='Traptanium trap';
@@ -43,4 +46,4 @@ function describe(f,game) {
   }
   return {slot,type,effect};
 }
-module.exports={slots,category,available,describe};
+module.exports={slots,category,available,describe,vehicleKeys,vehicleType};
