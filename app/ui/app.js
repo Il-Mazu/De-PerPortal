@@ -265,6 +265,7 @@ $('trap-name-form').onsubmit=event=>{
 };
 $('search').oninput=renderPicker;
 $('settings').onclick=()=>$('settings-dialog').showModal();
+$('to-game').onclick=()=>perform(()=>api.toGame());
 $('overlay').onclick=()=>perform(()=>api.overlay());
 $('settings-close').onclick=()=>$('settings-dialog').close();
 $('game').onchange=()=>perform(()=>api.game(Number($('game').value)));
@@ -311,10 +312,12 @@ setInterval(()=>{
   const input=readPad(navigator.getGamepads(),performance.now());
   if(!document.hasFocus() || !input.pressed.size)return;
   document.body.classList.add('pad');
+  $('to-game-key').textContent=Pad.labels[input.family].B;
   const pressed=input.pressed,dialog=document.querySelector('dialog[open]');
   for(const direction of ['UP','DOWN','LEFT','RIGHT']) if(pressed.has(direction)) moveFocus(direction);
   if(pressed.has('A')) activate(focusables().includes(document.activeElement)?document.activeElement:null);
-  if(pressed.has('B') && dialog) dialog.close();
+  // B backs out: first out of a dialog, then out of the GUI to the game.
+  if(pressed.has('B')) dialog?dialog.close():perform(()=>api.toGame());
   if(!dialog && (pressed.has('L1') || pressed.has('R1'))) $(`tab-${pressed.has('R1')?1:0}`).click();
   if(pressed.has('VIEW')) perform(()=>api.toGame());
 },33);

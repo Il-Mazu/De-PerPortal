@@ -54,7 +54,7 @@ Shortcuts work while a Skylanders game is running and Cemu has focus. The elemen
 
 Hold **L3 + R3** (press both sticks) for 2 seconds while a Skylanders game runs to open the quick swap dial over Cemu. Point a stick at an element and press **A / ✕** to load that player's element Skylander, just like its keyboard shortcut. **LB / RB (L1 / R1)** switch between Player 1, Player 2 and, in Swap Force, Trap Team and SuperChargers, a tab with that game's perk bases, traps or vehicles. **B / ○** closes the dial.
 
-Keep holding for 5 seconds to bring up the full Dè PerPortal window. Move with the stick or d-pad, select with **A / ✕**, close dialogs with **B / ○**, and return to Cemu with **View / Create** or another 5-second hold. Xbox (XInput, including controllers mapped by Parsec or Steam) and PlayStation controllers are supported; Cemu still receives the controller input while the dial is open.
+Keep holding for 5 seconds to bring up the full Dè PerPortal window. Move with the stick or d-pad, select with **A / ✕**, and go back with **B / ○**: it closes an open dialog, otherwise it returns to Cemu. **Back to game** in the toolbar, **View / Create** and another 5-second hold also return to Cemu. Xbox (XInput, including controllers mapped by Parsec or Steam) and PlayStation controllers are supported; Cemu still receives the controller input while the dial is open.
 
 ## Character selection and presets
 

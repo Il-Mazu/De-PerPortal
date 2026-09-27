@@ -1,3 +1,13 @@
+# Dè PerPortal 0.7.1
+
+- **Fixed:** there was no visible way to leave the GUI with a controller. **B / ○** now returns to Cemu when no dialog is open (it still closes dialogs first), and a new **Back to game** button in the toolbar shows which controller button to press. **View / Create** and the 5-second **L3 + R3** hold still work.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Tested with simulated gamepads; 0.7.0's controller features were confirmed on Windows.
+
+---
+
 # Dè PerPortal 0.7.0
 
 - **Fixed:** switching to a different trap (or any accessory) when one is already active now always clears the portal row first before loading the new figure, matching the behaviour of player-figure swaps. Previously the load could be silently ignored in some cases, leaving the old trap in place.

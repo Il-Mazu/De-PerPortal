@@ -210,3 +210,5 @@ body.busy .stage button,body.busy .element-card button,body.busy .perk-card butt
 @media(max-width:760px){.topbar{flex-wrap:wrap;padding:12px 16px}.toolbar{flex-wrap:wrap}.toolbar kbd{display:none}main{padding:18px 16px 0}.stage{height:700px}.favorite{top:420px;width:46%}.portal{bottom:340px;max-width:100%}.portal-light,.motes{bottom:490px}.element-aura{bottom:480px}.accessories{grid-template-columns:1fr}.gamebar>div{flex-wrap:wrap}.tag{display:none}.accessory-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.element-footnote{flex-direction:column;gap:4px}}
 /* Controller navigation: always show where focus is. */
 body.pad :focus{outline:3px solid var(--gilt-hi);outline-offset:3px;box-shadow:0 0 18px var(--gilt)}
+/* The pad button hint only matters while a controller is in use. */
+body:not(.pad) #to-game-key{display:none}
