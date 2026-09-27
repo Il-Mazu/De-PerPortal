@@ -1,10 +1,13 @@
 'use strict';
 // Gamepad reader shared by the main window and the radial menu. Uses the
 // W3C "standard" button layout, which Chromium applies to XInput pads and to
-// DualShock/DualSense over USB or Bluetooth.
-// ponytail: pads without a standard mapping may report other button indices.
+// DualShock/DualSense over USB or Bluetooth. Pads Chromium cannot map, such
+// as the virtual Xbox pad Parsec gives a remote player, report raw HID order,
+// where the stick clicks are buttons 8 and 9.
+// ponytail: raw pads get no d-pad (it is a hat axis); the stick covers it.
 const Pad=(()=>{
   const buttons={A:0,B:1,X:2,Y:3,L1:4,R1:5,VIEW:8,START:9,L3:10,R3:11,UP:12,DOWN:13,LEFT:14,RIGHT:15};
+  const raw={A:0,B:1,X:2,Y:3,L1:4,R1:5,VIEW:6,START:7,L3:8,R3:9};
   const directions=['UP','DOWN','LEFT','RIGHT'];
   const family=id=>/054c|sony|dualsense|dualshock|playstation|wireless controller/i.test(id)?'ps':'xbox';
   const labels={
@@ -23,7 +26,7 @@ const Pad=(()=>{
       for(const pad of pads) {
         if(!pad)continue;
         const was=last.get(pad.index) || {down:{},repeat:{}},down={};
-        for(const [name,i] of Object.entries(buttons)) down[name]=!!pad.buttons[i]?.pressed;
+        for(const [name,i] of Object.entries(pad.mapping==='standard'?buttons:raw)) down[name]=!!pad.buttons[i]?.pressed;
         const [lx=0,ly=0,rx=0,ry=0]=pad.axes;
         if(stickAsDpad) {
           if(ly<-.6)down.UP=true; if(ly>.6)down.DOWN=true;

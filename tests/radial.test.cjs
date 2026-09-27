@@ -30,12 +30,14 @@ test('radial tabs follow each game and map to the keyboard shortcuts',()=>{
 });
 
 test('pad reader reports new presses, the stick combo and the controller family',()=>{
-  const pad=(pressed,axes=[0,0,0,0],id='Xbox 360 Controller (XInput STANDARD GAMEPAD)')=>({index:0,id,axes,buttons:Array.from({length:17},(_,i)=>({pressed:pressed.includes(i)}))});
+  const pad=(pressed,axes=[0,0,0,0],id='Xbox 360 Controller (XInput STANDARD GAMEPAD)')=>({index:0,id,mapping:'standard',axes,buttons:Array.from({length:17},(_,i)=>({pressed:pressed.includes(i)}))});
   const read=Pad.reader({stickAsDpad:true});
   assert.deepEqual([...read([pad([0])],0).pressed],['A']);
   assert.equal(read([pad([0])],10).pressed.size,0,'held buttons do not repeat');
   const combo=read([pad([10,11],undefined,'DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)')],20);
   assert.equal(combo.combo,true);assert.equal(combo.family,'ps');
+  const parsec={index:1,id:'Xbox One Controller',mapping:'',axes:[0,0,0,0],buttons:Array.from({length:12},(_,i)=>({pressed:i===8 || i===9}))};
+  assert.equal(Pad.reader()([parsec],25).combo,true,'unmapped pads click the sticks on 8 and 9');
   assert.ok(read([pad([],[0,1,0,0])],30).pressed.has('DOWN'));
   assert.equal(read([pad([],[0,1,0,0])],100).pressed.size,0);
   assert.ok(read([pad([],[0,1,0,0])],500).pressed.has('DOWN'),'stick repeats while held');

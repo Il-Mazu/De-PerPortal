@@ -9,4 +9,4 @@
 
 ## Project logo
 
-`app/ui/logo.png` (header, splash screen and README) and `app/ui/icon.png` (window and executable icon) are the Dè PerPortal logo supplied by the maintainer, with the white background removed. It is built on the Skylanders wordmark and elemental emblems, which belong to Activision and are not covered by the code license.
+`app/ui/logo.png` (header, splash screen and README) and `app/ui/icon.png` (window and executable icon) are the Dè PerPortal logo supplied by the maintainer, with the black background removed. It is built on the Skylanders wordmark and elemental emblems, which belong to Activision and are not covered by the code license.

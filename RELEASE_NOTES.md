@@ -1,3 +1,14 @@
+# Dè PerPortal 1.1.4
+
+- **Fixed:** holding **L3 + R3** did nothing on controllers the system can't map to the standard layout, such as the virtual Xbox pad Parsec creates for a remote player. Those controllers number their buttons differently, and the stick clicks are now read from the right buttons.
+- **Changed:** the header, splash screen, README and app icon use the corrected Dè PerPortal logo.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. The button layout for unmapped controllers is covered by a unit test; L3 + R3 through Parsec has not been tested on Windows yet.
+
+---
+
 # Dè PerPortal 1.1.3
 
 - **Fixed:** holding **L3 + R3** for 5 seconds did not bring up the Dè PerPortal window while Cemu was fullscreen. Windows refuses focus to an app that did not receive the last input, and a controller press does not count. The portal helper now hands the window real focus, and the window stays on top of Cemu until you return to the game.
