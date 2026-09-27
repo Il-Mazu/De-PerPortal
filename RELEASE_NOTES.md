@@ -1,3 +1,14 @@
+# Dè PerPortal 1.1.2
+
+- **Fixed:** automatic updates failed with **Update skipped: ENOENT … chmod …\app.asar**. Electron treats `app.asar` as a folder, so writing the new copy failed. The updater now writes the new files with plain file access.
+- **Note:** 1.1.1 and older can't install this fix automatically. Download **De-PerPortal-1.1.2-windows-x64.zip** and extract it over your install once; later updates will install automatically.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. The failure and the fix were reproduced with Electron by extracting a package containing `app.asar`. A full update on Windows has not yet been tested.
+
+---
+
 # Dè PerPortal 1.1.1
 
 - **Fixed:** Dè PerPortal could show **Unsupported Cemu** and keep **Launch Cemu** disabled after Cemu closed. Any window whose title started with "Cemu" (such as an Explorer folder or a browser tab) was treated as Cemu. Only a running program whose executable name starts with "Cemu" counts now, and a second Cemu no longer marks the first one unsupported until it restarts.
