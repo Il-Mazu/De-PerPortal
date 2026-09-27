@@ -75,8 +75,11 @@ async function run(root,window) {
     if(actual!==expected) throw Error('The download was damaged. Try again later.');
     status(`Installing version ${version}…`,1);
     const staging=path.join(root,'de-perportal-data','update');
-    await fs.rm(staging,{recursive:true,force:true});
-    new (require('adm-zip'))(file).extractAllTo(staging,true);
+    // Electron's fs treats app.asar as a folder, so writing the new one fails;
+    // original-fs is plain Node fs.
+    const rawFs=require('original-fs');
+    await rawFs.promises.rm(staging,{recursive:true,force:true});
+    new (require('adm-zip'))(file,{fs:rawFs}).extractAllTo(staging,true);
     await fs.rm(file,{force:true});
     const exe=path.basename(process.execPath);
     await fs.access(path.join(staging,exe)).catch(()=>{throw Error('The new package has an unexpected layout.');});
