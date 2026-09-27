@@ -58,7 +58,16 @@ else {
     win.webContents.on('will-navigate',event=>event.preventDefault());
     win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));
     overlay=require('./overlay.cjs').createOverlay(manager,win);
-    radial=require('./radial.cjs').createRadial(manager,win);
+    // Freezes Cemu while the quick swap dial is open. Detached so the helper
+    // outlives a crashed app and resumes Cemu when its stdin closes.
+    const freeze=()=>{
+      const command=native(['freeze']);
+      const child=spawn(command.file,command.args,{windowsHide:true,detached:true,env:{...process.env,WINEDEBUG:'-all'},stdio:['pipe','ignore','ignore']});
+      const done=new Promise(resolve=>{child.on('exit',resolve);child.on('error',resolve);});
+      child.stdin.on('error',()=>{});
+      return ()=>{child.stdin.end();return done;};
+    };
+    radial=require('./radial.cjs').createRadial(manager,win,freeze);
     win.on('closed',()=>{overlay.destroy();radial.destroy();});
     manager.on('state',state=>{if(!win.isDestroyed()) win.webContents.send('state',state);});
     for(const [channel,handler] of Object.entries({

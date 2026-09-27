@@ -25,8 +25,8 @@ function tabs(manager) {
   return list;
 }
 
-function createRadial(manager,mainWindow) {
-  let open=false;
+function createRadial(manager,mainWindow,freeze) {
+  let open=false,release=null;
   const window=new BrowserWindow({width:size,height:size,show:false,frame:false,transparent:true,resizable:false,movable:false,focusable:false,
     skipTaskbar:true,alwaysOnTop:true,hasShadow:false,
     // Stays loaded while hidden so it can watch for the L3+R3 hold.
@@ -44,11 +44,13 @@ function createRadial(manager,mainWindow) {
     const area=screen.getDisplayMatching(reference).workArea;
     const cx=Math.max(area.x,Math.min(reference.x+reference.width/2,area.x+area.width)),cy=Math.max(area.y,Math.min(reference.y+reference.height/2,area.y+area.height));
     window.setBounds({x:Math.round(cx-size/2),y:Math.round(cy-size/2),width:size,height:size});
-    open=true;send();window.showInactive();
+    open=true;release=freeze?.();send();window.showInactive();
   }
+  // Resolves once Cemu is running again, so portal swaps can reach it.
   function hide() {
-    if(!open)return;
-    open=false;window.hide();window.webContents.send('radial-state',{open:false});
+    const resumed=release?.();release=null;
+    if(open) {open=false;window.hide();window.webContents.send('radial-state',{open:false});}
+    return resumed;
   }
   function toggleGui() {
     hide();
@@ -61,7 +63,7 @@ function createRadial(manager,mainWindow) {
   async function pick({tab,index,alt}) {
     const t=tabs(manager)[tab],item=t?.items?.[index];
     if(!item)return;
-    hide();
+    await hide();
     if(item.villain)manager.selectedTrap=item.villain;
     await manager.hotkey({...item.hotkey,...(t.twoPlayer?{player:alt?1:0}:{})});
   }
@@ -75,7 +77,7 @@ function createRadial(manager,mainWindow) {
   manager.on('state',send);
   mainWindow.on('focus',hide);
   window.loadFile(path.join(__dirname,'ui/radial.html'));
-  window.on('closed',()=>{manager.off('state',send);for(const channel in handlers)ipcMain.removeHandler(channel);});
+  window.on('closed',()=>{release?.();manager.off('state',send);for(const channel in handlers)ipcMain.removeHandler(channel);});
   return {destroy(){if(!window.isDestroyed())window.destroy();}};
 }
 module.exports={createRadial,tabs};

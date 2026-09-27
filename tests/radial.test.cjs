@@ -39,6 +39,10 @@ test('pad reader reports new presses, the stick combo and the controller family'
   assert.ok(read([pad([],[0,1,0,0])],30).pressed.has('DOWN'));
   assert.equal(read([pad([],[0,1,0,0])],100).pressed.size,0);
   assert.ok(read([pad([],[0,1,0,0])],500).pressed.has('DOWN'),'stick repeats while held');
+  // The dial waits for idle before acting, so frozen Cemu never sees the press.
+  assert.equal(read([pad([0])],600).idle,false);
+  assert.equal(read([pad([],[.2,0,0,.8])],610).idle,false,'a pushed stick is not idle');
+  assert.equal(read([pad([],[.1,.1,0,0])],620).idle,true);
   assert.equal(Pad.sector([0,-1],10),0);assert.equal(Pad.sector([1,0],10),3);
   assert.equal(Pad.sector([0,1],10),5);assert.equal(Pad.sector([-.1,-1],10),0);
 });

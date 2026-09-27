@@ -3,7 +3,7 @@ const colors={Magic:'#b76cf2',Water:'#3fa9f5',Tech:'#f5a524',Fire:'#ff6a3d',Eart
 const vehicles={Sky:'M12 3v18 M3 13l9-4 9 4 M8 20l4-2 4 2',Land:'M5 8l2-4h10l2 4 M3 8h18v9H3z M5 17v3 M19 17v3 M6 12h2 M16 12h2',Sea:'M3 13h18l-3 5H6z M12 3v10 M12 4l6 7h-6 M2 21c2-1 3-1 5 0s3 1 5 0 3-1 5 0 3 1 5 0'};
 const $=id=>document.getElementById(id);
 const read=Pad.reader();
-let state={open:false},tab=0,index=0,holdStart=null,stage=0,family='xbox';
+let state={open:false},tab=0,index=0,holdStart=null,stage=0,family='xbox',pending=null;
 
 function coin(item,i,count) {
   const el=document.createElement('div');
@@ -59,7 +59,10 @@ function poll() {
     return;
   }
   if(holdStart!==null) {holdStart=null;stage=0;setHold(0);}
-  if(!state.open)return;
+  if(!state.open) {pending=null;return;}
+  // Cemu is frozen while the dial is open. Act only once every button and
+  // stick is released, so the game never sees the confirming press.
+  if(pending) {if(input.idle){pending();pending=null;}return;}
   const t=state.tabs[tab],count=t.items.length,pressed=input.pressed;
   let next=index;
   if(input.stick) next=Pad.sector(input.stick,count);
@@ -67,9 +70,10 @@ function poll() {
   if(pressed.has('LEFT') || pressed.has('UP')) next=(index-1+count)%count;
   if(pressed.has('R1') || pressed.has('L1')) {tab=(tab+(pressed.has('R1')?1:-1)+state.tabs.length)%state.tabs.length;next=0;}
   if(next!==index || pressed.has('R1') || pressed.has('L1')) {index=next;render();}
-  if(pressed.has('A')) window.radial.pick({tab,index,alt:false});
-  else if(pressed.has('X') && t.twoPlayer) window.radial.pick({tab,index,alt:true});
-  else if(pressed.has('B')) window.radial.close();
+  const choice={tab,index};
+  if(pressed.has('A')) pending=()=>window.radial.pick({...choice,alt:false});
+  else if(pressed.has('X') && t.twoPlayer) pending=()=>window.radial.pick({...choice,alt:true});
+  else if(pressed.has('B')) pending=()=>window.radial.close();
 }
 window.radial.onState(next=>{state=next;render();});
 setInterval(poll,33);

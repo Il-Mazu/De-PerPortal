@@ -18,7 +18,7 @@ const Pad=(()=>{
     const last=new Map();
     let lastFamily='xbox';
     return (pads,now)=>{
-      const out={pressed:new Set(),combo:false,stick:null,family:lastFamily};
+      const out={pressed:new Set(),combo:false,stick:null,idle:true,family:lastFamily};
       let strongest=.5;
       for(const pad of pads) {
         if(!pad)continue;
@@ -34,6 +34,7 @@ const Pad=(()=>{
           if(!was.down[name]) {out.pressed.add(name);was.repeat[name]=now+400;lastFamily=family(pad.id);}
           else if(directions.includes(name) && now>=was.repeat[name]) {out.pressed.add(name);was.repeat[name]=now+140;}
         }
+        if(Object.values(down).some(Boolean) || Math.hypot(lx,ly)>.3 || Math.hypot(rx,ry)>.3) out.idle=false;
         if(down.L3 && down.R3) {out.combo=true;lastFamily=family(pad.id);}
         for(const [x,y] of [[lx,ly],[rx,ry]]) if(Math.hypot(x,y)>strongest) {strongest=Math.hypot(x,y);out.stick=[x,y];}
         last.set(pad.index,{down,repeat:was.repeat});
