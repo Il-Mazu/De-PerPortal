@@ -113,6 +113,11 @@ function draw() {
   }
   $('vehicles-section').hidden=state.game!==5;
   if(state.game===5) {
+    // The story vehicle slot is shared, so one button clears Sky, Land or Sea.
+    const onPortal=chosen(state.accessories.vehicle),observed=state.observed?.[7];
+    $('remove-vehicle').hidden=!onPortal && (!observed || observed==='None');
+    $('remove-vehicle').textContent=`Remove ${onPortal?name(onPortal):observed || 'vehicle'}`;
+    $('remove-vehicle').disabled=state.busy;
     $('vehicles').innerHTML=Object.entries(state.vehicleKeys).map(([key,type])=>{
       const shortcut=state.vehicleShortcuts[type],f=figure(shortcut.key);
       return `<div class="element-card" data-type="${type}"><button class="element-load" title="${f?`Load ${e(name(f))}`:`Choose a ${type} vehicle`}"><span class="element-label">${type}</span><div class="portrait">${portrait(f,accessoryIcon(type))}</div><span class="name">${e(f?name(f):'No vehicle')}</span></button><span class="slot-key">${key}${f && !shortcut.assigned?' · first found':''}</span><button class="edit" aria-label="Change ${type} vehicle">Edit</button></div>`;
@@ -273,6 +278,7 @@ $('download-art').onclick=()=>perform(async()=>{const b=$('download-art');b.disa
 $('art-banner-btn').onclick=()=>perform(async()=>{$('art-banner-btn').disabled=true;$('art-banner-btn').textContent='Downloading…';try{await api.artwork();$('art-banner').hidden=true;}catch(err){$('art-banner-btn').disabled=false;$('art-banner-btn').textContent='Download art · ~50 MB';throw err;}});
 $('art-banner-dismiss').onclick=()=>{artBannerDismissed=true;$('art-banner').hidden=true;};
 $('thumpback').onclick=()=>perform(()=>api.action({player:0,target:'thumpback'}));
+$('remove-vehicle').onclick=()=>perform(()=>api.action({target:'remove-accessory',slot:'vehicle'}));
 $('thumpling').onclick=()=>perform(()=>api.action({target:'thumpling'}));
 for(let p=0;p<2;p++) $(`tab-${p}`).onclick=()=>{player=p;render();};
 // Controller: stick/d-pad moves focus to the nearest control in that
