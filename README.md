@@ -6,8 +6,6 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 
 [Download for Windows](https://github.com/Il-Mazu/De-PerPortal/releases/latest)
 
-![Skylanders SuperChargers artwork](docs/assets/skylanders-banner.jpg)
-
 ## Features
 
 - Separate character assignments and profiles for two players.
