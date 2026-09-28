@@ -21,8 +21,6 @@ function checksum(sums,name) {
   }
   return null;
 }
-// Single-quoted PowerShell literal.
-const ps=s=>`'${String(s).replace(/'/g,"''")}'`;
 
 function splash() {
   const window=new BrowserWindow({width:640,height:440,frame:false,resizable:false,show:false,center:true,backgroundColor:'#0c1238',
@@ -59,6 +57,9 @@ async function run(root,window) {
   const shown=new Promise(resolve=>setTimeout(resolve,1200));
   // Only the packaged Windows app replaces itself; development builds just start.
   if(!app.isPackaged || process.platform!=='win32' || process.env.DE_PERPORTAL_NO_UPDATE) {status('Starting…');await shown;return false;}
+  const staging=path.join(root,'de-perportal-data','update');
+  // Leftover from the last install; the installer may still be exiting, so best effort.
+  await require('original-fs').promises.rm(staging,{recursive:true,force:true}).catch(()=>{});
   try {
     status('Checking for updates…');
     const timeout=new Promise((_,reject)=>setTimeout(()=>reject(Error('GitHub did not answer.')),6000));
@@ -74,7 +75,6 @@ async function run(root,window) {
     const actual=await download(zip.browser_download_url,file,p=>status(`Downloading version ${version}… ${Math.round(p*100)}%`,p));
     if(actual!==expected) throw Error('The download was damaged. Try again later.');
     status(`Installing version ${version}…`,1);
-    const staging=path.join(root,'de-perportal-data','update');
     // Electron's fs treats app.asar as a folder, so writing the new one fails;
     // original-fs is plain Node fs.
     const rawFs=require('original-fs');
@@ -83,23 +83,10 @@ async function run(root,window) {
     await fs.rm(file,{force:true});
     const exe=path.basename(process.execPath);
     await fs.access(path.join(staging,exe)).catch(()=>{throw Error('The new package has an unexpected layout.');});
-    // A running exe cannot overwrite itself: PowerShell waits for this app to
-    // exit, copies the new files over it and starts it again. NFC and
-    // de-perportal-data are not part of the package, so they stay as they are.
-    // ponytail: a copy that fails halfway leaves mixed versions; re-download the ZIP if that happens.
-    // A plain .ps1 (not -EncodedCommand, which antivirus flags) that logs to update.log.
-    const data=path.join(root,'de-perportal-data'),script=path.join(data,'update.ps1');
-    await fs.writeFile(script,'﻿'+[
-      `Start-Transcript -LiteralPath ${ps(path.join(data,'update.log'))} -Force`,
-      `Wait-Process -Id ${process.pid} -ErrorAction SilentlyContinue`,
-      `robocopy ${ps(staging)} ${ps(root)} /E /R:20 /W:1 /NFL /NDL /NJH /NJS`,
-      `"robocopy exit code $LASTEXITCODE"`,
-      `if($LASTEXITCODE -lt 8){Remove-Item -LiteralPath ${ps(staging)} -Recurse -Force}`,
-      `Start-Process -FilePath ${ps(path.join(root,exe))}`,
-      `Stop-Transcript`
-    ].join('\r\n'));
-    spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File',script],
-      {detached:true,stdio:'ignore',windowsHide:true}).unref();
+    // A running exe cannot overwrite itself, so the new version installs
+    // itself: it waits for this app to exit, copies its files over it and
+    // starts it (see finish). No script host, which antivirus flags.
+    spawn(path.join(staging,exe),['--finish-update',String(process.pid),root],{detached:true,stdio:'ignore'}).unref();
     status(`Restarting with version ${version}…`,1);
     setTimeout(()=>app.quit(),600);
     return true;
@@ -110,4 +97,28 @@ async function run(root,window) {
     return false;
   }
 }
-module.exports={splash,run,newer,checksum};
+// Copies the staged package over the install once the old app (pid) is gone.
+// NFC and de-perportal-data are not in the package, so they stay as they are.
+// ponytail: a copy that fails halfway leaves mixed versions; re-download the ZIP if that happens.
+async function install(staging,root,pid,rawFs=require('original-fs')) {
+  const alive=()=>{try{process.kill(pid,0);return true;}catch{return false;}};
+  for(let i=0;i<60 && alive();i++) await new Promise(r=>setTimeout(r,500));
+  // The old app's helper processes can hold files for a moment after it exits.
+  for(let i=1;;i++) {
+    try {await rawFs.promises.cp(staging,root,{recursive:true,force:true});return;}
+    catch(e) {if(i>=20) throw e;await new Promise(r=>setTimeout(r,1000));}
+  }
+}
+// In the new version started from the staging folder with
+// --finish-update <pid> <root>: install, log the outcome, start the app.
+function finish() {
+  const i=process.argv.indexOf('--finish-update');
+  if(i<0) return false;
+  const pid=Number(process.argv[i+1]),root=process.argv[i+2],staging=path.dirname(process.execPath);
+  const log=text=>fs.appendFile(path.join(root,'de-perportal-data','update.log'),`${new Date().toISOString()} ${text}\r\n`).catch(()=>{});
+  install(staging,root,pid)
+    .then(()=>log(`Installed ${app.getVersion()}.`),e=>log(`Install of ${app.getVersion()} failed: ${e.message}`))
+    .then(()=>{spawn(path.join(root,path.basename(process.execPath)),[],{detached:true,stdio:'ignore'}).unref();app.exit(0);});
+  return true;
+}
+module.exports={splash,run,finish,install,newer,checksum};

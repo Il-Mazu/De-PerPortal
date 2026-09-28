@@ -32,7 +32,9 @@ async function watchLibrary(root,onChange) {
 // to the focused app. XInput and raw HID keep working while Cemu has focus.
 app.commandLine.appendSwitch('disable-features','EnableWindowsGamingInputDataFetcher');
 protocol.registerSchemesAsPrivileged([{scheme:'art',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
-if(!app.requestSingleInstanceLock()) app.quit();
+// A freshly downloaded version installing itself: nothing else may start.
+if(require('./updater.cjs').finish()) {}
+else if(!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance',()=>{if(win){win.restore();win.focus();}});
   app.whenReady().then(async()=>{
