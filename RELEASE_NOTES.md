@@ -1,3 +1,14 @@
+# Dè PerPortal 1.2.0
+
+- **Changed:** automatic updates no longer run a PowerShell script, which antivirus software can flag as suspicious. The downloaded version now installs itself: it waits for the old app to close, copies its files over it and starts again. The result is written to `de-perportal-data\update.log`.
+- **Note:** 1.1.5 installs this release with its old updater; updates after 1.2.0 use the new way. 1.1.4 and older can't update automatically: download **De-PerPortal-1.2.0-windows-x64.zip** and extract it over your install once.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. Waiting for the old app and copying the new files is covered by a unit test, and the install step was run end to end with Electron on Linux; a full update on Windows has not been tested yet.
+
+---
+
 # Dè PerPortal 1.1.5
 
 - **Fixed:** an automatic update could download and unpack the new version, close with "Restarting…", and never come back, so the next start downloaded the same update again. The step that copies the new files and restarts the app now runs as a script file instead of a hidden encoded PowerShell command, which antivirus software tends to block, and writes what it did to `de-perportal-data\update.log`.
