@@ -1,3 +1,14 @@
+# Dè PerPortal 1.1.5
+
+- **Fixed:** an automatic update could download and unpack the new version, close with "Restarting…", and never come back, so the next start downloaded the same update again. The step that copies the new files and restarts the app now runs as a script file instead of a hidden encoded PowerShell command, which antivirus software tends to block, and writes what it did to `de-perportal-data\update.log`.
+- **Note:** 1.1.4 and older can't install this fix automatically. Download **De-PerPortal-1.1.5-windows-x64.zip** and extract it over your install once; later updates will install automatically.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. The new restart step has not yet been tested on Windows; if an update still fails, `de-perportal-data\update.log` shows why.
+
+---
+
 # Dè PerPortal 1.1.4
 
 - **Fixed:** holding **L3 + R3** did nothing on controllers the system can't map to the standard layout, such as the virtual Xbox pad Parsec creates for a remote player. Those controllers number their buttons differently, and the stick clicks are now read from the right buttons.

@@ -87,13 +87,18 @@ async function run(root,window) {
     // exit, copies the new files over it and starts it again. NFC and
     // de-perportal-data are not part of the package, so they stay as they are.
     // ponytail: a copy that fails halfway leaves mixed versions; re-download the ZIP if that happens.
-    const script=[
+    // A plain .ps1 (not -EncodedCommand, which antivirus flags) that logs to update.log.
+    const data=path.join(root,'de-perportal-data'),script=path.join(data,'update.ps1');
+    await fs.writeFile(script,'﻿'+[
+      `Start-Transcript -LiteralPath ${ps(path.join(data,'update.log'))} -Force`,
       `Wait-Process -Id ${process.pid} -ErrorAction SilentlyContinue`,
-      `robocopy ${ps(staging)} ${ps(root)} /E /R:20 /W:1 /NFL /NDL /NJH /NJS | Out-Null`,
+      `robocopy ${ps(staging)} ${ps(root)} /E /R:20 /W:1 /NFL /NDL /NJH /NJS`,
+      `"robocopy exit code $LASTEXITCODE"`,
       `if($LASTEXITCODE -lt 8){Remove-Item -LiteralPath ${ps(staging)} -Recurse -Force}`,
-      `Start-Process -FilePath ${ps(path.join(root,exe))}`
-    ].join('\n');
-    spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-EncodedCommand',Buffer.from(script,'utf16le').toString('base64')],
+      `Start-Process -FilePath ${ps(path.join(root,exe))}`,
+      `Stop-Transcript`
+    ].join('\r\n'));
+    spawn('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-WindowStyle','Hidden','-File',script],
       {detached:true,stdio:'ignore',windowsHide:true}).unref();
     status(`Restarting with version ${version}…`,1);
     setTimeout(()=>app.quit(),600);
