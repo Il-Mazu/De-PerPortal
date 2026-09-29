@@ -183,6 +183,27 @@ const {installArt}=require('../app/artwork.cjs');
     await page.setViewportSize({width:720,height:900});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     await page.screenshot({path:'out/de-perportal-compact.png',fullPage:true});
+    // Themes: Dè FishBet spins a random Skylander, and the choice survives a reload.
+    await page.setViewportSize({width:1280,height:900});
+    // Match the game (second slide) follows the current game.
+    await page.locator('#theme').click();await page.locator('#theme-next').click();await page.locator('#theme-apply').click();
+    assert.equal(await page.locator('body').getAttribute('data-theme'),'superchargers');
+    assert.equal(await page.locator('body').evaluate(b=>b.classList.contains('skin')),true);
+    assert.equal(await page.locator('.topbar').evaluate(el=>getComputedStyle(el,'::after').backgroundImage.startsWith('conic-gradient')),true);
+    // The carousel opens on the theme in use; Dè FishBet is the last slide.
+    await page.locator('#theme').click();await page.locator('#theme-prev').click();await page.locator('#theme-prev').click();await page.locator('#theme-apply').click();
+    assert.equal(await page.locator('body').getAttribute('data-theme'),'fishbet');
+    assert.equal(await page.locator('body').evaluate(b=>b.classList.contains('skin')),false);
+    await page.locator('#spin-1').click();
+    while(!(await instance.evaluate(()=>globalThis.uiActions.at(-1).target==='direct')))await new Promise(r=>setTimeout(r,50));
+    assert.equal(await instance.evaluate(()=>globalThis.uiActions.at(-1).player),1);
+    await page.screenshot({path:'out/de-perportal-fishbet.png',fullPage:true});
+    await page.setViewportSize({width:720,height:900});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await page.reload();
+    assert.equal(await page.locator('body').getAttribute('data-theme'),'fishbet');
+    await page.evaluate(()=>localStorage.removeItem('theme'));await page.reload();
+    assert.equal(await page.locator('body').getAttribute('data-theme'),'default');
   }
   if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
     const bytes=Buffer.from((await fs.readFile(path.join(__dirname,'fixtures/life-trap.hex'),'utf8')).trim(),'hex');

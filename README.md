@@ -16,6 +16,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - A zoomable Skylander list: Activision's character poster for each game.
 - Items, traps, vehicles, trophies, and Creation Crystals for supported games.
 - Nested NFC folders and optional community character artwork.
+- Themes: one for each Skylanders game (or one that follows the game), plus Dè perThumpback, Dè Cell to Singularity, Dè PerMCdonald, Dè perDoomScroll and Dè FishBet.
 
 ## Download and setup
 

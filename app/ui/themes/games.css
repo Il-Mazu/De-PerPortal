@@ -1,0 +1,395 @@
+/* One theme per Skylanders game. The shared rules below paint every surface
+   from a handful of variables; each game then sets those variables and adds
+   the one thing that makes it recognisable. */
+@font-face{font-family:'IM Fell English';src:url(../fonts/im-fell-english.woff2) format('woff2');font-display:block}
+@font-face{font-family:Bungee;src:url(../fonts/bungee.woff2) format('woff2');font-display:block}
+@font-face{font-family:'Luckiest Guy';src:url(../fonts/luckiest-guy.woff2) format('woff2');font-display:block}
+@font-face{font-family:'Black Ops One';src:url(../fonts/black-ops-one.woff2) format('woff2');font-display:block}
+@font-face{font-family:'Racing Sans One';src:url(../fonts/racing-sans-one.woff2) format('woff2');font-display:block}
+@font-face{font-family:Montserrat;src:url(../fonts/montserrat.woff2) format('woff2');font-weight:500 900;font-display:block}
+@font-face{font-family:'Pirata One';src:url(../fonts/pirata-one.woff2) format('woff2');font-display:block}
+@font-face{font-family:Poppins;src:url(../fonts/poppins-800.woff2) format('woff2');font-weight:800;font-display:block}
+@font-face{font-family:'TikTok Sans';src:url(../fonts/tiktok-sans.woff2) format('woff2');font-weight:400 900;font-display:block}
+@font-face{font-family:'Permanent Marker';src:url(../fonts/permanent-marker.woff2) format('woff2');font-display:block}
+
+/* Shared skin ---------------------------------------------------------- */
+.skin{--radius:12px;--heading:var(--gilt);--heading-shadow:0 2px 0 #0008;--display-size:1;
+  --panel-text:var(--text);--panel-muted:var(--muted);--panel-strong:#fff;--el-base:#fff;
+  --btn-text:var(--text);--cta-text:#1a1000;--key-text:#1a1000;--focus:var(--gilt-hi);--rule:var(--gilt);
+  color:var(--text);background:var(--bg)}
+.skin *{scrollbar-color:var(--gilt) var(--night)}
+.skin::before{background:var(--bg-layer,none);mix-blend-mode:normal;opacity:1;animation:none;mask:none}
+.skin::after{display:none}
+.skin :is(h1,h2,h3){font-family:var(--display);background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--heading);filter:none;text-shadow:var(--heading-shadow)}
+.skin h1{font-size:calc(34px * var(--display-size))}.skin h2{font-size:calc(24px * var(--display-size))}
+.skin :is(.primary,#launch,.player-label,.active-name,.element-label,.favorite .name,.sidekick .name,.picker-item>span,.villain-card span,.gamebar label,.theme-slide strong,.dialog-heading h2){font-family:var(--display)}
+.skin :focus-visible,.skin.pad :focus{outline-color:var(--focus)}
+.skin .topbar{background:var(--bar);border-image:none;border-bottom:var(--bar-edge)}
+:where(.skin) button{color:var(--btn-text);border-radius:var(--radius);background:var(--btn);box-shadow:var(--btn-shadow)}
+.skin :is(.primary,#launch){color:var(--cta-text);background:var(--cta);box-shadow:var(--cta-shadow)}
+.skin :is(.player-tabs .selected,.default-presets button[aria-pressed="true"]){color:var(--cta-text);background:var(--cta)}
+.skin :is(select,input){border-radius:var(--radius);color:var(--panel-strong);background:linear-gradient(var(--well),var(--well)) padding-box,var(--rim) border-box}
+.skin option{background:var(--night)}
+/* Panels carry their own text colours, so light pages and dark stone both read. */
+.skin :is(.favorite,.accessory-card,.villain-card,.art-banner,dialog,.active-name,.connection,.player-tabs,.figure-meta,#toast,.sidekick>button,.fb-popup){--text:var(--panel-text);--muted:var(--panel-muted);--parchment:var(--panel-strong);color:var(--panel-text)}
+.skin :is(.favorite,.accessory-card,.villain-card,.art-banner){border-radius:var(--radius);background:var(--surface)}
+.skin dialog{border-radius:calc(var(--radius) + 6px);background:var(--surface)}
+.skin dialog::backdrop{background:var(--backdrop,#000b)}
+.skin :is(.element-card,.perk-card,.picker-item){--text:var(--panel-text);color:var(--panel-text);border-radius:var(--radius);background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--color,var(--gilt)) 40%,transparent),transparent 70%) padding-box,var(--surface)}
+.skin .element-label{color:color-mix(in srgb,var(--color,var(--gilt)) var(--el-mix,65%),var(--el-base));text-shadow:none}
+.skin .player .remove{color:#fff}
+.skin :is(.accessory-card,.villain-card,.favorite) h3{text-shadow:none}
+.skin :is(.favorite .name,.active-name){color:var(--panel-strong);text-shadow:none}
+.skin .active-name{border-radius:var(--radius);background:var(--surface)}
+.skin :is(.connection,.player-tabs,.figure-meta,#half-controls,#root-path,.poster-view,.accessory-art){background:var(--well)}
+.skin .accessory-art{box-shadow:inset 0 0 0 1.5px var(--rule)}.skin .accessory-symbol{color:var(--heading)}
+.skin :is(kbd,.slot-key){color:var(--key-text);background:var(--key);box-shadow:var(--key-shadow)}
+.skin :is(.accessories-section,.elements-section,.perks-section,.vehicles-section){border-image:linear-gradient(90deg,transparent,var(--rule),transparent) 1}
+.skin #toast{background:var(--surface);box-shadow:0 12px 30px #000a}
+.skin .motes i{background:radial-gradient(#fff,var(--gilt) 40%,transparent 70%)}
+.skin .theme-dots i.on{background:var(--gilt)}
+
+/* Spyro's Adventure: Book of Eon ---------------------------------------
+   Eon's book of Skylands lore: parchment pages ruled in ink under a violet
+   night, the Core of Light shining up behind the portal. */
+.skin[data-theme=spyros-adventure]{--night:#1a1030;--text:#f2e6c8;--muted:#c9b8e8;--gilt:#f2c35a;--gilt-hi:#fff0c2;--gilt-lo:#8a5a12;--parchment:#f2d9a0;
+  --display:'IM Fell English',Georgia,serif;--display-size:1.12;--radius:4px;
+  --heading:#f7dc92;--heading-shadow:0 2px 0 #2a1204,0 0 18px #f2c35a55;--rule:#c9a45a;
+  --panel-text:#3a2412;--panel-muted:#6e5337;--panel-strong:#2a1608;--el-base:#3a2412;--el-mix:42%;
+  --rim:linear-gradient(#6b4520,#3a2412);
+  --page:linear-gradient(#f6e7c3e6,#e8cf98e6),url(textures/parchment.jpg) center/320px;
+  --surface:radial-gradient(ellipse at 50% 40%,transparent 55%,#8a5a2244) padding-box,var(--page) padding-box,var(--rim) border-box;
+  --well:#e0c48c;--backdrop:radial-gradient(#2a1845cc,#0a0414ee);
+  --bg:radial-gradient(ellipse 50% 40% at 50% 38%,#f2c35a33,transparent 70%),linear-gradient(180deg,#140c2c,#2a1848 45%,#1a1030);
+  --bg-layer:radial-gradient(1.5px 1.5px at 12% 18%,#fff9 50%,transparent),radial-gradient(1px 1px at 32% 8%,#fff8 50%,transparent),radial-gradient(1.5px 1.5px at 68% 14%,#fffa 50%,transparent),radial-gradient(1px 1px at 84% 30%,#fff7 50%,transparent),radial-gradient(1px 1px at 52% 24%,#fff6 50%,transparent),radial-gradient(1.5px 1.5px at 92% 6%,#fff9 50%,transparent);
+  --bar:linear-gradient(#1a0f30f2,#241540f2);--bar-edge:3px double #c9a45a;
+  --btn:var(--page) padding-box,var(--rim) border-box;--btn-text:#3a2412;--btn-shadow:0 2px 0 #1a0c04,inset 0 0 0 1px #fff6;
+  --cta:radial-gradient(circle at 40% 30%,#d4453a,#8e1a14 70%) padding-box,linear-gradient(#e8b04a,#6b3a0a) border-box;--cta-text:#fff0c2;--cta-shadow:0 3px 0 #3d0a06,0 0 18px #d4453a55;
+  --key:linear-gradient(#fff4d6,#e3c98f);--key-text:#3a2412;--key-shadow:0 1px 0 #6b4520,inset 0 0 0 1px #6b452066}
+[data-theme=spyros-adventure] :is(.favorite,.accessory-card,.element-card,.perk-card,.villain-card,dialog){box-shadow:inset 0 0 0 4px #f3e3bf00,inset 0 0 0 5px #6b452088,0 10px 24px #0009}
+[data-theme=spyros-adventure] :is(.primary,#launch){font-family:var(--display);font-size:18px}
+[data-theme=spyros-adventure] :is(dialog,.accessory-card,.fb-popup) :is(h2,h3){color:var(--panel-strong);text-shadow:none}
+[data-theme=spyros-adventure] .section-title h2::first-letter{font-size:1.35em;color:#e9665a}
+/* The Core of Light: rays fanning up from the portal. */
+[data-theme=spyros-adventure] .stage::before{content:'';position:absolute;left:50%;bottom:150px;width:900px;height:520px;translate:-50% 0;z-index:-2;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg at 50% 100%,#ffe9a833 0 4deg,transparent 4deg 12deg);mask:radial-gradient(ellipse 50% 100% at 50% 100%,#000 20%,transparent 75%)}
+
+/* Giants: Arkeyan Forge -------------------------------------------------
+   The Arkeyan war machines the Giants fought: riveted iron, molten seams,
+   the orange-to-gold of the Giants logo, and figures a size larger. */
+.skin[data-theme=giants]{--night:#140b07;--text:#f6e2cc;--muted:#c7a58a;--gilt:#ff9a2e;--gilt-hi:#ffd98a;--gilt-lo:#8a3a0a;--parchment:#ffd9a8;
+  --display:Bungee,Impact,sans-serif;--display-size:.92;--radius:3px;
+  --heading:#ffb13b;--heading-shadow:0 3px 0 #4a1a04,0 0 16px #ff7a1a66;--rule:#ff7a1a;
+  --panel-text:#f6e2cc;--panel-muted:#caa78c;--panel-strong:#fff1de;
+  --rim:linear-gradient(180deg,#ffcb6b,#ff7a1a 40%,#8a2e06);
+  --rivets:radial-gradient(circle at 9px 9px,#d8b08a 0 2.5px,#3a1d0c 3.5px,transparent 4.5px),radial-gradient(circle at calc(100% - 9px) 9px,#d8b08a 0 2.5px,#3a1d0c 3.5px,transparent 4.5px),radial-gradient(circle at 9px calc(100% - 9px),#d8b08a 0 2.5px,#3a1d0c 3.5px,transparent 4.5px),radial-gradient(circle at calc(100% - 9px) calc(100% - 9px),#d8b08a 0 2.5px,#3a1d0c 3.5px,transparent 4.5px);
+  --iron:linear-gradient(#2a1a12d9,#140b07e6),url(textures/iron.jpg) center/300px;
+  --surface:var(--rivets) padding-box,var(--iron) padding-box,var(--rim) border-box;
+  --well:#0e0704cc;--backdrop:radial-gradient(#3a1606cc,#070302ee);
+  --bg:radial-gradient(ellipse 70% 40% at 50% 100%,#ff6a1a33,transparent 70%),linear-gradient(180deg,#3d1a0c,#241008 45%,#140b07);
+  --bg-layer:repeating-linear-gradient(0deg,transparent 0 118px,#ff7a1a14 118px 120px);
+  --bar:var(--iron);--bar-edge:3px solid #ff7a1a;
+  --btn:linear-gradient(#5a3420,#2c160c) padding-box,var(--rim) border-box;--btn-shadow:0 3px 0 #0a0402,inset 0 1px 0 #ffffff26;
+  --cta:linear-gradient(180deg,#ffe07a,#ff9a2e 50%,#d8520e) padding-box,linear-gradient(#fff0b8,#7a2a04) border-box;--cta-shadow:0 4px 0 #4a1a04,0 0 26px #ff7a1a66;
+  --key:linear-gradient(#ffd98a,#ff9a2e);--key-shadow:0 2px 0 #6b2a04}
+[data-theme=giants] :is(h1,h2,h3){background:linear-gradient(180deg,#ffe28a 15%,#ff9a2e 60%,#e0540e);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 3px 0 #4a1a04)}
+[data-theme=giants] :is(.element-card,.perk-card){box-shadow:0 0 0 1px #000,0 8px 18px #000a,inset 0 -3px 0 #ff7a1a88}
+/* Giant-sized: the figures on the portal stand a size larger. */
+[data-theme=giants] .active-card .portrait{scale:1.12;transform-origin:50% 100%}
+[data-theme=giants] .player-label{position:relative;z-index:1;margin-bottom:26px}
+[data-theme=giants] .active-name{font-size:17px}
+[data-theme=giants] .active-card:hover .portrait{scale:1.16}
+
+/* Swap Force: Woodburrow ------------------------------------------------
+   Daylight over the Cloudbreak Islands, carved wood from the Woodburrow
+   tree, and every panel split into a top and a bottom that could swap. */
+.skin[data-theme=swap-force]{--night:#0d3a5c;--text:#0d2f4f;--muted:#265a82;--gilt:#9bd62a;--gilt-hi:#e4ff9a;--gilt-lo:#3f7a0a;--parchment:#0d3a5c;
+  --display:'Luckiest Guy','Lilita One',sans-serif;--display-size:1.05;--radius:14px;
+  --heading:#b8ec3c;--heading-shadow:-2px -2px 0 #0d3a5c,2px -2px 0 #0d3a5c,-2px 2px 0 #0d3a5c,2px 2px 0 #0d3a5c,0 5px 0 #0d3a5c;--rule:#0d3a5c;
+  --panel-text:#fff4de;--panel-muted:#e6cfa8;--panel-strong:#fff;--focus:#fff;
+  --rim:linear-gradient(180deg,#b8ec3c,#1fa7d6);
+  --wood:linear-gradient(#4a2a12b3,#2a1608cc),url(textures/wood.jpg) center/280px;
+  /* Top half sky-teal, bottom half leaf-green, meeting on a slanted seam. */
+  --split:linear-gradient(172deg,#1fa7d655 0 47%,#fff4 47% 49%,#9bd62a44 49%);
+  --surface:var(--split) padding-box,var(--wood) padding-box,var(--rim) border-box;
+  --well:#2a1608cc;--backdrop:radial-gradient(#0d3a5ccc,#04182aee);
+  --bg:linear-gradient(180deg,#5cc4f5,#8ed8fa 40%,#c9eefc 75%,#e8f8ff);
+  --bg-layer:url(../textures/dusk-clouds.jpg) 0 -120px/1400px 700px repeat-x;
+  --bar:var(--wood);--bar-edge:4px solid #9bd62a;
+  --btn:linear-gradient(#2a8fd6,#135fa0) padding-box,linear-gradient(#bfe9ff,#0d3a5c) border-box;--btn-text:#fff;--btn-shadow:0 3px 0 #0d3a5c;
+  --cta:linear-gradient(180deg,#d4ff5c,#9bd62a 55%,#5a9a12) padding-box,linear-gradient(#f2ffc0,#2f5a06) border-box;--cta-text:#173400;--cta-shadow:0 4px 0 #2f5a06,0 0 18px #9bd62a66;
+  --key:linear-gradient(#fff,#d8f2ff);--key-text:#0d3a5c;--key-shadow:0 2px 0 #0d3a5c}
+[data-theme=swap-force]::before{opacity:.55;mix-blend-mode:screen;filter:saturate(0) brightness(1.6)}
+[data-theme=swap-force] :is(.element-card,.perk-card,.picker-item){background:linear-gradient(172deg,color-mix(in srgb,var(--color,#1fa7d6) 55%,transparent) 0 47%,#fff4 47% 49%,transparent 49%) padding-box,var(--wood) padding-box,var(--rim) border-box}
+[data-theme=swap-force] .topbar .brand img{filter:drop-shadow(0 3px 0 #0d3a5c)}
+[data-theme=swap-force] :is(.tag,.element-footnote,footer){font-weight:800}
+
+/* Trap Team: Cloudcracker Prison ---------------------------------------
+   The blown-open prison: dark stone veined with gold, orange Traptanium
+   cut into crystal facets, stencilled cell-block type and searchlights. */
+.skin[data-theme=trap-team]{--night:#0b0f1a;--text:#e6ecf5;--muted:#9aa7bd;--gilt:#ffa21f;--gilt-hi:#ffe0a0;--gilt-lo:#8a4a06;--parchment:#ffd08a;
+  --display:'Black Ops One',Impact,sans-serif;--display-size:.95;--radius:0;
+  --heading:#ffb640;--heading-shadow:0 0 14px #ff8a1a88,0 2px 0 #000;--rule:#ff8a1a;
+  --panel-muted:#aab4c8;--panel-strong:#fff;
+  --rim:linear-gradient(135deg,#ffe0a0,#ff8a1a 35%,#7a3a04 60%,#ffb640);
+  --stone:linear-gradient(#141a28d9,#0b0f1ae6),url(textures/slate.jpg) center/360px;
+  --surface:var(--stone) padding-box,var(--rim) border-box;
+  --well:#05070dcc;--backdrop:radial-gradient(#1a2233cc,#020306ee);
+  --bg:linear-gradient(180deg,#0b0f1a,#141c2c 50%,#0b0f1a);
+  --bg-layer:conic-gradient(from 160deg at 12% 0,transparent 0 8deg,#9fd8ff14 8deg 16deg,transparent 16deg),conic-gradient(from 184deg at 88% 0,transparent 0 8deg,#9fd8ff10 8deg 15deg,transparent 15deg),linear-gradient(#0b0f1a99,#0b0f1a),url(textures/slate.jpg) center/420px;
+  --bar:var(--stone);--bar-edge:2px solid #ff8a1a;
+  --btn:linear-gradient(#26324a,#141a28) padding-box,linear-gradient(135deg,#ffb640,#5a2a04) border-box;--btn-shadow:0 3px 0 #000;
+  --cta:linear-gradient(135deg,#ffe8a8 0 18%,#ffb640 18% 45%,#ff8a1a 45% 70%,#d85e06 70%) padding-box,linear-gradient(#fff2c8,#6b2a02) border-box;--cta-shadow:0 0 22px #ff8a1a77,0 3px 0 #3a1602;
+  --key:linear-gradient(135deg,#ffe0a0,#ff9a1f);--key-shadow:0 2px 0 #5a2a04}
+/* Traptanium facets: slots and buttons are cut like the trap crystals. */
+[data-theme=trap-team] :is(.element-card,.perk-card,.favorite,.accessory-card,.primary,#launch,.picker-item){clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)}
+[data-theme=trap-team] :is(.primary,#launch){clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%)}
+[data-theme=trap-team] :is(h1,h2){letter-spacing:1px}
+/* Captured villains get a mugshot height chart. */
+[data-theme=trap-team] .villain-card{background:repeating-linear-gradient(180deg,transparent 0 13px,#ffffff14 13px 14px) padding-box,var(--surface)}
+
+/* SuperChargers: Rift Garage --------------------------------------------
+   The SuperChargers' garage: tread plate, a chequered flag, red and electric
+   blue livery, a purple rift behind the portal and everything leaning forward. */
+.skin[data-theme=superchargers]{--night:#0e1016;--text:#eef3fb;--muted:#9aa6bb;--gilt:#1fb6ff;--gilt-hi:#bfeaff;--gilt-lo:#0a4a8a;--parchment:#dfe7f2;
+  --display:'Racing Sans One',Impact,sans-serif;--display-size:1.06;--radius:4px;
+  --heading:#fff;--heading-shadow:3px 3px 0 #e3262e,6px 6px 0 #0e1016;--rule:#e3262e;
+  --panel-muted:#a8b3c6;--panel-strong:#fff;
+  --rim:linear-gradient(180deg,#f2f6fb,#8a95a8 45%,#3a4252 55%,#c9d2df);
+  --plate:linear-gradient(#1a1e28d9,#0e1016e6),url(textures/tread.jpg) center/220px;
+  --surface:var(--plate) padding-box,var(--rim) border-box;
+  --well:#05060acc;--backdrop:radial-gradient(#2a1450cc,#030306ee);
+  --bg:radial-gradient(ellipse 45% 40% at 50% 40%,#8a3cff44,transparent 70%),linear-gradient(180deg,#141822,#0e1016);
+  --bg-layer:repeating-linear-gradient(-12deg,transparent 0 140px,#1fb6ff0d 140px 142px,transparent 142px 160px,#e3262e0d 160px 161px);
+  --bar:linear-gradient(90deg,#e3262e 0 180px,#0e1016 180px);--bar-edge:0;
+  --btn:linear-gradient(#2a3140,#161a22) padding-box,var(--rim) border-box;--btn-shadow:0 3px 0 #000;
+  --cta:linear-gradient(180deg,#ff5a5f,#e3262e 55%,#9a0c12) padding-box,linear-gradient(#ffd0d2,#5a0408) border-box;--cta-text:#fff;--cta-shadow:0 3px 0 #3a0204,0 0 20px #e3262e55;
+  --key:#fff;--key-text:#0e1016;--key-shadow:0 0 0 2px #0e1016}
+[data-theme=superchargers] :is(h1,h2,h3,.primary,#launch,.active-name,.element-label,.player-label){font-style:italic}
+/* Leaning into the turn: controls and slots are parallelograms. */
+[data-theme=superchargers] :is(.toolbar button,.primary,#launch,.element-card,.perk-card,.active-name){clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+[data-theme=superchargers] :is(.toolbar button,.primary,#launch){padding-inline:20px}
+/* Chequered flag under the header. */
+[data-theme=superchargers] .topbar{box-shadow:0 8px 24px #0008}
+[data-theme=superchargers] .topbar::after{content:'';position:absolute;left:0;right:0;bottom:-10px;height:10px;background:conic-gradient(#fff 25%,#0e1016 0 50%,#fff 0 75%,#0e1016 0) 0 0/10px 10px}
+/* Race numbers: slot keys become white roundels. */
+[data-theme=superchargers] :is(.elements:not(.vehicles),.perks) .slot-key{display:grid;place-items:center;width:26px;height:26px;min-width:0;padding:0;border-radius:50%;font:italic 400 15px/1 'Racing Sans One',sans-serif}
+/* The rift: a purple vortex opening behind the portal. */
+[data-theme=superchargers] .stage::before{content:'';position:absolute;left:50%;top:40px;width:430px;height:430px;translate:-50% 0;z-index:-2;border-radius:50%;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,#8a3cff55 0 9deg,#1fb6ff22 9deg 14deg,transparent 14deg 24deg);mask:radial-gradient(circle,transparent 18%,#000 30%,transparent 70%);animation:rift 40s linear infinite}
+@keyframes rift{to{rotate:1turn}}
+
+/* Imaginators: Mind Magic -----------------------------------------------
+   Imaginite is raw imagination: holographic rims on deep indigo, sparkles,
+   and headings scribbled in a creator's marker. */
+.skin[data-theme=imaginators]{--night:#120a2e;--text:#f1ecff;--muted:#b3a8dc;--gilt:#ff7ad9;--gilt-hi:#ffe1f6;--gilt-lo:#6a2a9a;--parchment:#ffd8f2;
+  --display:'Permanent Marker','Lilita One',sans-serif;--display-size:1;--radius:16px;
+  --heading:#fff;--heading-shadow:0 0 12px #b86bff,0 0 2px #fff;--rule:#b86bff;
+  --panel-muted:#bfb3e6;--panel-strong:#fff;
+  --holo:conic-gradient(from 210deg,#ff7ad9,#ffd36b,#6bffb4,#6bd6ff,#b86bff,#ff7ad9);
+  --rim:var(--holo);
+  --surface:radial-gradient(ellipse at 30% 0,#b86bff33,transparent 60%) padding-box,linear-gradient(180deg,#2a1a5c,#170e3a) padding-box,var(--holo) border-box;
+  --well:#0a0620cc;--backdrop:radial-gradient(#2a1460cc,#05020fee);
+  --bg:radial-gradient(ellipse 60% 45% at 50% 34%,#b86bff44,transparent 70%),radial-gradient(ellipse 40% 30% at 15% 80%,#6bd6ff22,transparent 70%),linear-gradient(180deg,#1c0f45,#120a2e 60%,#0a061c);
+  --bg-layer:radial-gradient(2px 2px at 10% 20%,#ffd36b 50%,transparent),radial-gradient(1.5px 1.5px at 30% 70%,#6bd6ff 50%,transparent),radial-gradient(2px 2px at 55% 12%,#ff7ad9 50%,transparent),radial-gradient(1.5px 1.5px at 75% 55%,#6bffb4 50%,transparent),radial-gradient(2px 2px at 90% 25%,#fff 50%,transparent),radial-gradient(1.5px 1.5px at 45% 88%,#ffd36b 50%,transparent);
+  --bar:linear-gradient(#1c0f45f2,#170e3af2);--bar-edge:2px solid transparent;
+  --btn:linear-gradient(#34206e,#1f1450) padding-box,var(--holo) border-box;--btn-shadow:0 3px 0 #07031a;
+  --cta:linear-gradient(135deg,#ffe28a,#ff9ad9 45%,#b86bff) padding-box,linear-gradient(#fff,#6a2a9a) border-box;--cta-text:#2a0a40;--cta-shadow:0 3px 0 #3a1260,0 0 24px #ff7ad966;
+  --key:linear-gradient(#fff,#e8dcff);--key-text:#2a0a40;--key-shadow:0 2px 0 #6a2a9a}
+[data-theme=imaginators] .topbar{border-image:var(--holo) 1}
+[data-theme=imaginators] :is(.favorite,.accessory-card,.element-card,.perk-card,.picker-item,dialog){border-width:2.5px}
+/* Marker headings, a little crooked, with a scribbled underline. */
+[data-theme=imaginators] :is(h1,h2){rotate:-1.5deg;letter-spacing:.5px}
+[data-theme=imaginators] .section-title h2{padding-bottom:4px;background:linear-gradient(90deg,#ff7ad9,#6bd6ff) no-repeat 0 100%/100% 3px}
+[data-theme=imaginators] .active-card .placeholder{border-style:dashed;border-color:#ff7ad9}
+
+/* Dè Cell to Singularity ------------------------------------------------
+   The idle game about evolution: deep space with a teal nebula, the Earth
+   asleep on the horizon, and the Tech Tree of Life — glowing circuit nodes
+   joined by dashed lines — as the element shortcuts. */
+.skin[data-theme=singularity]{--night:#030a1f;--text:#e8f4ff;--muted:#8fa8cf;--gilt:#38d6ff;--gilt-hi:#d8f7ff;--gilt-lo:#1d5cff;--parchment:#bfe9ff;
+  --display:Montserrat,system-ui,sans-serif;--display-size:.9;--radius:10px;
+  --heading:#fff;--heading-shadow:0 0 18px #38b6ffaa,0 0 2px #fff;--rule:#38d6ff;
+  --panel-muted:#9fb6da;--panel-strong:#fff;--focus:#fff;
+  --rim:linear-gradient(180deg,#9fecff,#2a7dff 55%,#1a3a9a);
+  --surface:radial-gradient(ellipse at 50% 0,#38d6ff22,transparent 65%) padding-box,linear-gradient(180deg,#0b1d4ae6,#050f2ef0) padding-box,var(--rim) border-box;
+  --well:#020716d9;--backdrop:radial-gradient(#0b1d4acc,#01040eee);
+  --bg:radial-gradient(ellipse 45% 35% at 18% 62%,#1fa08a2e,transparent 70%),radial-gradient(ellipse 40% 30% at 80% 20%,#6a4aff22,transparent 70%),radial-gradient(ellipse 60% 40% at 50% 30%,#1d5cff26,transparent 70%),linear-gradient(180deg,#040d28,#030a1f 60%,#02061a);
+  --bg-layer:radial-gradient(1.5px 1.5px at 8% 12%,#fff 50%,transparent),radial-gradient(1px 1px at 22% 34%,#bfe9ff 50%,transparent),radial-gradient(2px 2px at 38% 8%,#fff 50%,transparent),radial-gradient(1px 1px at 47% 41%,#fff9 50%,transparent),radial-gradient(1.5px 1.5px at 63% 22%,#bfe9ff 50%,transparent),radial-gradient(1px 1px at 71% 5%,#fff 50%,transparent),radial-gradient(2px 2px at 86% 37%,#9fecff 50%,transparent),radial-gradient(1px 1px at 94% 14%,#fff 50%,transparent),radial-gradient(1px 1px at 14% 72%,#fff8 50%,transparent),radial-gradient(1.5px 1.5px at 57% 66%,#bfe9ff 50%,transparent),radial-gradient(1px 1px at 79% 81%,#fff9 50%,transparent),radial-gradient(1.5px 1.5px at 31% 90%,#fff 50%,transparent);
+  --bar:linear-gradient(180deg,#040d28f2,#061437e6);--bar-edge:1px solid #38d6ff66;
+  --btn:linear-gradient(180deg,#10265ee6,#081638) padding-box,var(--rim) border-box;--btn-shadow:0 0 12px #38b6ff33,inset 0 1px 0 #ffffff26;
+  --cta:linear-gradient(180deg,#ffffff,#bff0ff 45%,#5fd6ff) padding-box,linear-gradient(#fff,#2a7dff) border-box;--cta-text:#04123a;--cta-shadow:0 0 24px #38d6ffaa,0 0 4px #fff;
+  --key:#030a1f;--key-text:#fff;--key-shadow:0 0 0 1.5px #fff,0 0 8px #38d6ff}
+[data-theme=singularity] :is(h1,h2,h3,.primary,#launch,.player-label,.active-name,.element-label,.gamebar label){text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+[data-theme=singularity] .section-title h2{display:flex;align-items:center;gap:12px}
+/* A circuit terminal, the Tree of Life's node, marks each section. */
+[data-theme=singularity] .section-title h2::before{content:'';width:10px;height:10px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 10px #38d6ff}
+[data-theme=singularity] .brand img{height:72px;filter:drop-shadow(0 0 14px #2a7dff88)}
+/* Idle counters: Entropy (blue swirl) and Ideas (yellow bulb). */
+.cts-hud{display:flex;gap:10px;margin-right:auto;margin-left:24px}
+.cts-hud span{display:grid;grid-template-columns:auto auto;align-items:center;column-gap:8px;padding:5px 12px 5px 8px;border-radius:99px;background:#020716d9;box-shadow:inset 0 0 0 1px #38d6ff55}
+.cts-hud i{grid-row:span 2;width:18px;height:18px;border-radius:50%}
+.cts-entropy i{background:conic-gradient(#38d6ff,#1d5cff,#9fecff,#38d6ff);mask:radial-gradient(circle,transparent 30%,#000 32%);box-shadow:0 0 10px #38d6ff}
+.cts-ideas i{background:radial-gradient(circle at 40% 35%,#fff,#ffd84a 45%,#e0a000);box-shadow:0 0 10px #ffd84a}
+.cts-hud b{font:800 13px/1.1 Montserrat,sans-serif;color:#fff;font-variant-numeric:tabular-nums;min-width:9ch}
+.cts-hud small{font:700 9.5px/1 Montserrat,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8fa8cf}
+/* The Earth asleep under the portal, its rim lit like the game's key art. */
+[data-theme=singularity] .stage::before{content:'';position:absolute;left:-32px;right:-32px;bottom:-18px;height:200px;z-index:-2;pointer-events:none;
+  background:radial-gradient(ellipse 62% 150% at 50% 150%,#020716 48%,#0a2a7a 63%,#3aa0ff 65.2%,#dff7ff 65.6%,#38d6ff55 66.4%,transparent 71%),radial-gradient(ellipse 30% 60% at 50% 100%,#38d6ff33,transparent 70%)}
+/* The Tech Tree of Life: shortcuts are nodes on one dashed circuit line. */
+[data-theme=singularity] .elements{position:relative;isolation:isolate}
+[data-theme=singularity] .elements::before{content:'';position:absolute;left:0;right:0;top:62px;height:2px;z-index:-1;background:repeating-linear-gradient(90deg,#38d6ff 0 8px,transparent 8px 14px);box-shadow:0 0 8px #38d6ff}
+[data-theme=singularity] .element-card .portrait{width:72px;height:72px;margin:7px auto 5px;border-radius:50%;overflow:hidden;background:#030a1f;box-shadow:0 0 0 2px var(--color,#38d6ff),0 0 16px color-mix(in srgb,var(--color,#38d6ff) 70%,transparent)}
+[data-theme=singularity] .element-card .portrait img{object-fit:cover;border-radius:0}
+[data-theme=singularity] .element-card .placeholder .sigil{width:40px;height:40px}
+[data-theme=singularity] :is(.elements:not(.vehicles),.perks) .slot-key{display:grid;place-items:center;width:22px;height:22px;min-width:0;padding:0;border-radius:50%}
+
+/* Dè perThumpback --------------------------------------------------------
+   All Thumpback: the Water Giant who left the Phantom Tide to go fishing.
+   Deck planks and rope from his old ship, a fishing net over whale-blue sea,
+   silver like his shoulder pads, coral like the growth on his arms. */
+.skin[data-theme=thumpback]{--night:#06182c;--text:#e9f3f7;--muted:#9dbad0;--gilt:#8fd3ff;--gilt-hi:#e9f3f7;--gilt-lo:#2f6fb3;--parchment:#efe4cc;
+  --display:'Pirata One',Georgia,serif;--display-size:1.25;--radius:6px;
+  --heading:#e9f3f7;--heading-shadow:0 3px 0 #0b2a45,0 0 16px #8fd3ff55;--rule:#c9a66b;
+  --panel-muted:#d6c3a2;--panel-strong:#fff6e6;--panel-text:#f3e9d6;
+  --rim:linear-gradient(180deg,#eef3f7,#9aa6b2 45%,#4a5563 60%,#c7d0d8);
+  --deck:linear-gradient(#2a1a10b3,#160d06cc),url(textures/deck.jpg) center/300px;
+  --surface:var(--deck) padding-box,var(--rim) border-box;
+  --well:#0b2a45d9;--backdrop:radial-gradient(#0b2a45cc,#020a14ee);
+  --bg:radial-gradient(ellipse 70% 35% at 50% 0,#4f9ad955,transparent 70%),linear-gradient(180deg,#1b4f7a,#0e3354 35%,#081f38 70%,#06182c);
+  --bg-layer:url(textures/net.png) center/440px;
+  --bar:var(--deck);--bar-edge:0;
+  --btn:linear-gradient(180deg,#4f8fd1,#2f6fb3 50%,#1d4f86) padding-box,var(--rim) border-box;--btn-text:#fff;--btn-shadow:0 3px 0 #0b2a45,inset 0 1px 0 #ffffff40;
+  --cta:linear-gradient(180deg,#ffb59a,#ff7a59 50%,#d4502f) padding-box,linear-gradient(#ffe2d6,#7a2410) border-box;--cta-text:#3a0e02;--cta-shadow:0 4px 0 #6a1e08,0 0 20px #ff7a5955;
+  --key:linear-gradient(#fbf4e4,#e3d4b2);--key-text:#4a3218;--key-shadow:0 2px 0 #7a5a30,inset 0 0 0 1px #fff8}
+[data-theme=thumpback]::before{opacity:.12}
+[data-theme=thumpback] :is(.primary,#launch){font-size:20px;letter-spacing:.3px}
+/* Rope: under the header and between sections. */
+[data-theme=thumpback] .topbar{border-bottom:10px solid;border-image:url(textures/rope.jpg) 0 0 40 0 / 0 0 10px 0 round}
+[data-theme=thumpback] :is(.accessories-section,.elements-section,.perks-section,.vehicles-section){border-top:8px solid;border-image:url(textures/rope.jpg) 40 0 0 0 / 8px 0 0 0 round}
+/* Anchors mark the sections, and the Thumpback button always shines. */
+[data-theme=thumpback] .section-title h2{display:flex;align-items:center;gap:10px}
+[data-theme=thumpback] .section-title h2::before{content:'⚓';font-family:system-ui,sans-serif;font-size:.7em;color:#c7d0d8;text-shadow:0 2px 0 #0b2a45}
+[data-theme=thumpback] #thumpback:not(:disabled){box-shadow:0 3px 0 #0b2a45,0 0 18px #8fd3ffaa}
+/* Waves roll under the portal. */
+[data-theme=thumpback] .stage::before{content:'';position:absolute;left:-32px;right:-32px;bottom:10px;height:120px;z-index:-2;pointer-events:none;
+  background:radial-gradient(circle at 50% 100%,transparent 0 20px,#e9f3f7aa 21px 23px,transparent 24px) 0 26px/56px 30px repeat-x,
+    radial-gradient(circle at 50% 100%,#1d4f86 0 20px,transparent 21px) 28px 52px/56px 30px repeat-x,
+    linear-gradient(transparent 70px,#0e3354 72px,#081f38);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+/* The banner: Hail to the Whale, his portrait and his ship's log. */
+.ptb-hero{position:relative;display:grid;grid-template-columns:minmax(0,1.3fr) 220px minmax(200px,.8fr);align-items:center;gap:24px;margin-bottom:20px;padding:22px 26px;border:1.5px solid transparent;border-radius:8px;
+  background:radial-gradient(ellipse 40% 90% at 58% 50%,#8fd3ff33,transparent 70%) padding-box,linear-gradient(180deg,#1d4f86e6,#0b2a45f0) padding-box,var(--rim) border-box;box-shadow:0 12px 30px #0009;overflow:hidden}
+.ptb-hail{font:400 54px/1 'Pirata One',Georgia,serif;color:#e9f3f7;text-shadow:0 4px 0 #0b2a45,0 0 24px #8fd3ff66}
+.ptb-bio{margin:10px 0 16px;max-width:46ch;color:#cfe3ea;font-size:14px;line-height:1.5}
+.ptb-actions{display:flex;flex-wrap:wrap;gap:10px}
+.ptb-art{display:grid;place-items:center;height:210px;color:#c7d0d8;animation:bob 4.5s ease-in-out infinite alternate}
+.ptb-art img{max-height:210px;width:auto;filter:drop-shadow(0 12px 18px #0009) drop-shadow(0 0 22px #8fd3ff55)}
+.ptb-art .placeholder{display:contents}
+.ptb-anchor{width:130px;height:130px;filter:drop-shadow(0 6px 0 #0b2a45)}
+@keyframes bob{to{translate:0 -10px;rotate:2deg}}
+.ptb-log{align-self:stretch;padding:12px 14px;border-radius:6px;background:linear-gradient(#f6ecd6f2,#e6d6b4f2),url(textures/parchment.jpg) center/260px;color:#3a2412;box-shadow:inset 0 0 0 1px #7a5a30,0 6px 14px #0008;rotate:1.2deg}
+.skin .ptb-log h3{margin-bottom:8px;font:400 24px/1 'Pirata One',Georgia,serif;color:#3a2412;text-shadow:none}
+.ptb-log dl{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:5px 10px;margin:0;font-size:12px;font-weight:800}
+.ptb-log dd{display:flex;align-items:center;gap:8px;margin:0}
+.ptb-log i{flex:1;height:7px;border-radius:99px;background:linear-gradient(90deg,#2f6fb3 calc(var(--v,0) * 100%),#3a241222 0)}
+.ptb-log b{min-width:3ch;text-align:right}
+@media(max-width:1100px){.ptb-hero{grid-template-columns:minmax(0,1fr) 170px}.ptb-log{display:none}.ptb-hail{font-size:42px}}
+@media(max-width:760px){.ptb-hero{grid-template-columns:1fr}.ptb-art{display:none}}
+
+/* Dè PerMCdonald ---------------------------------------------------------
+   A fast-food self-order kiosk: clean white tiles on warm cream, the red bar
+   and yellow buttons, element shortcuts as numbered combos, and a Now
+   serving board whose order numbers are the figures on the portal. */
+.skin[data-theme=mcdonald]{--night:#27251f;--text:#27251f;--muted:#6f6a5f;--gilt:#ffc72c;--gilt-hi:#fff3c4;--gilt-lo:#b8860b;--parchment:#27251f;
+  --display:Poppins,system-ui,sans-serif;--display-size:.95;--radius:14px;
+  --heading:#27251f;--heading-shadow:none;--rule:#e2dbcd;--focus:#da291c;
+  --panel-text:#27251f;--panel-muted:#6f6a5f;--panel-strong:#27251f;--el-base:#27251f;--el-mix:55%;
+  --rim:linear-gradient(#e6dfd1,#e6dfd1);
+  --surface:linear-gradient(#fff,#fff) padding-box,var(--rim) border-box;
+  --well:#f3eee4;--backdrop:#27251fb3;
+  --bg:linear-gradient(180deg,#fbf8f2,#f4efe5);--bg-layer:none;
+  --bar:#da291c;--bar-edge:0;
+  --btn:linear-gradient(#fff,#fff) padding-box,var(--rim) border-box;--btn-text:#27251f;--btn-shadow:0 2px 0 #d9d1bf;
+  --cta:linear-gradient(#ffd24d,#ffc72c) padding-box,linear-gradient(#ffc72c,#e0a800) border-box;--cta-text:#27251f;--cta-shadow:0 3px 0 #c99a00;
+  --key:#da291c;--key-text:#fff;--key-shadow:none}
+[data-theme=mcdonald] h1{color:#da291c}
+[data-theme=mcdonald] :is(.favorite,.accessory-card,.element-card,.perk-card,.villain-card,dialog,.picker-item){box-shadow:0 6px 16px #27251f14}
+[data-theme=mcdonald] :is(.element-card,.perk-card,.picker-item){background:linear-gradient(#fff,#fff) padding-box,var(--rim) border-box}
+[data-theme=mcdonald] :is(.element-card,.perk-card):hover{box-shadow:0 10px 22px #27251f26,0 0 0 2px #ffc72c}
+[data-theme=mcdonald] .topbar .toolbar button{--rim:linear-gradient(#fff,#fff)}
+[data-theme=mcdonald] .active-card .placeholder{background:#fff;border-color:#da291c;color:#da291c}
+[data-theme=mcdonald] .figure-meta{color:#27251f}
+/* The logo: yellow arches over the name, on the red bar. */
+.mcd-logo{display:flex;align-items:center;gap:12px;height:64px}
+.mcd-logo svg{width:66px;height:54px;fill:none;stroke:#ffc72c;stroke-width:13;filter:drop-shadow(0 2px 0 #9e1b12)}
+.mcd-logo span{display:flex;flex-direction:column;font:800 13px/1 Poppins,sans-serif;color:#ffc72c}
+.mcd-logo b{font-size:25px;color:#fff;letter-spacing:-.3px}
+/* Combos: element and perk keys become big menu numbers. */
+[data-theme=mcdonald] :is(.elements:not(.vehicles),.perks) .slot-key{top:6px;bottom:auto;left:6px;display:grid;place-items:center;width:30px;height:30px;min-width:0;padding:0;border-radius:50%;font:800 16px/1 Poppins,sans-serif;box-shadow:0 2px 0 #9e1b12}
+/* Now serving: an order board with the figure IDs on the portal. */
+.mcd-board{display:flex;align-items:center;gap:8px;margin:0 12px 0 auto;padding:6px 8px 6px 14px;border-radius:10px;background:#27251f;box-shadow:0 4px 10px #27251f33}
+.mcd-board span{font:800 11px/1 Poppins,sans-serif;color:#fff;text-transform:uppercase;letter-spacing:.06em}
+.mcd-board b{min-width:52px;padding:4px 8px;border-radius:6px;background:#3a3730;font:800 18px/1 Poppins,sans-serif;color:#ffc72c;text-align:center;font-variant-numeric:tabular-nums}
+.mcd-icecream{margin-right:12px;padding:6px 12px;border-radius:99px;background:#fff;box-shadow:inset 0 0 0 1.5px #da291c;color:#da291c;font-size:12px;font-weight:800}
+.mcd-legal{flex-basis:100%;font-weight:800;color:#da291c}
+[data-theme=mcdonald] footer{flex-wrap:wrap}
+@media(max-width:1100px){.mcd-icecream{display:none}}
+[data-theme=mcdonald] :is(.elements:not(.vehicles),.perks) .element-label{padding-left:24px}
+
+/* Dè perDoomScroll -------------------------------------------------------
+   The vertical feed: true black, the cyan and pink of TikTok's split logo,
+   players as reels with a like rail and captions, a profile grid of
+   shortcuts with view counts, and a screen that snaps from post to post. */
+.skin[data-theme=doomscroll]{--night:#000;--text:#fff;--muted:#a8a8a8;--gilt:#25f4ee;--gilt-hi:#c9fffd;--gilt-lo:#0a8c89;--parchment:#fff;
+  --display:'TikTok Sans',system-ui,sans-serif;--display-size:.95;--radius:8px;
+  --heading:#fff;--heading-shadow:-2px 0 #25f4ee,2px 0 #fe2c55;--rule:#2a2a2a;--focus:#25f4ee;
+  --panel-muted:#a8a8a8;--panel-strong:#fff;--panel-text:#fff;
+  --rim:linear-gradient(#2a2a2a,#2a2a2a);
+  --surface:linear-gradient(#121212,#121212) padding-box,var(--rim) border-box;
+  --well:#1f1f1f;--backdrop:#000c;
+  --bg:#000;--bg-layer:none;
+  --bar:#000;--bar-edge:1px solid #1f1f1f;
+  --btn:linear-gradient(#2f2f2f,#2f2f2f) padding-box,linear-gradient(#2f2f2f,#2f2f2f) border-box;--btn-text:#fff;--btn-shadow:none;
+  --cta:linear-gradient(#fe2c55,#fe2c55) padding-box,linear-gradient(#fe2c55,#fe2c55) border-box;--cta-text:#fff;--cta-shadow:none;
+  --key:#2f2f2f;--key-text:#fff;--key-shadow:none}
+[data-theme=doomscroll] :is(h1,h2,h3,.primary,#launch,.player-label,.active-name,.element-label,.gamebar label){font-weight:800;letter-spacing:-.01em}
+[data-theme=doomscroll] .player-label{background:#000a;box-shadow:none}
+/* Snap from section to section like posts in a feed. */
+html:has(body[data-theme=doomscroll]){scroll-snap-type:y proximity}
+[data-theme=doomscroll] main>section{scroll-snap-align:start;scroll-margin-top:96px}
+/* The reel's progress bar runs along the header and starts over. */
+[data-theme=doomscroll] .topbar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#fff;transform-origin:left;animation:reel-progress 15s linear infinite}
+@keyframes reel-progress{from{scale:0 1}}
+.dsc-tabs{display:flex;align-items:center;gap:16px;margin:0 16px 0 auto;font:700 16px/1 'TikTok Sans',sans-serif;color:#ffffff99}
+.dsc-tabs b{color:#fff;font-weight:800;padding-bottom:6px;border-bottom:3px solid #fff;margin-bottom:-9px}
+.dsc-tabs i{font:800 10px/1 'TikTok Sans',sans-serif;font-style:normal;padding:3px 6px;border-radius:4px;background:#fe2c55;color:#fff}
+.dsc-time{margin-right:12px;padding:6px 12px;border-radius:99px;background:#1f1f1f;color:#a8a8a8;font-size:12px;font-weight:700}
+/* Players are reels: a tall frame, actions on the right, caption and sound below. */
+[data-theme=doomscroll] .active-card .portrait{position:relative;width:170px;height:262px;border-radius:14px;overflow:hidden;background:#111;box-shadow:0 0 0 3px #111,0 16px 30px #000c}
+[data-theme=doomscroll] .active-card .portrait img{object-fit:cover;border-radius:0}
+[data-theme=doomscroll] .active-card .portrait::after{content:'';position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#000d)}
+[data-theme=doomscroll] .active-card:hover .portrait{scale:1.02}
+[data-theme=doomscroll] .player:has(.dsc-caption) :is(.active-name,.figure-meta){display:none}
+.dsc-rail{position:absolute;left:150px;top:100px;display:flex;flex-direction:column;gap:10px;z-index:2;pointer-events:none}
+.dsc-rail span{display:flex;flex-direction:column;align-items:center;gap:1px;width:36px;font-size:21px;line-height:1;color:#fff;text-shadow:0 1px 3px #000}
+.dsc-rail small{font:700 10px/1.2 'TikTok Sans',sans-serif}
+.dsc-rail .dsc-like{pointer-events:auto;cursor:pointer;font-size:24px}.dsc-rail .liked{color:#fe2c55}
+.dsc-caption{position:absolute;left:30px;top:206px;width:118px;z-index:2;text-align:left;font-size:11px;line-height:1.3;color:#fff;text-shadow:0 1px 2px #000;overflow-wrap:anywhere}
+.dsc-caption b{display:block;font-size:12.5px}.dsc-caption span{font-weight:800}
+.dsc-sound{position:absolute;left:30px;top:268px;z-index:2;display:flex;align-items:center;gap:6px;width:150px;overflow:hidden;white-space:nowrap;font-size:10.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000}
+.dsc-sound i{flex:none}
+.dsc-sound i{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#fff 0 2px,#111 3px 5px,#333 6px);animation:disc 3s linear infinite}
+@keyframes disc{to{rotate:1turn}}
+/* Shortcuts are a profile grid: vertical thumbnails with view counts. */
+[data-theme=doomscroll] .element-card{padding-bottom:30px}
+[data-theme=doomscroll] .element-card .portrait{height:118px;margin:6px 6px 5px;border-radius:6px;overflow:hidden;background:#1f1f1f}
+[data-theme=doomscroll] .element-card .portrait img{object-fit:cover;border-radius:0}
+.dsc-views{position:absolute;left:12px;top:132px;font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000}
+[data-theme=doomscroll] .element-card:hover{box-shadow:0 0 0 2px #25f4ee,0 0 0 4px #fe2c55}
+/* The break it suggests and will not let you take. */
+.dsc-break{position:fixed;left:50%;bottom:0;z-index:90;width:380px;max-width:100vw;translate:-50% 0;padding:22px 22px 20px;border-radius:16px 16px 0 0;background:#1f1f1f;box-shadow:0 -10px 40px #000c;text-align:center;animation:sheet .35s cubic-bezier(.2,1,.3,1)}
+@keyframes sheet{from{translate:-50% 100%}}
+.dsc-break h2{margin-bottom:6px;font:800 20px 'TikTok Sans',sans-serif;background:none;color:#fff;filter:none}
+.dsc-break p{margin-bottom:16px;color:#a8a8a8}
+.dsc-break button{display:block;width:100%;margin-top:8px}
+@media(max-width:1100px){.dsc-tabs,.dsc-time{display:none}}

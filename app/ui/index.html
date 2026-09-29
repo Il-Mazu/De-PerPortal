@@ -3,22 +3,45 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' art: data:; style-src 'self'; script-src 'self'; connect-src 'none'">
-  <title>Dè PerPortal</title><link rel="stylesheet" href="style.css">
+  <title>Dè PerPortal</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="themes/games.css"><link rel="stylesheet" href="themes/fishbet.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><img src="logo.png" alt="Skylanders Dè PerPortal"></div>
+    <div class="brand"><img class="logo-default" src="logo.png" alt="Skylanders Dè PerPortal"><img class="fb" src="themes/fishbet-logo.png" alt="Dè FishBet"><img class="cts" src="themes/singularity-logo.png" alt="Dè Cell to Singularity"><div class="mcd mcd-logo"><svg viewBox="0 0 100 80" aria-hidden="true"><path d="M9 78Q9 6 29.5 6T50 58Q50 6 70.5 6T91 78"/></svg><span>Dè<b>PerMCdonald</b></span></div></div>
     <div class="toolbar">
       <button id="to-game" title="Minimize Dè PerPortal and return to Cemu">Back to game <kbd id="to-game-key">B</kbd></button>
       <button id="overlay" title="Show shortcut reminders over Cemu">Overlay</button>
       <button id="thumpback" title="Load Thumpback for Player 1 · Alt+T"><span id="thump-art"></span>Thumpback <kbd>Alt T</kbd></button>
       <button id="thumpling" title="Add Thumpling as sidekick · Alt+Shift+T">Thumpling <kbd>Alt Shift T</kbd></button>
       <button id="posters" title="Activision's poster of every Skylander in this game">Skylander list</button>
+      <button id="theme" title="Change how Dè PerPortal looks">Theme</button>
       <button id="settings" aria-label="Library and settings">Settings</button>
     </div>
   </header>
+  <aside class="fb fb-side" aria-hidden="true">
+    <div class="fb-promo"><b>Reel in the big</b><strong>Win up to 5,500 gems</strong><div><span class="fb-go">Go fishing</span><span class="fb-guide">Guide</span></div></div>
+    <div class="fb-tiles"><span data-fake>🚤<b>VIP levels</b></span><span data-fake>🎡<b>Wheel of fortune</b></span></div>
+    <nav><span data-fake>🎁<b>Promotions</b></span><hr><span data-fake>🎰<b>Casino</b></span><span data-fake>🃏<b>Live casino</b></span><span data-fake>💎<b>Jackpots</b><i>New</i></span><hr><span data-fake>⚽<b>Sports</b></span><span data-fake>📡<b>Live betting</b></span><span data-fake>🎮<b>Virtual sports</b></span><hr><span data-fake>🏆<b>Tournaments</b></span></nav>
+    <div class="fb-side-foot"><span data-fake>🇮🇹<b>Italiano</b></span><span data-fake>❔<b>Help centre</b></span></div>
+  </aside>
   <main>
-    <section class="heading"><h1>Portal</h1><div class="connection"><span id="connection-dot"></span><span id="connection">Waiting for Cemu</span></div></section>
+    <div class="fb fb-ticker" aria-hidden="true"><div id="fb-wins"></div></div>
+    <section class="fb fb-hero" aria-label="Spin a random Skylander">
+      <button id="fb-prev" class="fb-arrow" aria-label="Previous promotion">‹</button>
+      <div class="fb-slide"><span id="fb-chip" class="fb-chip"></span><p id="fb-headline" class="fb-headline"></p><small id="fb-fine"></small>
+        <div class="fb-spins"><button id="spin-0" class="fb-spin">Spin · Player 1</button><button id="spin-1" class="fb-spin fb-spin-two">Spin · Player 2</button></div>
+        <div id="fb-dots" class="fb-dots" aria-hidden="true"></div></div>
+      <img class="fb-fish" src="themes/fishbet-fish.png" alt="">
+      <button id="fb-next" class="fb-arrow" aria-label="Next promotion">›</button>
+    </section>
+    <div class="fb fb-cats" aria-hidden="true"><span data-fake>📜 Providers</span><span data-fake>⭐ Top</span><span data-fake>🔔 New</span><span data-fake>🔥 Popular</span><span data-fake>💠 Exclusive</span><span data-fake>🌀 Live portal</span><span data-fake>🎯 Roulette</span><span data-fake>7️⃣ Hot jackpots</span></div>
+    <section class="ptb ptb-hero" aria-labelledby="ptb-hail">
+      <div class="ptb-copy"><p id="ptb-hail" class="ptb-hail">Hail to the Whale!</p><p class="ptb-bio">Once a deckhand of the Phantom Tide, forever chasing the Leviathan Cloud Crab. Water Giant, anchor in hand, patience of an angler.</p>
+        <div class="ptb-actions"><button id="ptb-load" class="primary">Load Thumpback</button><button id="ptb-mini">Add Thumpling</button></div></div>
+      <div id="ptb-art" class="ptb-art" aria-hidden="true"></div>
+      <div class="ptb-log"><h3>Ship’s log</h3><dl id="ptb-stats"></dl></div>
+    </section>
+    <section class="heading"><h1>Portal</h1><div class="cts cts-hud" aria-hidden="true"><span class="cts-entropy"><i></i><b id="cts-entropy">0</b><small>Entropy</small></span><span class="cts-ideas"><i></i><b id="cts-ideas">0</b><small>Ideas</small></span></div><div class="dsc dsc-tabs" aria-hidden="true"><span>Following</span><b>For You</b><i>LIVE</i></div><span class="dsc dsc-time" id="dsc-time">Screen time today: 0 min</span><div class="mcd mcd-board"><span>Now serving</span><b id="mcd-p0">—</b><b id="mcd-p1">—</b></div><span class="mcd mcd-icecream">🍦 Ice cream machine: broken</span><div class="connection"><span id="connection-dot"></span><span id="connection">Waiting for Cemu</span></div></section>
     <section class="gamebar"><div><label for="game">Game</label><select id="game" aria-label="Game profile"></select><span id="auto-label" class="tag">Manual profile</span></div><button id="launch">Launch Cemu</button></section>
     <section id="art-banner" class="art-banner" hidden><div>Character portraits are available as an optional download.</div><button id="art-banner-btn">Download art · ~50 MB</button><button id="art-banner-dismiss" aria-label="Dismiss">×</button></section>
     <section class="stage" aria-label="Portal of Power">
@@ -33,12 +56,17 @@
     <section class="elements-section"><div class="section-title"><h2>Element shortcuts</h2><div class="player-tabs" role="group" aria-label="Element team player"><button id="tab-0" class="selected">Player 1</button><button id="tab-1">Player 2</button></div></div><div id="elements" class="elements"></div><div class="element-footnote"><span><kbd>Alt</kbd> + <kbd>1–9 / −</kbd> · Add <kbd>Shift</kbd> for Player 2. Shortcuts work in Cemu.</span><span>Click to load · Edit to assign</span></div></section>
     <section id="vehicles-section" class="vehicles-section" hidden><div class="section-title"><h2>Vehicle shortcuts</h2><button id="remove-vehicle" class="remove" hidden>Remove vehicle</button></div><div id="vehicles" class="elements vehicles"></div><div class="element-footnote"><span><kbd>Alt</kbd> + <kbd>Q W E</kbd> · Sky, Land, Sea. Shift is optional; both players share the vehicle.</span><span>Click to load · Edit to assign</span></div></section>
     <section id="perks-section" class="perks-section" hidden><div class="section-title"><h2>Swap Force perk shortcuts</h2><span id="perks-player" class="label"></span></div><div id="perks" class="perks"></div><div class="element-footnote"><span><kbd>Alt</kbd> + <kbd>Q W E R Y U I O</kbd> · Add <kbd>Shift</kbd> for Player 2.</span><span>Loads a full pair, or changes the active Swap Force bottom.</span></div></section>
-    <footer><span id="status" role="status" aria-live="polite">Scanning NFC library…</span><span id="library-count"></span></footer>
+    <footer><span id="status" role="status" aria-live="polite">Scanning NFC library…</span><span id="library-count"></span><span class="mcd mcd-legal">i’m portalin’ it · Order numbers are the Skylanders on your portal.</span><span class="fb fb-legal">18+ · No real money, gems or Skylanders are ever at stake. Play responsibly, bet never.</span></footer>
   </main>
   <dialog id="picker"><div class="dialog-heading"><h2 id="picker-title">Choose a Skylander</h2><button id="picker-close" aria-label="Close picker">×</button></div><input id="search" type="search" placeholder="Search Skylanders" aria-label="Search figures"><div id="half-controls" hidden><p id="half-summary"></p><button id="change-top">Change top</button></div><div id="picker-results" class="picker-results"></div><p id="picker-empty" hidden>No compatible figures found in your NFC folder.</p></dialog>
   <dialog id="poster-dialog"><div class="dialog-heading"><h2 id="poster-title">Skylander list</h2><button id="poster-close" aria-label="Close Skylander list">×</button></div><div id="poster-view" class="poster-view"><button id="poster-zoom" aria-label="Zoom in"><img id="poster-img" alt=""></button><p id="poster-missing" hidden>No Skylander list poster for this game yet.</p></div><p class="poster-hint">Click to zoom in or out. When zoomed, drag or scroll to look around.</p></dialog>
   <dialog id="settings-dialog"><div class="dialog-heading"><h2>Library & connection</h2><button id="settings-close" aria-label="Close settings">×</button></div><p>Keep Dè PerPortal and its release files beside Cemu, with your figure dumps in the neighboring <strong>NFC</strong> folder.</p><code id="root-path"></code><div class="settings-actions"><button id="reset-trap-detections">Reset trap detections · keep dumps unchanged</button><button id="restore-trap-backup">Restore latest trap backup</button><button id="rescan">Rescan NFC library</button><button id="enable">Enable Cemu portal</button><button id="download-art">Download character art · 50 MB</button><button id="art-folder">Use local artwork folder</button></div><p>Reset trap detections clears PerPortal's remembered villains and names, then treats each trap's current contents as ignored/empty until its detected villain changes. It never edits NFC dump files. Restore latest trap backup recovers originals from previous destructive clears; restart Cemu after restoring.</p><p>Artwork downloads from the Emulanders community pack and stays on your computer. Skylanders artwork belongs to its respective owners.</p><p>Use the supported skylandersNFC/Cemu-Skylanders-Emulated-Portal build. Shortcuts work while Cemu has focus and a Skylanders game is running.</p><details><summary>Library scan details</summary><pre id="warnings"></pre></details></dialog>
   <dialog id="trap-name-dialog"><form id="trap-name-form"><h2>Name trapped villain</h2><p id="trap-name-file"></p><label for="trap-name">Villain name</label><input id="trap-name" maxlength="80" autocomplete="off"><p>This name is saved for this trap file. Update it after changing villains in the game. Leave blank to clear it.</p><button id="trap-name-save" type="submit">Save name</button><button id="trap-name-cancel" type="button">Cancel</button></form></dialog>
+  <dialog id="theme-dialog"><div class="dialog-heading"><h2>Theme</h2><button id="theme-close" aria-label="Close themes">×</button></div>
+    <div class="theme-carousel"><button id="theme-prev" aria-label="Previous theme">‹</button><div class="theme-window"><div id="theme-track" class="theme-track"></div></div><button id="theme-next" aria-label="Next theme">›</button></div>
+    <div class="theme-footer"><div id="theme-dots" class="theme-dots" aria-hidden="true"></div><button id="theme-apply" class="primary">Use this theme</button></div></dialog>
+  <div id="fb-popup" class="fb fb-popup" role="dialog" aria-labelledby="fb-popup-title" hidden><button id="fb-popup-close" aria-label="Close offer">×</button><div id="fb-popup-icon" class="fb-popup-icon" aria-hidden="true"></div><h2 id="fb-popup-title"></h2><p id="fb-popup-text"></p><button id="fb-popup-cta" class="fb-spin"></button><small>Terms apply. The terms are that nothing happens.</small></div>
+  <div id="dsc-break" class="dsc dsc-break" role="dialog" aria-labelledby="dsc-break-title" hidden><h2 id="dsc-break-title">Time for a break?</h2><p id="dsc-break-text"></p><button id="dsc-keep" class="primary">Keep scrolling</button><button id="dsc-rest">Take a break</button></div>
   <div id="toast" role="alert" hidden></div>
   <script src="pad.js"></script>
   <script src="app.js"></script>

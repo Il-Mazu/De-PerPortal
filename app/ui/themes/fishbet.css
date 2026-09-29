@@ -1,0 +1,109 @@
+/* Dè FishBet: a parody of a deep-sea betting site. Glossy blue slabs, heavy
+   italic caps, a yellow jackpot button and a green one that actually spins. */
+[data-theme=fishbet]{--night:#03124a;--ink:#020a2e;--gilt:#3cc2ff;--gilt-hi:#dff5ff;--gilt-lo:#0b53d9;--parchment:#bfe4ff;--text:#f3f9ff;--muted:#8fb0e6;
+  --rim:linear-gradient(180deg,#8fe2ff,#2a8cf0 45%,#0d3fb4);--panel:linear-gradient(180deg,#0e3199,#081f6b);--display:Nunito,system-ui,sans-serif;
+  --jackpot:#ffd21f;--win:#22d160;--side:224px;--bar:74px;
+  display:grid;grid-template-columns:var(--side) minmax(0,1fr);align-items:start;
+  background:radial-gradient(ellipse 70% 40% at 60% 0,#1c4fd466,transparent 70%),linear-gradient(180deg,#0a2a8c,#061d6e 40%,var(--night))}
+[data-theme=fishbet] *{scrollbar-color:#2a8cf0 var(--night)}
+/* Light shafts through the water replace the drifting clouds. */
+[data-theme=fishbet]::before{background:repeating-linear-gradient(115deg,transparent 0 70px,#7fd4ff0c 70px 76px);mix-blend-mode:normal;opacity:1;animation:none;mask:linear-gradient(#000,transparent 70%)}
+[data-theme=fishbet]::after{display:none}
+
+/* Type: one heavy italic voice in caps, the betting-site shout. */
+[data-theme=fishbet] :is(h1,h2,h3,button,.player-label,.active-name,.element-label,.favorite .name,.sidekick .name,.picker-item>span,.villain-card span,.gamebar label,.theme-slide strong){font-family:Nunito,system-ui,sans-serif;font-style:italic;font-weight:900;text-transform:uppercase;letter-spacing:.2px}
+[data-theme=fishbet] :is(h1,h2){background:none;color:#fff;filter:none;text-shadow:0 2px 0 #021050}
+[data-theme=fishbet] h1{font-size:30px}[data-theme=fishbet] h2{font-size:21px}[data-theme=fishbet] h3{font-size:16px}
+[data-theme=fishbet] .section-title h2{flex:1;display:flex;align-items:center;gap:14px}
+[data-theme=fishbet] .section-title h2::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#3cc2ff,transparent)}
+[data-theme=fishbet] kbd{font-style:normal;color:#fff;background:#0b2a8f;box-shadow:0 0 0 1px #3cc2ff99,0 2px 0 #021050}
+[data-theme=fishbet] :focus-visible,[data-theme=fishbet].pad :focus{outline-color:var(--jackpot)}
+
+/* Buttons: glossy blue slabs; the main call is yellow, the spin is green. */
+:where([data-theme=fishbet]) button{border:2px solid transparent;border-radius:6px;font-size:13px;
+  background:linear-gradient(180deg,#2b8cff,#0c4fd0) padding-box,linear-gradient(180deg,#aee9ff,#1a5fe0) border-box;box-shadow:inset 0 1px 0 #ffffff55,0 3px 0 #021050}
+[data-theme=fishbet] :is(.primary,#launch){font-size:15px;font-weight:900;color:#1a1300;text-shadow:0 1px 0 #fff6;
+  background:linear-gradient(180deg,#ffe860,#ffc400 50%,#f0a000) padding-box,linear-gradient(#fff6b0,#b77800) border-box;box-shadow:inset 0 1px 0 #fff,0 3px 0 #6b4200,0 0 20px #ffd21f44}
+[data-theme=fishbet] .fb-spin{padding:12px 26px;font-size:17px;color:#fff;text-shadow:0 2px 0 #0a5a22;
+  background:linear-gradient(180deg,#6af58c,#22c957 50%,#12953c) padding-box,linear-gradient(#c8ffd6,#0a6a2a) border-box;box-shadow:inset 0 1px 0 #fff9,0 4px 0 #064a1c,0 0 26px #22d16055}
+[data-theme=fishbet] .fb-spin.fb-spin-two{background:linear-gradient(180deg,#2b8cff,#0c4fd0) padding-box,linear-gradient(180deg,#aee9ff,#1a5fe0) border-box;text-shadow:0 2px 0 #021050;box-shadow:inset 0 1px 0 #ffffff55,0 4px 0 #021050}
+[data-theme=fishbet] .fb-spin.reeling{min-width:220px;animation:reel .14s steps(2) infinite}
+@keyframes reel{50%{filter:brightness(1.35)}}
+[data-theme=fishbet] :is(select,input){border-radius:6px;background:linear-gradient(#041656,#0a2380) padding-box,var(--rim) border-box}
+[data-theme=fishbet] option{background:#0a2380}
+[data-theme=fishbet] :is(.player-tabs,.connection){border-radius:6px}
+
+/* Header and casino sidebar. */
+[data-theme=fishbet] .topbar{grid-column:1/-1;height:var(--bar);padding:0 20px;border-bottom:1px solid #2a6ae0;border-image:none;
+  background:repeating-radial-gradient(ellipse 40px 12px at 50% 100%,transparent 0 9px,#ffffff08 10px 11px),linear-gradient(180deg,#0a2a8c,#07207a);box-shadow:0 6px 18px #0009}
+[data-theme=fishbet] .brand img{height:52px}
+[data-theme=fishbet] main{grid-column:2;grid-row:2;width:100%;padding-top:14px}
+.fb-side{grid-column:1;grid-row:2;position:sticky;top:var(--bar);display:flex;flex-direction:column;gap:10px;height:calc(100vh - var(--bar) - 20px);margin:10px 0 0 10px;padding:10px;overflow:auto;
+  border-radius:10px;background:linear-gradient(180deg,#0e3aa8,#0a2a8c);box-shadow:inset 0 0 0 1px #2a6ae0,0 8px 20px #0006;font:italic 900 12.5px/1.2 Nunito,sans-serif;text-transform:uppercase}
+[data-fake]{cursor:pointer}[data-fake]:hover{filter:brightness(1.25)}
+.fb-promo{padding:10px;border-radius:8px;background:radial-gradient(circle at 90% 20%,#3cc2ff66,transparent 50%),linear-gradient(160deg,#1b55d8,#0b2a8f);box-shadow:inset 0 0 0 1px #5fb0ff}
+.fb-promo b{display:block;font-size:11px}.fb-promo strong{display:block;margin:2px 0 8px;color:var(--jackpot);font-size:13px}
+.fb-promo div{display:flex;gap:6px}.fb-promo span{flex:1;padding:6px 0;border-radius:5px;text-align:center;font-size:11px}
+.fb-go{color:#1a1300;background:linear-gradient(180deg,#ffe860,#f0a800);box-shadow:0 2px 0 #6b4200}.fb-guide{background:#0c4fd0;box-shadow:inset 0 0 0 1.5px #7fd4ff}
+.fb-tiles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fb-tiles span{display:flex;flex-direction:column;justify-content:flex-end;gap:4px;height:84px;padding:8px;border-radius:8px;font-size:26px;background:linear-gradient(180deg,#1f6ae8,#0b2a8f);box-shadow:inset 0 0 0 1.5px #7fd4ff}
+.fb-tiles b{font-size:10.5px}
+.fb-side nav{display:flex;flex-direction:column}.fb-side nav span{display:flex;align-items:center;gap:12px;padding:10px 8px;font-size:17px}
+.fb-side nav b{font-size:12.5px}.fb-side nav i{margin-left:auto;padding:1px 7px;border-radius:4px;font-size:10px;color:#0b2a8f;background:#fff}
+.fb-side hr{width:80%;height:2px;margin:4px auto;border:0;background:radial-gradient(#5fd0ff,transparent 70%)}
+.fb-side-foot{display:grid;grid-template-columns:1fr 1fr;margin-top:auto;padding-top:10px;border-top:1px solid #2a6ae0;text-align:center}
+.fb-side-foot span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:17px}.fb-side-foot b{font-size:10.5px}
+
+/* Recent wins, scrolling forever. */
+.fb-ticker{overflow:hidden;margin-bottom:12px;border-radius:6px;background:#020a2e99;box-shadow:inset 0 0 0 1px #1c4fd4;white-space:nowrap;font-size:12px}
+#fb-wins{display:inline-flex;padding:7px 0;animation:ticker 70s linear infinite}#fb-wins span{margin-right:36px}
+#fb-wins b{color:#fff}#fb-wins em{font-style:italic;font-weight:900;color:var(--jackpot)}
+@keyframes ticker{to{translate:-50% 0}}
+
+/* Promo hero: sunlit water, the mascot, and the real spin buttons. */
+.fb-hero{position:relative;isolation:isolate;display:flex;align-items:center;min-height:260px;padding:26px 64px;border-radius:12px;overflow:hidden;box-shadow:inset 0 0 0 1px #3c8cff,0 10px 30px #0008;
+  background:radial-gradient(circle at 18% 78%,#ffffff26 0 3px,transparent 4px),radial-gradient(circle at 24% 60%,#ffffff1f 0 2px,transparent 3px),radial-gradient(circle at 62% 30%,#ffffff26 0 4px,transparent 5px),radial-gradient(circle at 66% 48%,#ffffff1a 0 2px,transparent 3px),
+    radial-gradient(ellipse 60% 70% at 72% -10%,#bfeaff88,transparent 60%),linear-gradient(180deg,#3aa4ff,#1560d8 22%,#0a3aa8 58%,#041a66)}
+.fb-hero::before{content:'';position:absolute;inset:0;z-index:-1;background:repeating-conic-gradient(from 140deg at 72% -30%,#d8f3ff26 0 2.5deg,transparent 2.5deg 8deg);mask:linear-gradient(#000,transparent 75%)}
+.fb-slide{position:relative;z-index:1;max-width:560px}
+.fb-chip{display:inline-block;padding:3px 10px;border-radius:3px;color:#0a1a4a;background:linear-gradient(#fff,#cfd8ea);box-shadow:0 2px 0 #021050;font:italic 900 11px Nunito,sans-serif;text-transform:uppercase}
+.fb-headline{margin:10px 0 4px;font:italic 900 38px/1.05 Nunito,sans-serif;text-transform:uppercase;color:#fff;text-shadow:0 3px 0 #021050,0 0 24px #3cc2ff88;text-wrap:balance}
+.fb-slide small{display:block;color:#cfe6ff;font-size:12px}
+.fb-spins{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.fb-dots{display:flex;gap:9px;margin-top:16px}.fb-dots i{width:8px;height:8px;border-radius:50%;background:#ffffff55}.fb-dots i.on{background:#fff}
+.fb-fish{position:absolute;right:70px;bottom:-6px;height:250px;transform:scaleX(-1);filter:drop-shadow(0 10px 18px #0009);animation:swim 4s ease-in-out infinite alternate;pointer-events:none}
+@keyframes swim{to{translate:0 -12px;rotate:-3deg}}
+[data-theme=fishbet] .fb-arrow{position:absolute;top:50%;z-index:2;translate:0 -50%;padding:0 10px;font-size:44px;line-height:1;color:#5ee8c0;background:none;border:0;box-shadow:none;text-shadow:0 2px 0 #021050}
+#fb-prev{left:6px}#fb-next{right:6px}
+.fb-cats{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 22px;font:italic 900 12px Nunito,sans-serif;text-transform:uppercase}
+.fb-cats span{padding:8px 14px;border-radius:6px;background:linear-gradient(180deg,#1f6ae8,#0b2a8f);box-shadow:inset 0 0 0 1.5px #5fb0ff,0 3px 0 #021050}
+
+/* Panels become casino tiles; slot keys become giant ranking numerals. */
+[data-theme=fishbet] :is(.favorite,.accessory-card,.element-card,.perk-card,.villain-card,.art-banner){border-radius:8px}
+[data-theme=fishbet] dialog{border-radius:12px;background:linear-gradient(180deg,#0f3aa8f7,#061d6ef7) padding-box,var(--rim) border-box}
+[data-theme=fishbet] dialog::backdrop{background:radial-gradient(#0a2a8ccc,#010826ee)}
+[data-theme=fishbet] .active-name{font-size:16px;border-radius:6px;background:linear-gradient(180deg,#1b5de0,#0a2a8c) padding-box,var(--rim) border-box}
+[data-theme=fishbet] :is(.element-card,.perk-card){background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--color,#3cc2ff) 45%,transparent),transparent 70%) padding-box,linear-gradient(180deg,#0f37a8,#071a5e) padding-box,var(--rim) border-box}
+[data-theme=fishbet] .picker-item{border-radius:8px;background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--color,#3cc2ff) 35%,transparent),transparent 70%) padding-box,linear-gradient(180deg,#1446c0,#0a2380) padding-box,linear-gradient(170deg,#8fe2ff,#1a5fe0) border-box}
+[data-theme=fishbet] .elements:not(.vehicles){row-gap:28px;margin-bottom:22px}
+[data-theme=fishbet] :is(.elements:not(.vehicles),.perks) .slot-key{left:-4px;bottom:-16px;padding:0;min-width:0;background:none;box-shadow:none;font:italic 900 46px/1 Nunito,sans-serif;color:#0a2a8c;-webkit-text-stroke:3px #dff5ff;paint-order:stroke fill;text-shadow:0 3px 0 #021050}
+[data-theme=fishbet] :is(.accessories-section,.elements-section,.perks-section,.vehicles-section){border-image:none;border-top:0}
+/* Portal motes turn into bubbles. */
+[data-theme=fishbet] .motes i{width:9px;height:9px;background:radial-gradient(circle at 35% 30%,#fff 0 12%,#9fe4ff33 45%,transparent 70%);box-shadow:inset 0 0 0 1px #bfe9ffaa}
+
+/* Footer disclaimer and the bonus pop-up. */
+[data-theme=fishbet] footer{flex-wrap:wrap}
+.fb-legal{flex-basis:100%;color:#7f9bd0}
+[data-theme=fishbet] #toast{border-radius:8px;color:#fff;background:linear-gradient(180deg,#2b8cff,#0c4fd0);box-shadow:0 0 0 2px #aee9ff,0 12px 30px #000a}
+.fb-popup{position:fixed;right:24px;bottom:24px;z-index:90;width:330px;padding:24px 22px 16px;border-radius:14px;text-align:center;
+  background:radial-gradient(circle at 50% 0,#3cc2ff66,transparent 60%),linear-gradient(180deg,#0f3aa8,#061d6e);box-shadow:0 0 0 2px #8fe2ff,0 0 40px #3cc2ff77,0 20px 40px #000b;animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+.fb-popup-icon{font-size:52px;line-height:1;animation:wiggle 1.2s ease-in-out 2}
+@keyframes wiggle{25%{rotate:-12deg}75%{rotate:12deg}}
+.fb-popup h2{margin:10px 0 6px;color:var(--jackpot);text-shadow:0 2px 0 #021050}
+.fb-popup p{color:#dbeaff}.fb-popup .fb-spin{width:100%;margin:16px 0 8px}.fb-popup small{color:var(--muted);font-size:10.5px}
+[data-theme=fishbet] #fb-popup-close{position:absolute;top:8px;right:8px;padding:2px 9px;font-size:16px;box-shadow:none}
+
+/* Narrow windows fold the sidebar into an icon rail, then drop it. */
+@media(max-width:1500px){[data-theme=fishbet]{--side:78px}.fb-promo,.fb-side b,.fb-side nav i{display:none}.fb-tiles,.fb-side-foot{grid-template-columns:1fr;gap:6px}.fb-tiles span{height:auto;align-items:center}.fb-side nav span{justify-content:center;padding:9px 0}}
+@media(max-width:1100px){.fb-fish{height:190px;right:40px}.fb-headline{font-size:30px}}
+@media(max-width:760px){[data-theme=fishbet]{display:block}.fb-side,.fb-fish{display:none}.fb-hero{padding:22px 44px}}
