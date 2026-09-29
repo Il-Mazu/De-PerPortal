@@ -1,3 +1,20 @@
+# Dè PerPortal 1.3.0
+
+- **New:** themes. The **Theme** button opens a small carousel with a preview of each look; the one you pick is remembered the next time you start the app. **Dè Dusk over Skylands** stays the default.
+- **New:** a theme for every Skylanders game: **Dè Book of Eon** (Spyro's Adventure), **Dè Arkeyan Forge** (Giants), **Dè Woodburrow** (Swap Force), **Dè Cloudcracker Prison** (Trap Team), **Dè Rift Garage** (SuperChargers) and **Dè Mind Magic** (Imaginators). Pick **Match the game** and the look changes with the game you choose.
+- **New:** the **Dè perThumpback** theme, all about the Water Giant: the Phantom Tide's deck planks and rope, a fishing net over whale-blue sea, a "Hail to the Whale!" banner with his portrait, bio and ship's log of his stats, and buttons to load Thumpback or Thumpling.
+- **New:** the **Dè Cell to Singularity** theme, after the idle evolution game: deep space over a sleeping Earth, element shortcuts as glowing Tree of Life nodes, and Entropy and Ideas counters that climb on their own until the simulation reaches the singularity and starts over.
+- **New:** the **Dè PerMCdonald** theme, a fast-food order kiosk: red bar, yellow buttons, white menu tiles, element shortcuts as numbered combos and a Now serving board showing the order numbers (the figure IDs) of the Skylanders on your portal. Sometimes it asks if you want fries with that. The ice cream machine is broken.
+- **New:** the **Dè perDoomScroll** theme, your portal as a vertical feed: each player is a reel with likes, comments and a caption, element shortcuts are a profile grid with view counts, the page snaps from section to section, and a screen time counter keeps climbing. Every few minutes it suggests a break; taking one gets you "Just one more reel."
+- **New:** the **Dè FishBet** theme, a parody of a deep-sea betting site: its own logo, glossy blue casino styling, a scrolling list of made-up wins, and bonus pop-ups and menus that do nothing at all. The only real buttons it adds are **Spin · Player 1** and **Spin · Player 2**, which load a random Skylander from your library (Swap Force figures get a random bottom too).
+- **New:** the quick swap dial (hold **L3 + R3**) shows each player's default in its centre. Press **Y / △** to put it back on the portal, the same as **Alt + 0**.
+
+## Validation
+
+The Windows release workflow runs the build, full unit suite, and packaging. The UI test checks that Match the game follows the game, switches to Dè FishBet, spins a random Skylander for Player 2, checks the theme survives a reload and that the page still fits a narrow window; every theme was also checked from screenshots on Linux. A unit test checks that the dial's default maps to Alt + 0 for each player. The themes and the dial's default have not been tried on Windows yet.
+
+---
+
 # Dè PerPortal 1.2.0
 
 - **Changed:** automatic updates no longer run a PowerShell script, which antivirus software can flag as suspicious. The downloaded version now installs itself: it waits for the old app to close, copies its files over it and starts again. The result is written to `de-perportal-data\update.log`.
