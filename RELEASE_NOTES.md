@@ -9,10 +9,11 @@
 - **New (beta):** the elemental gate helper for Spyro's Adventure, Giants, Swap Force and Trap Team. Choose your level and its gate elements light up; **Alt + G** loads the next one.
 - **New:** the quick swap dial has a **Recent** ring: Random first, then the last Skylanders you played in this game.
 - **New:** profile export and import, a Discord status, and an OBS overlay at `http://127.0.0.1:47831/`, all in Settings.
+- **Fixed:** importing a profile ignored SuperChargers vehicle shortcuts; they're now restored, and a missing or wrong-type vehicle is reported instead of silently kept.
 
 ## Validation
 
-Unit tests cover reading level, gold, hero points and nicknames from encrypted saves and telling new, played and damaged saves apart; backup rotation and restore; the history; the unsaved warning; random with Nuzlocke; profile import; the Discord status; the OBS server and the dial's Recent ring. The UI test opens Collection and checks its filters, the poster and Setup, and every theme was checked from screenshots of each Collection tab on Linux. The save offsets were checked against a generated save, not a played figure; the new Alt + D and Alt + G hotkeys, the Discord status and the whole release have not been tried on Windows yet.
+Unit tests cover reading level, gold, hero points and nicknames from encrypted saves and telling new, played and damaged saves apart; backup rotation and restore; the history; the unsaved warning; random with Nuzlocke; profile import including vehicle shortcuts; the Discord status; the OBS server and the dial's Recent ring. The UI test opens Collection and checks its filters, the poster and Setup, and every theme was checked from screenshots of each Collection tab on Linux. The full unit and UI suites now also pass natively on Windows, and Alt + D and Alt + G were tried live there against a real Cemu session. The save offsets were checked against a generated save, not a played figure; the Discord status has not been tried on Windows yet.
 
 ---
 
