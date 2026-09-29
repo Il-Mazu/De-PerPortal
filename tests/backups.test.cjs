@@ -86,6 +86,27 @@ test('an imported profile keeps figures in this library and reports the rest',as
   } finally {await fs.rm(root,{recursive:true,force:true});}
 });
 
+test('profile import restores vehicle shortcuts and rejects missing or wrong-type vehicles',async()=>{
+  const root=await temp();
+  try {
+    await fs.mkdir(path.join(root,'NFC'));
+    for(const id of [3220,3232,3224]) {
+      const bytes=dump(id,id);bytes.writeUInt16LE(16384,28);
+      await fs.writeFile(path.join(root,'NFC',`${id}.sky`),bytes);
+    }
+    const manager=new Manager(root,async()=>'');await manager.init();manager.config.game=5;
+    await manager.select({target:'vehicle-shortcut',choice:{top:'3232.sky',type:'Sky'}});
+    const exported=JSON.parse(JSON.stringify(manager.exportProfile()));
+    await manager.select({target:'vehicle-shortcut',choice:{top:'3220.sky',type:'Sky'}});
+    exported.profile.vehicles.Land={top:'missing.sky',bottom:null};
+    exported.profile.vehicles.Sea={top:'3224.sky',bottom:null};
+    assert.equal(await manager.importProfile(exported),2);
+    assert.deepEqual(manager.profile.vehicles,{Sky:{top:'3232.sky',bottom:null},Land:null,Sea:null});
+    const restarted=new Manager(root,async()=>'');await restarted.init();
+    assert.deepEqual(restarted.config.profiles[5].vehicles,manager.profile.vehicles);
+  } finally {await fs.rm(root,{recursive:true,force:true});}
+});
+
 test('the OBS overlay only listens on this computer and streams the portal',async()=>{
   const {EventEmitter}=require('node:events');
   const {createObs,port}=require('../app/obs.cjs');

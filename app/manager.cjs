@@ -446,7 +446,14 @@ class Manager extends EventEmitter {
       if(model.candidates(this.figures,this.game,null,'sidekick').some(f=>f.key===data.profile.sidekick.top)) sidekick={top:data.profile.sidekick.top,bottom:null};
       else missing++;
     }
-    this.config.profiles[this.game]={...this.profile,players,sidekick};
+    const vehicles={};
+    if(this.game===5) for(const type of Object.values(accessories.vehicleKeys)) {
+      const c=data.profile.vehicles?.[type],f=this.figures.find(f=>f.key===c?.top);
+      if(c && !c.bottom && accessories.available(f,5,'vehicle') && accessories.vehicleType(f)===type)
+        vehicles[type]={top:f.key,bottom:null};
+      else {vehicles[type]=null;if(c) missing++;}
+    }
+    this.config.profiles[this.game]={...this.profile,players,sidekick,...(this.game===5?{vehicles}:{})};
     await this.save();this.message=missing?`Profile imported. ${missing} figure${missing===1?' is':'s are'} not in your library and left unassigned.`:'Profile imported.';this.publish();
     return missing;
   }
