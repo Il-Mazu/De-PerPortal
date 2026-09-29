@@ -43,13 +43,23 @@ jobs:
           path: |
             release/*.zip
             release/SHA256SUMS.txt
+      - name: Extract latest release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          # Get-Content/Set-Content mangle the é/è accents on Windows without an
+          # explicit codepage; read and write raw UTF-8 bytes instead.
+          $content = [System.IO.File]::ReadAllText("RELEASE_NOTES.md")
+          $separator = [regex]::Match($content, '(?m)^---\s*?$')
+          $latest = if ($separator.Success) { $content.Substring(0, $separator.Index) } else { $content }
+          [System.IO.File]::WriteAllText("release/LATEST_RELEASE_NOTES.md", $latest.TrimEnd() + "`n", [System.Text.UTF8Encoding]::new($false))
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: Dè PerPortal ${{ github.ref_name }}
           make_latest: true
           prerelease: false
-          body_path: RELEASE_NOTES.md
+          body_path: release/LATEST_RELEASE_NOTES.md
           files: |
             release/*.zip
             release/SHA256SUMS.txt
