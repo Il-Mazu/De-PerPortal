@@ -11,7 +11,7 @@
 [data-theme=fishbet]::after{display:none}
 
 /* Type: one heavy italic voice in caps, the betting-site shout. */
-[data-theme=fishbet] :is(h1,h2,h3,button,.player-label,.active-name,.element-label,.favorite .name,.sidekick .name,.picker-item>span,.villain-card span,.gamebar label,.theme-slide strong){font-family:Nunito,system-ui,sans-serif;font-style:italic;font-weight:900;text-transform:uppercase;letter-spacing:.2px}
+[data-theme=fishbet] :is(h1,h2,h3,button,.player-label,.active-name,.element-label,.favorite .name,.sidekick .name,.picker-item>span,.vault-item>span,.hub-count,.ledger dd,.villain-card span,.gamebar label,.theme-slide strong){font-family:Nunito,system-ui,sans-serif;font-style:italic;font-weight:900;text-transform:uppercase;letter-spacing:.2px}
 [data-theme=fishbet] :is(h1,h2){background:none;color:#fff;filter:none;text-shadow:0 2px 0 #021050}
 [data-theme=fishbet] h1{font-size:30px}[data-theme=fishbet] h2{font-size:21px}[data-theme=fishbet] h3{font-size:16px}
 [data-theme=fishbet] .section-title h2{flex:1;display:flex;align-items:center;gap:14px}
@@ -85,6 +85,10 @@
 [data-theme=fishbet] .active-name{font-size:16px;border-radius:6px;background:linear-gradient(180deg,#1b5de0,#0a2a8c) padding-box,var(--rim) border-box}
 [data-theme=fishbet] :is(.element-card,.perk-card){background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--color,#3cc2ff) 45%,transparent),transparent 70%) padding-box,linear-gradient(180deg,#0f37a8,#071a5e) padding-box,var(--rim) border-box}
 [data-theme=fishbet] .picker-item{border-radius:8px;background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--color,#3cc2ff) 35%,transparent),transparent 70%) padding-box,linear-gradient(180deg,#1446c0,#0a2380) padding-box,linear-gradient(170deg,#8fe2ff,#1a5fe0) border-box}
+[data-theme=fishbet] .vault-item:not(.missing){border-radius:8px;background:radial-gradient(ellipse 70% 38% at 50% 100%,color-mix(in srgb,var(--color,#3cc2ff) 50%,transparent),transparent) padding-box,linear-gradient(180deg,#1446c0,#0a2380) padding-box,linear-gradient(170deg,#8fe2ff,#1a5fe0) border-box}
+[data-theme=fishbet] .vault-item.missing{border-radius:8px;border-width:2px}
+[data-theme=fishbet] .hub-count b{color:var(--jackpot)}
+[data-theme=fishbet] :is(.ledger div,.hub-block,.history li,.check-row,.vault-detail){border-radius:8px}
 [data-theme=fishbet] .elements:not(.vehicles){row-gap:28px;margin-bottom:22px}
 [data-theme=fishbet] :is(.elements:not(.vehicles),.perks) .slot-key{left:-4px;bottom:-16px;padding:0;min-width:0;background:none;box-shadow:none;font:italic 900 46px/1 Nunito,sans-serif;color:#0a2a8c;-webkit-text-stroke:3px #dff5ff;paint-order:stroke fill;text-shadow:0 3px 0 #021050}
 [data-theme=fishbet] :is(.accessories-section,.elements-section,.perks-section,.vehicles-section){border-image:none;border-top:0}

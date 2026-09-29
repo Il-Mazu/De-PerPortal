@@ -22,17 +22,17 @@
 .skin::after{display:none}
 .skin :is(h1,h2,h3){font-family:var(--display);background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--heading);filter:none;text-shadow:var(--heading-shadow)}
 .skin h1{font-size:calc(34px * var(--display-size))}.skin h2{font-size:calc(24px * var(--display-size))}
-.skin :is(.primary,#launch,.player-label,.active-name,.element-label,.favorite .name,.sidekick .name,.picker-item>span,.villain-card span,.gamebar label,.theme-slide strong,.dialog-heading h2){font-family:var(--display)}
+.skin :is(.primary,#launch,.player-label,.active-name,.element-label,.favorite .name,.sidekick .name,.picker-item>span,.vault-item>span,.hub-count,.ledger dd,.gates label,.villain-card span,.gamebar label,.theme-slide strong,.dialog-heading h2){font-family:var(--display)}
 .skin :focus-visible,.skin.pad :focus{outline-color:var(--focus)}
 .skin .topbar{background:var(--bar);border-image:none;border-bottom:var(--bar-edge)}
 :where(.skin) button{color:var(--btn-text);border-radius:var(--radius);background:var(--btn);box-shadow:var(--btn-shadow)}
 .skin :is(.primary,#launch){color:var(--cta-text);background:var(--cta);box-shadow:var(--cta-shadow)}
-.skin :is(.player-tabs .selected,.default-presets button[aria-pressed="true"]){color:var(--cta-text);background:var(--cta)}
+.skin :is(.player-tabs .selected,.default-presets button[aria-pressed="true"],#settings-dialog [aria-pressed="true"],.hub-actions [aria-pressed="true"]){color:var(--cta-text);background:var(--cta)}
 .skin :is(select,input){border-radius:var(--radius);color:var(--panel-strong);background:linear-gradient(var(--well),var(--well)) padding-box,var(--rim) border-box}
 .skin option{background:var(--night)}
 /* Panels carry their own text colours, so light pages and dark stone both read. */
 .skin :is(.favorite,.accessory-card,.villain-card,.art-banner,dialog,.active-name,.connection,.player-tabs,.figure-meta,#toast,.sidekick>button,.fb-popup){--text:var(--panel-text);--muted:var(--panel-muted);--parchment:var(--panel-strong);color:var(--panel-text)}
-.skin :is(.favorite,.accessory-card,.villain-card,.art-banner){border-radius:var(--radius);background:var(--surface)}
+.skin :is(.favorite,.accessory-card,.villain-card,.art-banner,.vault-detail){border-radius:var(--radius);background:var(--surface)}
 .skin dialog{border-radius:calc(var(--radius) + 6px);background:var(--surface)}
 .skin dialog::backdrop{background:var(--backdrop,#000b)}
 .skin :is(.element-card,.perk-card,.picker-item){--text:var(--panel-text);color:var(--panel-text);border-radius:var(--radius);background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--color,var(--gilt)) 40%,transparent),transparent 70%) padding-box,var(--surface)}
@@ -41,7 +41,18 @@
 .skin :is(.accessory-card,.villain-card,.favorite) h3{text-shadow:none}
 .skin :is(.favorite .name,.active-name){color:var(--panel-strong);text-shadow:none}
 .skin .active-name{border-radius:var(--radius);background:var(--surface)}
-.skin :is(.connection,.player-tabs,.figure-meta,#half-controls,#root-path,.poster-view,.accessory-art){background:var(--well)}
+.skin :is(.connection,.player-tabs,.figure-meta,#half-controls,#root-path,#obs-url,.poster-view,.accessory-art){background:var(--well)}
+/* Kept apart from the list above: its ids would outrank each theme's own ledger. */
+.skin :is(.ledger div,.hub-block,.history li,.check-row){background:var(--well)}
+/* Collection: owned figures lit from below on the theme's own surface; missing ones unlit. */
+.skin .vault-item{--text:var(--panel-text);color:var(--panel-text);border-radius:var(--radius);background:radial-gradient(ellipse 70% 38% at 50% 100%,color-mix(in srgb,var(--color,var(--gilt)) 45%,transparent),transparent) padding-box,var(--surface)}
+.skin .vault-item.missing{background:none}
+.skin .vault-item small{color:var(--panel-muted)}
+.skin .vault-detail{--text:var(--panel-text);--muted:var(--panel-muted);--parchment:var(--panel-strong);color:var(--panel-text)}
+.skin .detail-figure+.detail-figure{border-top-color:var(--rule)}
+.skin .meter i{background:linear-gradient(90deg,var(--color) calc(var(--v) * 100%),var(--well) 0)}
+.skin .meter-label{color:color-mix(in srgb,var(--color) var(--el-mix,65%),var(--el-base))}
+.skin .hub-count b{color:var(--panel-strong)}
 .skin .accessory-art{box-shadow:inset 0 0 0 1.5px var(--rule)}.skin .accessory-symbol{color:var(--heading)}
 .skin :is(kbd,.slot-key){color:var(--key-text);background:var(--key);box-shadow:var(--key-shadow)}
 .skin :is(.accessories-section,.elements-section,.perks-section,.vehicles-section){border-image:linear-gradient(90deg,transparent,var(--rule),transparent) 1}
@@ -66,7 +77,7 @@
   --btn:var(--page) padding-box,var(--rim) border-box;--btn-text:#3a2412;--btn-shadow:0 2px 0 #1a0c04,inset 0 0 0 1px #fff6;
   --cta:radial-gradient(circle at 40% 30%,#d4453a,#8e1a14 70%) padding-box,linear-gradient(#e8b04a,#6b3a0a) border-box;--cta-text:#fff0c2;--cta-shadow:0 3px 0 #3d0a06,0 0 18px #d4453a55;
   --key:linear-gradient(#fff4d6,#e3c98f);--key-text:#3a2412;--key-shadow:0 1px 0 #6b4520,inset 0 0 0 1px #6b452066}
-[data-theme=spyros-adventure] :is(.favorite,.accessory-card,.element-card,.perk-card,.villain-card,dialog){box-shadow:inset 0 0 0 4px #f3e3bf00,inset 0 0 0 5px #6b452088,0 10px 24px #0009}
+[data-theme=spyros-adventure] :is(.favorite,.accessory-card,.element-card,.perk-card,.villain-card,.vault-item:not(.missing),dialog){box-shadow:inset 0 0 0 4px #f3e3bf00,inset 0 0 0 5px #6b452088,0 10px 24px #0009}
 [data-theme=spyros-adventure] :is(.primary,#launch){font-family:var(--display);font-size:18px}
 [data-theme=spyros-adventure] :is(dialog,.accessory-card,.fb-popup) :is(h2,h3){color:var(--panel-strong);text-shadow:none}
 [data-theme=spyros-adventure] .section-title h2::first-letter{font-size:1.35em;color:#e9665a}
@@ -120,7 +131,7 @@
   --cta:linear-gradient(180deg,#d4ff5c,#9bd62a 55%,#5a9a12) padding-box,linear-gradient(#f2ffc0,#2f5a06) border-box;--cta-text:#173400;--cta-shadow:0 4px 0 #2f5a06,0 0 18px #9bd62a66;
   --key:linear-gradient(#fff,#d8f2ff);--key-text:#0d3a5c;--key-shadow:0 2px 0 #0d3a5c}
 [data-theme=swap-force]::before{opacity:.55;mix-blend-mode:screen;filter:saturate(0) brightness(1.6)}
-[data-theme=swap-force] :is(.element-card,.perk-card,.picker-item){background:linear-gradient(172deg,color-mix(in srgb,var(--color,#1fa7d6) 55%,transparent) 0 47%,#fff4 47% 49%,transparent 49%) padding-box,var(--wood) padding-box,var(--rim) border-box}
+[data-theme=swap-force] :is(.element-card,.perk-card,.picker-item,.vault-item:not(.missing)){background:linear-gradient(172deg,color-mix(in srgb,var(--color,#1fa7d6) 55%,transparent) 0 47%,#fff4 47% 49%,transparent 49%) padding-box,var(--wood) padding-box,var(--rim) border-box}
 [data-theme=swap-force] .topbar .brand img{filter:drop-shadow(0 3px 0 #0d3a5c)}
 [data-theme=swap-force] :is(.tag,.element-footnote,footer){font-weight:800}
 
@@ -142,7 +153,7 @@
   --cta:linear-gradient(135deg,#ffe8a8 0 18%,#ffb640 18% 45%,#ff8a1a 45% 70%,#d85e06 70%) padding-box,linear-gradient(#fff2c8,#6b2a02) border-box;--cta-shadow:0 0 22px #ff8a1a77,0 3px 0 #3a1602;
   --key:linear-gradient(135deg,#ffe0a0,#ff9a1f);--key-shadow:0 2px 0 #5a2a04}
 /* Traptanium facets: slots and buttons are cut like the trap crystals. */
-[data-theme=trap-team] :is(.element-card,.perk-card,.favorite,.accessory-card,.primary,#launch,.picker-item){clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)}
+[data-theme=trap-team] :is(.element-card,.perk-card,.favorite,.accessory-card,.primary,#launch,.picker-item,.vault-item){clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)}
 [data-theme=trap-team] :is(.primary,#launch){clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%)}
 [data-theme=trap-team] :is(h1,h2){letter-spacing:1px}
 /* Captured villains get a mugshot height chart. */
@@ -197,7 +208,7 @@
   --cta:linear-gradient(135deg,#ffe28a,#ff9ad9 45%,#b86bff) padding-box,linear-gradient(#fff,#6a2a9a) border-box;--cta-text:#2a0a40;--cta-shadow:0 3px 0 #3a1260,0 0 24px #ff7ad966;
   --key:linear-gradient(#fff,#e8dcff);--key-text:#2a0a40;--key-shadow:0 2px 0 #6a2a9a}
 [data-theme=imaginators] .topbar{border-image:var(--holo) 1}
-[data-theme=imaginators] :is(.favorite,.accessory-card,.element-card,.perk-card,.picker-item,dialog){border-width:2.5px}
+[data-theme=imaginators] :is(.favorite,.accessory-card,.element-card,.perk-card,.picker-item,.vault-item,dialog){border-width:2.5px}
 /* Marker headings, a little crooked, with a scribbled underline. */
 [data-theme=imaginators] :is(h1,h2){rotate:-1.5deg;letter-spacing:.5px}
 [data-theme=imaginators] .section-title h2{padding-bottom:4px;background:linear-gradient(90deg,#ff7ad9,#6bd6ff) no-repeat 0 100%/100% 3px}
@@ -243,6 +254,8 @@
 [data-theme=singularity] .element-card .portrait img{object-fit:cover;border-radius:0}
 [data-theme=singularity] .element-card .placeholder .sigil{width:40px;height:40px}
 [data-theme=singularity] :is(.elements:not(.vehicles),.perks) .slot-key{display:grid;place-items:center;width:22px;height:22px;min-width:0;padding:0;border-radius:50%}
+/* Progress meters are charging circuits. */
+[data-theme=singularity] .meter i{height:6px;box-shadow:0 0 10px color-mix(in srgb,var(--color) 70%,transparent)}
 
 /* Dè perThumpback --------------------------------------------------------
    All Thumpback: the Water Giant who left the Phantom Tide to go fishing.
@@ -293,6 +306,9 @@
 .ptb-log dd{display:flex;align-items:center;gap:8px;margin:0}
 .ptb-log i{flex:1;height:7px;border-radius:99px;background:linear-gradient(90deg,#2f6fb3 calc(var(--v,0) * 100%),#3a241222 0)}
 .ptb-log b{min-width:3ch;text-align:right}
+/* Progress totals are written in the ship's log. */
+[data-theme=thumpback] .ledger div{color:#3a2412;background:linear-gradient(#f6ecd6f2,#e6d6b4f2),url(textures/parchment.jpg) center/260px;box-shadow:inset 0 0 0 1px #7a5a30}
+[data-theme=thumpback] .ledger dt{color:#6e5337}[data-theme=thumpback] .ledger dd{color:#3a2412}
 @media(max-width:1100px){.ptb-hero{grid-template-columns:minmax(0,1fr) 170px}.ptb-log{display:none}.ptb-hail{font-size:42px}}
 @media(max-width:760px){.ptb-hero{grid-template-columns:1fr}.ptb-art{display:none}}
 
@@ -313,8 +329,12 @@
   --cta:linear-gradient(#ffd24d,#ffc72c) padding-box,linear-gradient(#ffc72c,#e0a800) border-box;--cta-text:#27251f;--cta-shadow:0 3px 0 #c99a00;
   --key:#da291c;--key-text:#fff;--key-shadow:none}
 [data-theme=mcdonald] h1{color:#da291c}
-[data-theme=mcdonald] :is(.favorite,.accessory-card,.element-card,.perk-card,.villain-card,dialog,.picker-item){box-shadow:0 6px 16px #27251f14}
+[data-theme=mcdonald] :is(.favorite,.accessory-card,.element-card,.perk-card,.villain-card,dialog,.picker-item,.vault-item:not(.missing)){box-shadow:0 6px 16px #27251f14}
 [data-theme=mcdonald] :is(.element-card,.perk-card,.picker-item){background:linear-gradient(#fff,#fff) padding-box,var(--rim) border-box}
+/* Progress prints as an order receipt. */
+[data-theme=mcdonald] .ledger{grid-template-columns:1fr;gap:0;max-width:440px;padding:10px 18px 14px;border-radius:2px;background:#fff;box-shadow:0 6px 16px #27251f1f;font-variant-numeric:tabular-nums}
+[data-theme=mcdonald] .ledger div{display:flex;align-items:baseline;justify-content:space-between;padding:8px 0;border-radius:0;background:none;border-bottom:1.5px dashed #d9d1bf}
+[data-theme=mcdonald] .ledger dd{font-size:17px}
 [data-theme=mcdonald] :is(.element-card,.perk-card):hover{box-shadow:0 10px 22px #27251f26,0 0 0 2px #ffc72c}
 [data-theme=mcdonald] .topbar .toolbar button{--rim:linear-gradient(#fff,#fff)}
 [data-theme=mcdonald] .active-card .placeholder{background:#fff;border-color:#da291c;color:#da291c}
@@ -386,6 +406,9 @@ html:has(body[data-theme=doomscroll]){scroll-snap-type:y proximity}
 [data-theme=doomscroll] .element-card .portrait img{object-fit:cover;border-radius:0}
 .dsc-views{position:absolute;left:12px;top:132px;font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px #000}
 [data-theme=doomscroll] .element-card:hover{box-shadow:0 0 0 2px #25f4ee,0 0 0 4px #fe2c55}
+/* History is your watch history. */
+[data-theme=doomscroll] .history li{box-shadow:none;border-radius:12px}
+[data-theme=doomscroll] .history b::after{content:'  #portal #fyp';font-weight:800;color:#25f4ee}
 /* The break it suggests and will not let you take. */
 .dsc-break{position:fixed;left:50%;bottom:0;z-index:90;width:380px;max-width:100vw;translate:-50% 0;padding:22px 22px 20px;border-radius:16px 16px 0 0;background:#1f1f1f;box-shadow:0 -10px 40px #000c;text-align:center;animation:sheet .35s cubic-bezier(.2,1,.3,1)}
 @keyframes sheet{from{translate:-50% 100%}}

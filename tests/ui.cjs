@@ -88,6 +88,8 @@ const {installArt}=require('../app/artwork.cjs');
   await page.locator('#favorite-0 .default-presets button').nth(1).click();
   assert.match(await page.locator('#picker-title').textContent(),/default preset 2/);
   await page.locator('#search').fill('Spyro');
+  // The last click left the pointer on this tile's edge, where the hover lift makes it jitter.
+  await page.mouse.move(0,0);
   await page.locator('.picker-item[data-key="16-0.sky"]').click();
   await page.waitForFunction(()=>!document.getElementById('picker').open);
   assert.equal(await page.locator('#favorite-0 .name').textContent(),'Spyro');
@@ -103,11 +105,26 @@ const {installArt}=require('../app/artwork.cjs');
   assert.equal(await page.locator('.picker-item').count(),2); // no Giant Thumpback in ordinary Water choices
   await page.locator('#picker-close').click();
   await page.locator('#settings').click();await page.locator('#settings-close').click();
-  // Skylander list shows the current game's poster.
+  // Collection: this game's catalog against the library, with the poster on top.
+  await page.locator('#collection').click();
+  await page.locator('#vault .vault-item').first().waitFor();
+  const owned=await page.locator('#vault .vault-item:not(.missing)').count();
+  assert.ok(owned>0 && await page.locator('#vault .vault-item.missing').count()>0);
+  assert.match(await page.locator('#hub-count').textContent(),new RegExp(`^${owned} of \\d+ in your library$`));
+  await page.selectOption('#vault-show','missing');
+  assert.equal(await page.locator('#vault .vault-item:not(.missing)').count(),0);
+  await page.selectOption('#vault-show','owned');
+  await page.locator('#vault .vault-item').first().click();
+  await page.locator('#vault-detail .backups').getByText(/None yet/).waitFor();
   await page.locator('#posters').click();
   await page.waitForFunction(()=>document.getElementById('poster-img').naturalWidth>0);
   assert.match(await page.locator('#poster-title').textContent(),/Skylander list/);
   await page.locator('#poster-close').click();
+  assert.equal(await page.locator('#hub').evaluate(el=>el.open),true,'closing the poster keeps Collection open');
+  await page.getByRole('tab',{name:'Setup'}).click();
+  await page.locator('#checks .check-row').first().waitFor();
+  assert.equal(await page.locator('#checks [data-status=bad]').filter({hasText:'Cemu next to'}).count(),1,'no Cemu in the fixture folder');
+  await page.locator('#hub-close').click();
   await page.locator('#tab-0').click();
   await selectGame('2');
   assert.equal(await page.locator('#perks-section').isVisible(),false);
@@ -162,6 +179,7 @@ const {installArt}=require('../app/artwork.cjs');
         else if(data.target==='remove-accessory')delete fixture.accessories[data.slot];
         main.webContents.send('state',fixture);
       });
+      ipcMain.removeHandler('random');ipcMain.handle('random',(_event,player)=>{globalThis.uiActions.push({target:'random',player});});
       main.webContents.send('state',fixture);
     },fixture);
     await page.locator('#player-0 .active-name').filter({hasText:'Spyro'}).waitFor();
@@ -195,7 +213,7 @@ const {installArt}=require('../app/artwork.cjs');
     assert.equal(await page.locator('body').getAttribute('data-theme'),'fishbet');
     assert.equal(await page.locator('body').evaluate(b=>b.classList.contains('skin')),false);
     await page.locator('#spin-1').click();
-    while(!(await instance.evaluate(()=>globalThis.uiActions.at(-1).target==='direct')))await new Promise(r=>setTimeout(r,50));
+    while(!(await instance.evaluate(()=>globalThis.uiActions.at(-1).target==='random')))await new Promise(r=>setTimeout(r,50));
     assert.equal(await instance.evaluate(()=>globalThis.uiActions.at(-1).player),1);
     await page.screenshot({path:'out/de-perportal-fishbet.png',fullPage:true});
     await page.setViewportSize({width:720,height:900});
@@ -204,6 +222,39 @@ const {installArt}=require('../app/artwork.cjs');
     assert.equal(await page.locator('body').getAttribute('data-theme'),'fishbet');
     await page.evaluate(()=>localStorage.removeItem('theme'));await page.reload();
     assert.equal(await page.locator('body').getAttribute('data-theme'),'default');
+    // Collection in every theme, with played saves, a history and a gate level.
+    await page.setViewportSize({width:1280,height:900});
+    const played=await page.evaluate(()=>window.dePerPortal.state());
+    played.game=3;played.session={pid:1,supported:true,game:3,focused:false};played.active=[{top:'16-0.sky',bottom:null},null];
+    played.gates=require('../resources/gates.json')['3'];played.gateLevel=1;played.challenge={nuzlocke:true,fallen:['9-0.sky']};
+    // Own every other Swap Force figure so the shelf mixes lit and empty slots.
+    for(const [i,c] of require('../resources/catalog.json').filter(c=>c.game===3).entries()) if(i%2===0 && !played.figures.some(f=>f.id===c.id && f.variant===c.variant))
+      played.figures.push({key:`sf/${c.id}-${c.variant}.sky`,id:c.id,variant:c.variant,uid:`f${i}`,half:c.id>=1000 && c.id<=1015?'bottom':c.id>=2000 && c.id<=2015?'top':'whole',info:c,art:null,accessory:null});
+    played.figures.forEach((f,i)=>{if(f.info && ['Skylander','Giant','Swapper'].includes(f.info.kind))f.save=i%5===4?{state:'damaged'}:{state:'ok',xp:i*3100,level:Math.min(10,1+i%10),maxed:i%4===0,gold:i*137,heroPoints:i*3,nickname:''};});
+    played.history=played.figures.slice(0,6).map((f,i)=>({key:f.key,name:f.info?.name,game:3,player:i%2,at:Date.now()-i*900000}));
+    await instance.evaluate(({BrowserWindow},fixture)=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/index.html')).webContents.send('state',fixture),played);
+    await page.locator('.element-card.gate').first().waitFor();
+    assert.equal(await page.locator('#gates').isVisible(),true);
+    await page.locator('#collection').click();
+    await page.locator('#vault .vault-item').first().waitFor();
+    await page.locator('#vault .vault-item:not(.missing)').first().click();
+    await fs.mkdir('out/themes',{recursive:true});
+    for(const theme of ['default','spyros-adventure','giants','swap-force','trap-team','superchargers','imaginators','thumpback','singularity','mcdonald','doomscroll','fishbet']) {
+      await page.evaluate(id=>setTheme(id),theme);
+      for(const tab of ['Figures','Progress','History','Setup']) {
+        await page.getByRole('tab',{name:tab}).click();
+        if(tab==='Setup') await page.locator('#checks .check-row').first().waitFor();
+        await page.locator('#hub').screenshot({path:`out/themes/${theme}-${tab.toLowerCase()}.png`});
+      }
+      await page.getByRole('tab',{name:'Figures'}).click();
+    }
+    await page.setViewportSize({width:720,height:900});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await page.locator('#hub').screenshot({path:'out/themes/compact-figures.png'});
+    await page.evaluate(()=>setTheme('default'));
+    await page.locator('#hub-close').click();
+    await page.setViewportSize({width:1280,height:900});
+    await page.screenshot({path:'out/de-perportal-stats.png',fullPage:true});
   }
   if(process.env.DE_PERPORTAL_INTEGRATION!=='1') {
     const bytes=Buffer.from((await fs.readFile(path.join(__dirname,'fixtures/life-trap.hex'),'utf8')).trim(),'hex');

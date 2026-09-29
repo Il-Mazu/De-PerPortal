@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,ipcMain,protocol,net,dialog}=require('electron');
+const {app,BrowserWindow,ipcMain,protocol,net,dialog,shell}=require('electron');
 const fs=require('node:fs/promises');
 const fsWatch=require('node:fs');
 const path=require('node:path');
@@ -80,6 +80,11 @@ else {
     radial=require('./radial.cjs').createRadial(manager,win,freeze,process.platform==='win32'?raise:null);
     win.on('closed',()=>{overlay.destroy();radial.destroy();});
     manager.on('state',state=>{if(!win.isDestroyed()) win.webContents.send('state',state);});
+    // Discord Rich Presence and the OBS browser source are off until enabled in Settings.
+    const presence=require('./discord.cjs').createPresence(),obs=require('./obs.cjs').createObs(manager);
+    const stream=()=>{presence.enable(!!manager.config.discord);presence.update(manager.state());obs.enable(!!manager.config.obs);};
+    manager.on('state',stream);stream();
+    app.on('before-quit',()=>{presence.enable(false);obs.enable(false);});
     for(const [channel,handler] of Object.entries({
       state:()=>manager.state(), action:data=>manager.action(data),select:data=>manager.select(data),game:g=>manager.setGame(g),rescan:()=>manager.rescan(),'reset-trap-detections':()=>manager.resetTrapDetections(),'restore-trap-backup':()=>manager.restoreLatestTrapBackup(),
       'overlay-show':()=>overlay.show(),
@@ -94,7 +99,30 @@ else {
         child.on('error',e=>{manager.message=e.message;manager.publish();}); child.unref();
       },
       'art-folder':async()=>{const r=await dialog.showOpenDialog(win,{properties:['openDirectory'],title:'Choose character artwork folder'});if(!r.canceled){manager.config.artRoot=r.filePaths[0];await manager.save();await manager.rescan();}},
-      artwork:async()=>{const {downloadArt}=require('./artwork.cjs');manager.message='Downloading character artwork…';manager.publish();await downloadArt(root);manager.config.artRoot=null;await manager.save();await manager.rescan();manager.message='Character artwork is ready.';manager.publish();}
+      artwork:async()=>{const {downloadArt}=require('./artwork.cjs');manager.message='Downloading character artwork…';manager.publish();await downloadArt(root);manager.config.artRoot=null;await manager.save();await manager.rescan();manager.message='Character artwork is ready.';manager.publish();},
+      catalog:()=>require('../resources/catalog.json'),
+      diagnostics:()=>manager.diagnostics(),
+      backups:key=>manager.backups(key),
+      'restore-backup':data=>manager.restoreBackup(data || {}),
+      random:player=>manager.random(player),
+      challenge:data=>manager.setChallenge(data || {}),
+      'gate-level':index=>manager.setGateLevel(index),
+      stream:data=>manager.setStream(data),
+      'show-figure':key=>shell.showItemInFolder(manager.figurePath(key)),
+      'open-issues':()=>shell.openExternal('https://github.com/Il-Mazu/De-PerPortal/issues'),
+      'export-profile':async()=>{
+        const game=manager.state().games[manager.game-1];
+        const r=await dialog.showSaveDialog(win,{title:'Export profile',defaultPath:`${game} profile.json`,filters:[{name:'Dè PerPortal profile',extensions:['json']}]});
+        if(r.canceled) return false;
+        await fs.writeFile(r.filePath,JSON.stringify(manager.exportProfile(),null,2));return true;
+      },
+      'import-profile':async()=>{
+        const r=await dialog.showOpenDialog(win,{title:'Import profile',properties:['openFile'],filters:[{name:'Dè PerPortal profile',extensions:['json']}]});
+        if(r.canceled) return null;
+        const text=await fs.readFile(r.filePaths[0],'utf8');
+        let data;try {data=JSON.parse(text);} catch {throw Error('This file is not a Dè PerPortal profile.');}
+        return manager.importProfile(data);
+      }
     })) ipcMain.handle(channel,async(event,arg)=>{
       if(event.sender!==win.webContents || event.senderFrame!==win.webContents.mainFrame) throw Error('Invalid request.');
       return handler(arg);

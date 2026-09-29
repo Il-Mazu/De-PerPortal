@@ -3,6 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const catalog = require('../resources/catalog.json');
 const traps=require('./traps.cjs');
+const save=require('./figure.cjs');
 const elements = ['Magic','Water','Tech','Fire','Earth','Life','Air','Undead','Light','Dark'];
 const games = ["Spyro’s Adventure",'Giants','Swap Force','Trap Team','SuperChargers','Imaginators'];
 const perks = [
@@ -33,12 +34,16 @@ async function scan(root, artRoot) {
       if (/\.(png|jpe?g|webp)$/i.test(file)) images.push(file);
       if (dumps && /\.(sky|bin|dump|dmp)$/i.test(file)) {
         try {
-          if ((await fs.stat(file)).size!==1024) throw Error('Not a 1024-byte dump');
+          const stat=await fs.stat(file);
+          if (stat.size!==1024) throw Error('Not a 1024-byte dump');
           const bytes=await fs.readFile(file);
           const figure=identify(bytes);
-          // Trap decoding is advisory only.  A corrupt save must not make the
-          // otherwise usable accessory disappear from the library.
+          figure.mtime=stat.mtimeMs;
+          // Trap and save decoding are advisory only.  A corrupt save must not
+          // make the otherwise usable figure disappear from the library.
           if(figure.info?.kind==='Trap') figure.trap=traps.decode(bytes);
+          figure.save=save.read(bytes,figure.info?.kind);
+          if(figure.save?.state==='damaged') warnings.push(`${entry.name}: save data failed its checksum`);
           figures.push({...figure,path:file,key:path.relative(root,file).split(path.sep).join('/')});
           if(!figure.info) warnings.push(`Unknown figure ${figure.id}:${figure.variant} in ${entry.name}`);
         } catch(e) { warnings.push(`${entry.name}: ${e.message}`); }

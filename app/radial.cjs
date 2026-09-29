@@ -2,6 +2,7 @@
 const {BrowserWindow,ipcMain,screen}=require('electron');
 const path=require('node:path');
 const {trapKeys}=require('./manager.cjs');
+const model=require('./model.cjs');
 const elementKeys=['1','2','3','4','5','6','7','8','9','-'];
 const size=440;
 
@@ -23,6 +24,11 @@ function tabs(manager) {
     ]});
   }
   if(s.game===5) list.push({title:'Vehicles',items:Object.entries(s.vehicleKeys).map(([key,type])=>({label:type,detail:name({top:s.vehicleShortcuts[type].key}),vehicle:type,hotkey:{player:0,key}}))});
+  // Random first, then the figures played most recently in this game.
+  const library=key=>manager.figures.find(f=>f.key===key);
+  const recent=(s.recent||[]).filter(h=>h.game===s.game && h.player!==null && model.playable(library(h.key),s.game)).map(h=>model.choice(library(h.key),manager.figures)).filter(Boolean);
+  list.push({title:'Recent',twoPlayer:true,items:[{label:'Random',detail:'Any Skylander in your library',glyph:'?',hotkey:{key:'D'}},
+    ...recent.map(c=>({label:name(c),detail:library(c.top).info.element,el:library(c.top).info.element,choice:c}))]});
   return list;
 }
 
@@ -67,6 +73,11 @@ function createRadial(manager,mainWindow,freeze,raise) {
     if(!item)return;
     await hide();
     if(item.villain)manager.selectedTrap=item.villain;
+    if(item.choice) {
+      try { await manager.action({player:alt?1:0,target:'direct',choice:item.choice}); }
+      catch(e) { manager.message=e.message;manager.publish();manager.emit('notification',e.message); }
+      return;
+    }
     await manager.hotkey({...item.hotkey,...(t.twoPlayer?{player:alt?1:0}:{})});
   }
   function verify(event){if(event.sender!==window.webContents || event.senderFrame!==window.webContents.mainFrame)throw Error('Invalid radial request.');}

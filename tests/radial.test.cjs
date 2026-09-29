@@ -8,12 +8,12 @@ function fakeManager(game,extra={}) {
   const figures=[{key:'spyro.sky',info:{name:'Spyro',kind:'Skylander',element:'Magic'}},{key:'jet.sky',info:{name:'Jet-Vac',kind:'Vehicle'}}];
   const players=[0,1].map(p=>({elements:{Magic:p?null:{top:'spyro.sky',bottom:null}},favorite:p?null:extra.favorite}));
   return {figures:extra.figures||[],trapName:extra.trapName||(()=>null),
-    state:()=>({game,figures,elements:model.elements,perks:model.perks,profile:{players},vehicleKeys:{Q:'Sky',W:'Land',E:'Sea'},vehicleShortcuts:{Sky:{key:'jet.sky'},Land:{key:null},Sea:{key:null}}})};
+    state:()=>({game,figures,recent:extra.recent||[],elements:model.elements,perks:model.perks,profile:{players},vehicleKeys:{Q:'Sky',W:'Land',E:'Sea'},vehicleShortcuts:{Sky:{key:'jet.sky'},Land:{key:null},Sea:{key:null}}})};
 }
 
 test('radial tabs follow each game and map to the keyboard shortcuts',()=>{
   const giants=tabs(fakeManager(2));
-  assert.deepEqual(giants.map(t=>t.title),['Player 1','Player 2']);
+  assert.deepEqual(giants.map(t=>t.title),['Player 1','Player 2','Recent']);
   assert.equal(giants[0].items.length,8,'Light and Dark arrive with Trap Team');
   assert.deepEqual(giants[0].items[0],{label:'Magic',detail:'Spyro',el:'Magic',hotkey:{player:0,key:'1'}});
   assert.equal(giants[1].items[0].detail,'Not assigned');
@@ -29,7 +29,12 @@ test('radial tabs follow each game and map to the keyboard shortcuts',()=>{
   assert.deepEqual(traps[10].hotkey,{player:0,key:'L'});
   const vehicles=tabs(fakeManager(5))[2].items;
   assert.deepEqual(vehicles.map(v=>[v.label,v.detail,v.hotkey.key]),[['Sky','Jet-Vac','Q'],['Land','Not assigned','W'],['Sea','Not assigned','E']]);
-  assert.equal(tabs(fakeManager(6)).length,2);
+  assert.equal(tabs(fakeManager(6)).length,3);
+  // Recent: a random pick first, then what was played in this game, loaded directly.
+  const spyro={key:'spyro.sky',id:16,variant:0,half:'whole',info:{name:'Spyro',kind:'Skylander',element:'Magic',game:1}};
+  const recent=tabs(fakeManager(2,{figures:[spyro],recent:[{key:'spyro.sky',game:2,player:0},{key:'spyro.sky',game:1,player:0},{key:'gone.sky',game:2,player:1}]})).at(-1);
+  assert.equal(recent.twoPlayer,true);
+  assert.deepEqual(recent.items.map(i=>[i.label,i.hotkey || i.choice]),[['Random',{key:'D'}],['Spyro',{top:'spyro.sky',bottom:null}]]);
 });
 
 test('pad reader reports new presses, the stick combo and the controller family',()=>{

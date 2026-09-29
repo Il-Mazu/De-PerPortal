@@ -11,6 +11,8 @@ function key(bytes,block) { return crypto.createHash('md5').update(bytes.subarra
 function decrypt(bytes) {
   const out=Buffer.from(bytes);
   for(let block=8;block<64;block++) if(!trailers.has(block)) {
+    // A block the game never wrote stays all zero and is stored unencrypted.
+    if(out.subarray(block*16,block*16+16).every(b=>b===0)) continue;
     const decipher=crypto.createDecipheriv('aes-128-ecb',key(out,block),null); decipher.setAutoPadding(false);
     Buffer.concat([decipher.update(out.subarray(block*16,block*16+16)),decipher.final()]).copy(out,block*16);
   }
@@ -46,4 +48,4 @@ function decode(bytes) {
     return decodeRecord(data,block);
   } catch { return {state:'unknown'}; }
 }
-module.exports={crc16,decrypt,areaValid,decodeRecord,decode};
+module.exports={crc16,decrypt,areaValid,newer,decodeRecord,decode};

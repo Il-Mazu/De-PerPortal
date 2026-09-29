@@ -16,6 +16,7 @@ int main(void){
  if(GetForegroundWindow()!=cemu){SendMessageTimeoutW(cemu,WM_SETTEXT,0,(LPARAM)original,SMTO_ABORTIFHUNG,2000,&result);return 3;}
  chord(0,'1');Sleep(600);chord(1,'0');Sleep(600);chord(0,'T');Sleep(600);chord(1,'T');Sleep(600);
  const char *perks="QWERYUIO";for(const char *p=perks;*p;p++){chord(*p=='O',*p);Sleep(300);}
+ chord(0,'D');Sleep(300);chord(1,'G');Sleep(300);
  HWND other=CreateWindowW(L"STATIC",L"Dè PerPortal test: another application",WS_OVERLAPPEDWINDOW|WS_VISIBLE,100,100,400,200,NULL,NULL,GetModuleHandleW(NULL),NULL);
  SetForegroundWindow(other);Sleep(500);chord(0,'2');chord(0,'T');chord(1,'T');Sleep(500);
  DestroyWindow(other);

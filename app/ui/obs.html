@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dè PerPortal · OBS</title>
+<!-- An OBS browser source: transparent, lower-left, one plate per player. -->
+<style>
+  html,body{margin:0;background:transparent;overflow:hidden}
+  body{display:flex;align-items:flex-end;gap:14px;height:100vh;padding:24px;box-sizing:border-box;font:800 20px/1.1 'Trebuchet MS',system-ui,sans-serif;color:#fff}
+  .plate{display:flex;align-items:center;gap:12px;padding:10px 18px 10px 10px;border-radius:14px;background:linear-gradient(180deg,#1f2a6ee6,#0c1238e6);box-shadow:0 0 0 2px var(--c,#f6c64f),0 8px 20px #0008}
+  .plate img,.plate i{width:64px;height:64px;object-fit:contain;flex:none}
+  .plate i{border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--c,#f6c64f) 45%,#0c1238)}
+  small{display:block;margin-top:3px;font-size:14px;font-weight:700;color:#d6dcff}
+</style>
+</head>
+<body>
+<script>
+  const colors={Magic:'#b76cf2',Water:'#3fa9f5',Tech:'#f5a524',Fire:'#ff6a3d',Earth:'#b88346',Life:'#68d445',Air:'#8fdcff',Undead:'#a59ac8',Light:'#ffe36b',Dark:'#7b62d6'};
+  new EventSource('/events').onmessage=event=>{
+    const data=JSON.parse(event.data);
+    document.body.replaceChildren(...data.players.filter(Boolean).map(p=>{
+      const plate=document.createElement('div'),text=document.createElement('div'),meta=document.createElement('small');
+      plate.className='plate';plate.style.setProperty('--c',colors[p.element] || '#f6c64f');
+      const art=document.createElement(p.art?'img':'i');if(p.art)art.src=p.art;
+      text.textContent=p.name;
+      meta.textContent=[`Player ${p.player}`,p.element,p.level && `Lv ${p.level}`].filter(Boolean).join(' · ');
+      text.append(meta);plate.append(art,text);return plate;
+    }));
+  };
+</script>
+</body>
+</html>

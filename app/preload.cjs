@@ -13,5 +13,17 @@ contextBridge.exposeInMainWorld('dePerPortal',{
   artwork:()=>ipcRenderer.invoke('artwork'),
   artFolder:()=>ipcRenderer.invoke('art-folder'),
   enable:()=>ipcRenderer.invoke('enable'),
+  catalog:()=>ipcRenderer.invoke('catalog'),
+  diagnostics:()=>ipcRenderer.invoke('diagnostics'),
+  backups:key=>ipcRenderer.invoke('backups',key),
+  restoreBackup:data=>ipcRenderer.invoke('restore-backup',data),
+  random:player=>ipcRenderer.invoke('random',player),
+  challenge:data=>ipcRenderer.invoke('challenge',data),
+  gateLevel:index=>ipcRenderer.invoke('gate-level',index),
+  stream:data=>ipcRenderer.invoke('stream',data),
+  exportProfile:()=>ipcRenderer.invoke('export-profile'),
+  importProfile:()=>ipcRenderer.invoke('import-profile'),
+  showFigure:key=>ipcRenderer.invoke('show-figure',key),
+  openIssues:()=>ipcRenderer.invoke('open-issues'),
   onState:callback=>ipcRenderer.on('state',(_,state)=>callback(state))
 });

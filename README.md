@@ -17,6 +17,11 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - Items, traps, vehicles, trophies, and Creation Crystals for supported games.
 - Nested NFC folders and optional community character artwork.
 - Themes: one for each Skylanders game (or one that follows the game), plus Dè perThumpback, Dè Cell to Singularity, Dè PerMCdonald, Dè perDoomScroll and Dè FishBet.
+- Automatic backups of every figure before it goes on the portal, and a warning when a figure leaves the portal without having saved.
+- Each figure's level, gold, hero points and nickname, read from its own save.
+- A Collection with every figure of the game, your progress per element, what you played, and a setup check.
+- A random pick, a Nuzlocke challenge, and an elemental gate helper for each level (beta).
+- Profile import and export, a Discord status and an OBS overlay.
 
 ## Download and setup
 
@@ -51,6 +56,8 @@ The build currently requires Cemu's English interface. In Settings, enable the C
 | Alt + Q / W / E / R / Y / U / I / O | Swap Force perk base for Player 1 |
 | Alt + Shift + Q / W / E / R / Y / U / I / O | Swap Force perk base for Player 2 |
 | Alt + Q / W / E | SuperChargers: load the assigned Sky / Land / Sea vehicle |
+| Alt + D | Load a random Skylander for Player 1 (add Shift for Player 2) |
+| Alt + G | Load the next element the chosen level has a gate for (add Shift for Player 2) |
 
 Shortcuts work while a Skylanders game is running and Cemu has focus. The element order is Magic, Water, Tech, Fire, Earth, Life, Air, Undead, Light, Dark. Thumpling requires the Giants sidekick dump; the Trap Team playable mini is a separate edition.
 
@@ -71,6 +78,20 @@ In Swap Force, fixed perk bases are Rocket (Boom Jet), Tornado (Doom Stone), Spr
 Cemu opens the selected dump directly and saves progress to it. Trap dump editing is disabled because the current clear operation can make trap toys unreadable. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
+
+## Collection, backups and progress
+
+**Collection** in the toolbar lists every figure of the current game. Figures in your NFC folder are lit in their element's colour with their level and gold; the ones you don't have are empty slots. Search, filter by element, or show only missing figures, figures below level 10, or damaged saves. **Poster** opens Activision's poster of the game's Skylanders.
+
+Select a figure to see its level, gold, hero points, nickname and when you last played it, load it for either player, or open its folder. Levels come from the figure's own save; past level 10 they show as **10+**.
+
+Every time a figure goes on the portal, Dè PerPortal first copies its dump to `de-perportal-data/backups`, keeping the last 10 versions of each figure. Under **Backups** in a figure's card, press **Restore** twice to put an older save back; the file it replaces is backed up too. Take the figure off the portal first. Cemu writes a figure's progress when the game decides to save, so if a figure leaves the portal after more than 3 minutes without its dump changing, Dè PerPortal warns that recent progress may be lost. The figure cards also show when each dump was last saved.
+
+**Progress** shows how many of the game's figures you have per element, how many are level 10, the gold and hero points across your figures, and your most played Skylanders. Turn on **Nuzlocke rules** to mark a Skylander as fallen from its card: fallen Skylanders can't be loaded or picked at random until you revive them. **History** lists what went on the portal, newest first. **Setup** checks where Cemu is, whether it is running and supported, your NFC folder, damaged saves, duplicate dumps, figures in another game's folder and artwork, with a button to fix what it can.
+
+**Random** (Alt + D) loads a random Skylander for the selected player, skipping fallen ones and figures already on the portal. In Spyro's Adventure, Giants, Swap Force and Trap Team, choose the level you are playing under **Element shortcuts**: the elements it has gates for light up, and Alt + G loads the next one that isn't on the portal yet. The level list comes from darkSpyro and the Skylanders Wiki and is in beta; use **report a wrong level** if one is off.
+
+In **Settings**, **Export profile** saves the game's defaults, presets and shortcuts to a file and **Import profile** loads one; figures missing from your library are left unassigned. **Discord status** shows the game and the Skylanders on your portal in your Discord profile. **OBS overlay** serves a page at `http://127.0.0.1:47831/` for an OBS Browser Source, showing the figures on your portal; it is only reachable from your computer.
 
 ## Items, traps and vehicles (v0.5.8)
 

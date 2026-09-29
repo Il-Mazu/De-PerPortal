@@ -1,3 +1,21 @@
+# Dè PerPortal 2.0.0
+
+- **New:** automatic backups. Every figure is copied to `de-perportal-data/backups` before it goes on the portal, keeping the last 10 versions of each. Restore one from the figure's card in **Collection**; the file it replaces is backed up too.
+- **New:** a warning when a figure leaves the portal after more than 3 minutes without its dump having changed. Cemu only writes progress when the game saves, so that progress may be lost. Figure cards show when each dump was last saved.
+- **New:** each figure's level, gold, hero points and nickname, read from its own save, on the portal, the element cards and in the picker. The picker can sort by level, gold or recently played. Levels past 10 show as **10+**; Imaginators figures don't show stats yet.
+- **New:** **Collection** replaces **Skylander list** in the toolbar. **Figures** lists every figure of the game, lit when it's in your library and an empty slot when it isn't, with search and filters for missing figures, figures below level 10 and damaged saves. **Progress** has totals, a meter per element and your most played Skylanders. **History** lists what went on the portal. **Setup** checks Cemu, your NFC folder, damaged saves, duplicate dumps and misplaced figures. **Poster** still opens Activision's poster.
+- **New:** **Random** and **Alt + D** load a random Skylander; FishBet's Spin buttons now use the same pick.
+- **New:** **Nuzlocke rules**: mark a Skylander as fallen and it can't be loaded or picked at random until you revive it.
+- **New (beta):** the elemental gate helper for Spyro's Adventure, Giants, Swap Force and Trap Team. Choose your level and its gate elements light up; **Alt + G** loads the next one.
+- **New:** the quick swap dial has a **Recent** ring: Random first, then the last Skylanders you played in this game.
+- **New:** profile export and import, a Discord status, and an OBS overlay at `http://127.0.0.1:47831/`, all in Settings.
+
+## Validation
+
+Unit tests cover reading level, gold, hero points and nicknames from encrypted saves and telling new, played and damaged saves apart; backup rotation and restore; the history; the unsaved warning; random with Nuzlocke; profile import; the Discord status; the OBS server and the dial's Recent ring. The UI test opens Collection and checks its filters, the poster and Setup, and every theme was checked from screenshots of each Collection tab on Linux. The save offsets were checked against a generated save, not a played figure; the new Alt + D and Alt + G hotkeys, the Discord status and the whole release have not been tried on Windows yet.
+
+---
+
 # Dè PerPortal 1.3.0
 
 - **New:** themes. The **Theme** button opens a small carousel with a preview of each look; the one you pick is remembered the next time you start the app. **Dè Dusk over Skylands** stays the default.

@@ -5,6 +5,11 @@ const {EventEmitter}=require('node:events');
 const model=require('./model.cjs');
 const accessories=require('./accessories.cjs');
 const trapData=require('./traps.cjs');
+const {Journal}=require('./journal.cjs');
+const discord=require('./discord.cjs');
+const obs=require('./obs.cjs');
+const gates=require('../resources/gates.json');
+const unsavedAfter=3*60*1000;
 const trapKeys=['Q','W','E','R','Y','U','I','O','P','L'];
 const trapSignature=trap=>`${trap?.state||'unknown'}:${trap?.state==='captured'?trap.recordId:''}`;
 const trapIdentity=f=>JSON.stringify([f.key,f.uid,f.id,f.variant]);
@@ -15,6 +20,7 @@ class Manager extends EventEmitter {
     this.config={game:2,profiles:{},artRoot:null}; this.figures=[]; this.warnings=[];
     this.session={pid:0,supported:false,game:0,focused:false};
     this.active=[null,null]; this.sidekick=null; this.accessories={}; this.observed=[]; this.labels={}; this.busy=false; this.message='Start Cemu to connect your portal.';
+    this.journal=new Journal(root); this.loaded=new Map();
   }
   get game() { return this.session.game || this.config.game; }
   get profile() {
@@ -37,6 +43,7 @@ class Manager extends EventEmitter {
       if(c && Number.isInteger(c.game) && c.game>=1 && c.game<=6 && c.profiles && typeof c.profiles==='object') this.config=c;
     } catch(e) { if(e.code!=='ENOENT') this.message='Could not read saved settings; using defaults.'; }
     this.selectedTrap=this.config.trapSelections?.[this.game] ?? null;
+    await this.journal.load().catch(()=>{});
     await this.rescan();
   }
   async rescan() {
@@ -82,7 +89,10 @@ class Manager extends EventEmitter {
       active:this.active,sidekick:this.sidekick,accessories:this.accessories,accessorySlots:accessories.slots,observed:this.observed,busy:this.busy,message:this.message,warnings:this.warnings,
       hasArt,vehicleShortcuts:this.vehicleShortcuts(),vehicleKeys:accessories.vehicleKeys,
       figures:this.figures.map(({path:_,uid,art,...f})=>({...f,...(f.info?.kind==='Trap'?{trapLabel:this.config.trapLabels?.[JSON.stringify([f.key,uid,f.id,f.variant])] || null}:{}),accessory:accessories.describe(f,this.game),art:art?`art://figure/${encodeURIComponent(f.key)}`:null})),
-      root:this.root,elements:model.elements,perks:model.perks,games:model.games};
+      root:this.root,elements:model.elements,perks:model.perks,games:model.games,
+      recent:this.journal.recent(8),history:this.journal.history.slice(-60).reverse(),lastPlayed:this.journal.lastPlayed(),
+      challenge:{nuzlocke:!!this.config.nuzlocke,fallen:this.fallen()},gates:this.gates,gateLevel:this.config.gateLevels?.[this.game] ?? null,
+      stream:{discord:!!this.config.discord,obs:!!this.config.obs,discordAvailable:discord.available(),obsUrl:`http://127.0.0.1:${obs.port}/`}};
   }
   vehicleShortcuts() {
     // An assigned vehicle wins; otherwise the first of that type by name.
@@ -270,14 +280,17 @@ class Manager extends EventEmitter {
     const others=[...Object.values(this.accessories).map(c=>c.top),...this.active.flatMap((c,p)=>p===player && target!=='sidekick'?[]:c?[c.top,c.bottom].filter(Boolean):[]),...(target!=='sidekick' && this.sidekick?[this.sidekick.top]:[])];
     const otherFigures=others.map(k=>this.figures.find(f=>f.key===k)).filter(Boolean);
     for(const f of files) {
+      if(this.config.nuzlocke && this.fallen().includes(f.key)) throw Error(`${f.info.name} has fallen. Revive it in Collection to use it again.`);
       const now=model.identify(await fs.readFile(f.path));
       if(now.id!==f.id || now.variant!==f.variant || now.uid!==f.uid) throw Error('A figure changed since scanning. Rescan your NFC folder.');
       if(otherFigures.some(x=>x.key===f.key || x.uid===f.uid)) throw Error('That figure is already on the portal. Choose a different figure for each player.');
     }
+    const outgoing=(target==='sidekick' || target==='remove-sidekick'?[this.sidekick]:[this.active[player]]).flatMap(c=>c?[c.top,c.bottom].filter(Boolean):[]);
     this.busy=true; this.message='Swapping on the portal…'; this.publish();
     try {
       const run=async(args)=>{
         if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
+        if(args[0]==='load') await this.beforeLoad(args[2],player);
         const output=await this.control(args);
         if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
         const label=typeof output==='string' && output.match(/Row (\d+): .* -> (.*)/);
@@ -302,6 +315,7 @@ class Manager extends EventEmitter {
           if(files[1]) { await run(['load',String(first+1),files[1].path]); this.active[player].bottom=files[1].key; }
         } else { await run(['clear',String(first)]); this.active[player]=null; }
       }
+      this.warnUnsaved(outgoing.filter(k=>![this.sidekick,...this.active].some(c=>c && (c.top===k || c.bottom===k))));
       this.message=target==='remove-sidekick'?'Sidekick removed.':target==='remove'?`Player ${player+1} removed.`:replaceBottom?`${perkBase.perk.name} base is on Player ${player+1}.`:`${files[0].info.name} is on the portal.`;
     } catch(e) { this.message=`Swap stopped: ${e.message} Check Cemu before retrying.`; throw e; }
   }
@@ -319,7 +333,7 @@ class Manager extends EventEmitter {
         ...Object.entries(this.accessories).filter(([key])=>key!==slot).map(([,c])=>c.top)];
       if(this.figures.some(other=>keys.includes(other.key) && (other.key===f.key || other.uid===f.uid))) throw Error('That figure is already on the portal. Choose a different figure.');
     }
-    const row=String(definition.row);
+    const row=String(definition.row),outgoing=this.accessories[slot]?.top;
     this.busy=true;this.message=removing?'Removing accessory…':'Activating accessory…';this.publish();
     try {
       if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
@@ -329,15 +343,131 @@ class Manager extends EventEmitter {
       delete this.accessories[slot];
       if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
       if(!removing) {
+        await this.beforeLoad(f.path,null);
         const output=await this.control(['load',row,f.path]);
         const label=typeof output==='string' && output.match(/Row (\d+): .* -> (.*)/);
         if(label)this.labels[Number(label[1])]=label[2].trim();
         if(this.session.pid!==pid || this.game!==game) throw Error('Cemu or the game changed during the swap.');
         this.accessories[slot]={top:f.key,bottom:null};
       }
+      if(outgoing && outgoing!==f?.key) this.warnUnsaved([outgoing]);
       this.message=removing?'Accessory removed.':`${f.info.name} is on the portal.`;
     } catch(e) { this.message=`Accessory swap stopped: ${e.message} Check Cemu before retrying.`;throw e; }
   }
+  get gates() { return gates[this.game]||[]; }
+  fallen() { return this.config.fallen?.[this.game] || []; }
+  async beforeLoad(file,player) {
+    const f=this.figures.find(f=>f.path===file);
+    if(!f) return;
+    // A failed backup must not stop play, but it must be visible.
+    try { await this.journal.backup(f.key,f.path); } catch(e) { this.emit('notification',`Backup of ${f.info?.name||f.key} failed: ${e.message}`); }
+    try { this.loaded.set(f.key,{mtime:(await fs.stat(f.path)).mtimeMs,at:Date.now()}); } catch {}
+    this.journal.record({key:f.key,name:f.info?.name||f.key,game:this.game,player,at:Date.now()}).catch(()=>{});
+  }
+  // Cemu writes progress when the game decides to save (Cemu issue #1322).
+  // A figure whose dump never changed while it was on the portal may lose progress.
+  async warnUnsaved(keys) {
+    for(const key of keys) {
+      const loaded=this.loaded.get(key),f=this.figures.find(f=>f.key===key);
+      this.loaded.delete(key);
+      if(!loaded || !f || Date.now()-loaded.at<unsavedAfter) continue;
+      try {
+        if((await fs.stat(f.path)).mtimeMs!==loaded.mtime) continue;
+        const text=`${f.info?.name||key} had not saved since it was loaded. Recent progress may be lost; its backup is in Collection › History.`;
+        this.message=text;this.publish();this.emit('notification',text);
+      } catch {}
+    }
+  }
+  async backups(key) {
+    if(!this.figures.some(f=>f.key===key)) throw Error('That figure is not in your library.');
+    return (await this.journal.list(key)).map(name=>({name,at:parseInt(name)}));
+  }
+  async restoreBackup({key,name}) {
+    if(this.busy) throw Error('Wait for the current operation.');
+    const f=this.figures.find(f=>f.key===key);
+    if(!f) throw Error('That figure is not in your library.');
+    const onPortal=[this.sidekick,...this.active,...Object.values(this.accessories)].some(c=>c && (c.top===key || c.bottom===key));
+    if(onPortal) throw Error(`Take ${f.info?.name||key} off the portal before restoring it.`);
+    this.busy=true;this.publish();
+    try { await this.journal.restore(key,f.path,name);this.message=`${f.info?.name||key} restored from ${new Date(parseInt(name)).toLocaleString()}. The file it replaced is kept as a backup.`; }
+    finally { this.busy=false;await this.rescan(); }
+  }
+  async random(player) {
+    if(![0,1].includes(player)) throw Error('Invalid player.');
+    const fallen=this.config.nuzlocke?this.fallen():[];
+    const taken=[this.sidekick,...this.active.filter((_,p)=>p!==player),...Object.values(this.accessories)].flatMap(c=>c?[c.top,c.bottom]:[]);
+    const takenUids=new Set(this.figures.filter(f=>taken.includes(f.key)).map(f=>f.uid));
+    const pool=model.candidates(this.figures,this.game).filter(f=>f.half!=='bottom' && !fallen.includes(f.key) && !takenUids.has(f.uid))
+      .map(f=>model.choice(f,this.figures)).filter(c=>c && !(c.bottom && fallen.includes(c.bottom)));
+    if(!pool.length) throw Error('No Skylander is free for a random pick.');
+    const choice=pool[Math.floor(Math.random()*pool.length)];
+    await this.action({player,target:'direct',choice});
+    this.emit('notification',`Random · Player ${player+1}: ${this.figures.find(f=>f.key===choice.top).info.name}`);
+    return choice;
+  }
+  async setChallenge({nuzlocke,fallen,key,reset}={}) {
+    if(typeof nuzlocke==='boolean') this.config.nuzlocke=nuzlocke;
+    const list=new Set(this.fallen());
+    if(reset) list.clear();
+    if(key) {
+      if(!this.figures.some(f=>f.key===key)) throw Error('That figure is not in your library.');
+      if(fallen) list.add(key); else list.delete(key);
+    }
+    (this.config.fallen ||= {})[this.game]=[...list];
+    await this.save();this.publish();
+  }
+  async setGateLevel(index) {
+    if(index!==null && !(Number.isInteger(index) && this.gates[index])) throw Error('Choose a level from the list.');
+    (this.config.gateLevels ||= {})[this.game]=index;
+    await this.save();this.publish();
+  }
+  async setStream(options) {
+    for(const k of ['discord','obs']) if(typeof options?.[k]==='boolean') this.config[k]=options[k];
+    await this.save();this.publish();
+  }
+  exportProfile() { return {app:'Dè PerPortal',version:1,game:this.game,profile:this.profile}; }
+  // Figures missing from this library become unassigned slots.
+  async importProfile(data) {
+    if(this.busy) throw Error('Wait for the current operation.');
+    if(data?.app!=='Dè PerPortal' || data.game!==this.game || !Array.isArray(data.profile?.players) || data.profile.players.length!==2) throw Error(`This file is not a Dè PerPortal profile for ${model.games[this.game-1]}.`);
+    let missing=0;
+    const check=(c,valid=()=>true)=>{
+      if(!c) return null;
+      try { const files=model.resolveChoice(c,this.figures,this.game);if(valid(files)) return {top:c.top,bottom:c.bottom||null}; } catch {}
+      missing++;return null;
+    };
+    const players=data.profile.players.map(p=>{
+      const out={favorites:Array.from({length:3},(_,i)=>check(p.favorites?.[i] ?? (i===0?p.favorite:null))),activeFavorite:p.activeFavorite,elements:{}};
+      for(const el of model.elements) out.elements[el]=check(p.elements?.[el],files=>files.length===1 && model.elementalDoorFigure(files[0],this.game,el));
+      model.normalizeDefaults(out);return out;
+    });
+    let sidekick=null;
+    if(data.profile.sidekick) {
+      if(model.candidates(this.figures,this.game,null,'sidekick').some(f=>f.key===data.profile.sidekick.top)) sidekick={top:data.profile.sidekick.top,bottom:null};
+      else missing++;
+    }
+    this.config.profiles[this.game]={...this.profile,players,sidekick};
+    await this.save();this.message=missing?`Profile imported. ${missing} figure${missing===1?' is':'s are'} not in your library and left unassigned.`:'Profile imported.';this.publish();
+    return missing;
+  }
+  async diagnostics() {
+    const exists=p=>fs.access(p).then(()=>true,()=>false);
+    const cemu=(await Promise.all(['Cemu-Skylanders-Emulated-Portal.exe','Cemu.exe'].map(n=>exists(path.join(this.root,n))))).some(Boolean);
+    const groups=new Map();
+    for(const f of this.figures) { const id=`${f.uid}:${f.id}:${f.variant}`;groups.set(id,[...(groups.get(id)||[]),f.key]); }
+    // A figure newer than the game its top folder is named after can't be used in that game.
+    // Older figures in a newer game's folder are fine: later games accept them.
+    const folders=[/spyro/,/giants/,/swap/,/trap/,/super/,/imaginators/];
+    const misplaced=this.figures.filter(f=>{
+      const parts=f.key.toLowerCase().split('/'),g=parts.length>1?folders.findIndex(r=>r.test(parts[0])):-1;
+      return f.info && g>=0 && f.info.game>g+1;
+    }).map(f=>f.key);
+    return {cemu,running:!!this.session.pid,supported:!!this.session.supported,game:this.session.game,nfc:await exists(path.join(this.root,'NFC')),
+      counts:model.games.map((_,i)=>this.figures.filter(f=>f.info?.game===i+1).length),total:this.figures.length,unknown:this.figures.filter(f=>!f.info).length,
+      art:this.figures.some(f=>f.art),damaged:this.figures.filter(f=>f.save?.state==='damaged').map(f=>f.key),
+      duplicates:[...groups.values()].filter(g=>g.length>1),misplaced,warnings:this.warnings};
+  }
+  figurePath(key) { const f=this.figures.find(f=>f.key===key);if(!f) throw Error('That figure is not in your library.');return f.path; }
   async hotkey({player,key}) {
     if(!this.session.game) return;
     if(this.game===4 && player===0 && !this.busy && (key==='Up' || key==='Down' || key==='LockTrap' || trapKeys.includes(key))) {
@@ -398,6 +528,22 @@ class Manager extends EventEmitter {
         }
         this.emit('notification',`Player ${player+1}: assign a default preset first.`);
       } finally { this.switchingPreset=false; }
+      return;
+    }
+    if(key==='D' || key==='G') {
+      if(this.busy) return;
+      try {
+        if(key==='D') await this.random(player);
+        else {
+          const level=this.gates[this.config.gateLevels?.[this.game]];
+          if(!level) throw Error('Choose the level you are playing under Element shortcuts first.');
+          const onPortal=new Set(this.active.flatMap(c=>c?[c.top]:[]).map(k=>this.figures.find(f=>f.key===k)?.info?.element));
+          const element=level.elements.find(e=>!onPortal.has(e));
+          if(!element) { this.emit('notification',`${level.level}: every element it needs is on the portal.`);return; }
+          await this.action({player,target:element});
+          this.emit('notification',`${level.level} · ${element} gate`);
+        }
+      } catch(e) { this.message=e.message;this.publish();this.emit('notification',e.message); }
       return;
     }
     const target=key==='T'?(player===1?'thumpling':'thumpback'):key==='0'?'favorite':model.elements[['1','2','3','4','5','6','7','8','9','-'].indexOf(key)] || (this.game===3 && model.perks.some(p=>p.key===key)?`perk-${key}`:null);

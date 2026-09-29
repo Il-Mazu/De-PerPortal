@@ -15,6 +15,8 @@ function coin(item,i,count) {
     if(item.villain) {const initial=document.createElement('span');initial.className='initial';initial.textContent=item.label[0];el.append(initial);}
   } else if(item.badge!==undefined) {
     const badge=document.createElement('i');badge.className='badge';badge.style.setProperty('--i',item.badge);el.append(badge);
+  } else if(item.glyph) {
+    const glyph=document.createElement('span');glyph.className='initial';glyph.textContent=item.glyph;el.append(glyph);
   } else if(item.vehicle) {
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),path=document.createElementNS('http://www.w3.org/2000/svg','path');
     svg.setAttribute('viewBox','0 0 24 24');path.setAttribute('d',vehicles[item.vehicle]);svg.append(path);el.append(svg);

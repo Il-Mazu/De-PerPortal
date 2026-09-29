@@ -11,7 +11,7 @@ const exec=promisify(execFile);
   await new Promise(r=>setTimeout(r,1500));
   console.log((await exec('wine',['out/hotkey-driver.exe'],{env,timeout:15000})).stdout);
   await new Promise(r=>setTimeout(r,500));
-  assert.deepEqual(events,[{type:'hotkey',player:0,key:'1'},{type:'hotkey',player:1,key:'0'},{type:'hotkey',player:0,key:'T'},{type:'hotkey',player:1,key:'T'},...['Q','W','E','R','Y','U','I'].map(key=>({type:'hotkey',player:0,key})),{type:'hotkey',player:1,key:'O'}]);
-  console.log('PASS: element, default, Thumpback, and all Swap Force perk hotkeys; no event outside Cemu. No game launched.');
+  assert.deepEqual(events,[{type:'hotkey',player:0,key:'1'},{type:'hotkey',player:1,key:'0'},{type:'hotkey',player:0,key:'T'},{type:'hotkey',player:1,key:'T'},...['Q','W','E','R','Y','U','I'].map(key=>({type:'hotkey',player:0,key})),{type:'hotkey',player:1,key:'O'},{type:'hotkey',player:0,key:'D'},{type:'hotkey',player:1,key:'G'}]);
+  console.log('PASS: element, default, Thumpback, random, gate and all Swap Force perk hotkeys; no event outside Cemu. No game launched.');
  }finally{watcher.kill();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

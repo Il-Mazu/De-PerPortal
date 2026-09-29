@@ -15,6 +15,21 @@ function replay(el,cls) {
   el.addEventListener('animationend',function done(event){if(event.target!==el && !event.target.matches('.portal-light'))return;el.classList.remove(cls);el.removeEventListener('animationend',done);});
 }
 function chosen(c) { return c?figure(c.top):null; }
+// What the figure's own save says, in a few words.
+const number=n=>n.toLocaleString('en-US');
+function level(f) { return f?.save?.state==='ok'?`Lv ${f.save.maxed?'10+':f.save.level}`:''; }
+function stats(f) {
+  const s=f?.save;
+  if(!s) return '';
+  if(s.state==='new') return 'New figure';
+  if(s.state==='damaged') return 'Damaged save';
+  return `${level(f)} · ${number(s.gold)} gold`;
+}
+function ago(ms) {
+  const m=Math.round((Date.now()-ms)/60000);
+  return m<1?'just now':m<60?`${m} min ago`:m<1440?`${Math.round(m/60)} h ago`:new Date(ms).toLocaleDateString();
+}
+const fallen=f=>state.challenge.nuzlocke && state.challenge.fallen.includes(f?.key);
 function halfPortrait(f) { return `<div class="half-art">${portrait(f)}</div>`; }
 function orientHalves() {
   for(const img of document.querySelectorAll('.half-art img')) {
@@ -24,7 +39,9 @@ function orientHalves() {
 }
 function art(c) { return c?.bottom?`<div class="pair">${halfPortrait(figure(c.top))}${halfPortrait(figure(c.bottom))}</div>`:portrait(chosen(c)); }
 function choiceName(c) { return c?.bottom?`${name(figure(c.top))} / ${name(figure(c.bottom))}`:name(chosen(c)); }
-function toast(message) { $('toast').textContent=String(message).replace(/^Error invoking remote method '[^']+': Error: /,'');$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,7000); }
+// Errors from the main process arrive wrapped in Electron's own prefix.
+const clean=message=>String(message).replace(/^Error invoking remote method '[^']+': Error: /,'');
+function toast(message) { $('toast').textContent=clean(message);$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,7000); }
 async function perform(fn) { try { await fn(); } catch(error) {toast(error.message);} }
 function render() {
   if(!state)return;
@@ -79,7 +96,7 @@ function draw() {
     $(`player-${p}`).style.setProperty('--player-color',tone);
     $(`player-${p}`).dataset.element=f?.info?.element || '';
     document.querySelector(p?'.aura-two':'.aura-one').classList.toggle('is-active',!!f);
-    $(`player-${p}`).innerHTML=`<div class="player-label">Player ${p+1}</div><button class="active-card" title="Choose Player ${p+1}’s active Skylander"><div class="portrait">${art(current)}</div><span class="active-name">${e(f?name(f):'Choose Skylander')}</span><span class="figure-meta">${e(f?`${f.info?.element||''} · ${current?.bottom?'Swap combination':f.info?.kind||'Skylander'}`:'Click to load a figure')}</span></button>${f?'<button class="remove">Remove from portal</button>':''}`;
+    $(`player-${p}`).innerHTML=`<div class="player-label">Player ${p+1}</div><button class="active-card" title="Choose Player ${p+1}’s active Skylander"><div class="portrait">${art(current)}</div><span class="active-name">${e(f?name(f):'Choose Skylander')}</span><span class="figure-meta">${e(f?[f.info?.element,current?.bottom?'Swap combination':level(f) || f.info?.kind || 'Skylander',f.mtime && `saved ${ago(f.mtime)}`].filter(Boolean).join(' · '):'Click to load a figure')}</span></button>${f?'<button class="remove">Remove from portal</button>':''}`;
     $(`player-${p}`).insertAdjacentHTML('beforeend',reel(f,p));
     $(`player-${p}`).querySelector('.active-card').onclick=()=>openPicker({player:p,target:'direct'});
     const observed=state.observed?.[p*2];
@@ -111,9 +128,20 @@ function draw() {
     const remove=document.createElement('button');remove.className='remove';remove.textContent='Remove';remove.onclick=()=>perform(()=>api.action({target:'remove-sidekick'}));$('sidekick').append(remove);
   }
   for(let p=0;p<2;p++) $(`tab-${p}`).classList.toggle('selected',p===player);
+  $('random').disabled=state.busy;
+  // Elemental gates exist in the first four games only.
+  $('gates').hidden=!state.gates.length;
+  if(state.gates.length) {
+    if($('gate-level').dataset.game!==String(state.game)) {
+      $('gate-level').innerHTML=`<option value="">Not set</option>${state.gates.map((g,i)=>`<option value="${i}">${e(g.level)} · ${e(g.elements.join(', '))}</option>`).join('')}`;
+      $('gate-level').dataset.game=state.game;
+    }
+    $('gate-level').value=state.gateLevel ?? '';
+  }
+  const needed=new Set(state.gates[state.gateLevel]?.elements || []);
   $('elements').innerHTML=state.elements.map((element,i)=>{
     const c=state.profile.players[player].elements[element],f=chosen(c);
-    return `<div class="element-card" data-element="${element}" data-el="${element}"><button class="element-load" title="${f?`Load ${e(name(f))}`:`Choose ${element} figure`}"><span class="element-label">${sigil(element)}${element}</span><div class="portrait">${portrait(f,sigil(element))}</div><span class="name">${e(f?name(f):'Not assigned')}</span></button><span class="dsc dsc-views">▶ ${views(f)}</span><span class="slot-key">${i===9?'−':i+1}</span><button class="edit" aria-label="Change ${element} Skylander">Edit</button></div>`;
+    return `<div class="element-card${needed.has(element)?' gate':''}" data-element="${element}" data-el="${element}"><button class="element-load" title="${f?`Load ${e(name(f))}`:`Choose ${element} figure`}${needed.has(element)?' · this level has a gate for it':''}"><span class="element-label">${sigil(element)}${element}</span><div class="portrait">${portrait(f,sigil(element))}</div><span class="name">${e(f?name(f):'Not assigned')}</span>${level(f)?`<span class="stat">${level(f)}</span>`:''}</button><span class="dsc dsc-views">▶ ${views(f)}</span><span class="slot-key">${i===9?'−':i+1}</span><button class="edit" aria-label="Change ${element} Skylander">Edit</button></div>`;
   }).join('');
   for(const card of $('elements').children) {
     const el=card.dataset.element; card.style.setProperty('--color',colors[el]);
@@ -155,6 +183,11 @@ function draw() {
   $('library-count').textContent=`${state.figures.length} figures in your library`;
   $('root-path').textContent=state.root;
   $('warnings').textContent=state.warnings.length?state.warnings.join('\n'):'All figure headers recognized.';
+  $('discord').setAttribute('aria-pressed',state.stream.discord);$('discord').disabled=!state.stream.discordAvailable;
+  $('discord-note').textContent=state.stream.discordAvailable?'Shows the game and the Skylanders on your portal in your Discord profile while Discord is running.':'Discord status isn’t available in this build.';
+  $('obs').setAttribute('aria-pressed',state.stream.obs);
+  $('obs-url').hidden=!state.stream.obs;$('obs-url').textContent=state.stream.obsUrl;
+  if($('hub').open) renderHub();
   // Show art download banner on first run when no art is available
   if(!artBannerDismissed) $('art-banner').hidden=state.hasArt;
   for(const edit of document.querySelectorAll('.edit'))edit.textContent='Edit';
@@ -273,11 +306,14 @@ function openPicker(options) {
   $('half-controls').hidden=true;
   renderPicker();$('picker').showModal();$('search').focus();
 }
+// Name keeps the library order; the others put the biggest first.
+const sorts={level:f=>f.save?.state==='ok'?f.save.xp:-1,gold:f=>f.save?.state==='ok'?f.save.gold:-1,recent:f=>state.lastPlayed[f.key] || 0};
 function renderPicker() {
-  const options=available(),accessoryPicker=picking.target==='accessory' || picking.target==='vehicle-shortcut';$('picker-empty').hidden=!!options.length;
+  const by=sorts[$('picker-sort').value],options=by && !pendingTop?available().sort((a,b)=>by(b)-by(a)):available(),accessoryPicker=picking.target==='accessory' || picking.target==='vehicle-shortcut';$('picker-empty').hidden=!!options.length;
+  $('picker-sort').hidden=accessoryPicker;
   $('picker-empty').textContent=accessoryPicker?'No matching accessories in your NFC library for this game. Add your own dumps and rescan in Settings.':'No compatible figures found in your NFC folder.';
   $('picker-results').classList.toggle('accessory-picker',accessoryPicker);
-  $('picker-results').innerHTML=options.map(f=>`<button class="picker-item" data-key="${e(f.key)}" data-el="${e(f.info.element)}"${accessoryPicker?` title="${e(f.accessory.effect)}"`: ''}><div class="portrait">${f.half==='whole'?portrait(f):halfPortrait(f)}</div><span>${e(f.info.name)}</span><small>${e(f.info.element)} · ${pendingTop && f.id===pendingTop.id-1000 && f.variant===pendingTop.variant?'Matching bottom':e(f.info.kind)}</small>${accessoryPicker?`<small class="accessory-type">${e(f.accessory.type)}</small>`:''}<small class="filename" title="${e(f.key)}">${e(f.key.split('/').pop())}</small></button>`).join('');
+  $('picker-results').innerHTML=options.map(f=>`<button class="picker-item${fallen(f)?' fallen':''}" data-key="${e(f.key)}" data-el="${e(f.info.element)}"${accessoryPicker?` title="${e(f.accessory.effect)}"`: ''}${fallen(f)?' disabled':''}><div class="portrait">${f.half==='whole'?portrait(f):halfPortrait(f)}</div><span>${e(f.info.name)}</span><small>${e(f.info.element)} · ${pendingTop && f.id===pendingTop.id-1000 && f.variant===pendingTop.variant?'Matching bottom':e(f.info.kind)}</small>${accessoryPicker?`<small class="accessory-type">${e(f.accessory.type)}</small>`:''}${fallen(f)?'<small class="stat bad">Fallen</small>':stats(f)?`<small class="stat${f.save.state==='damaged'?' bad':''}">${e(stats(f))}</small>`:''}<small class="filename" title="${e(f.key)}">${e(f.key.split('/').pop())}</small></button>`).join('');
   orientHalves();
   for(const button of $('picker-results').children) button.onclick=()=>perform(async()=>{
     if(pickerSaving)return;
@@ -312,6 +348,14 @@ $('trap-name-form').onsubmit=event=>{
   });
 };
 $('search').oninput=renderPicker;
+$('picker-sort').onchange=renderPicker;
+$('random').onclick=()=>perform(()=>api.random(player));
+$('gate-level').onchange=()=>perform(()=>api.gateLevel($('gate-level').value===''?null:Number($('gate-level').value)));
+$('gate-report').onclick=()=>perform(()=>api.openIssues());
+$('export-profile').onclick=()=>perform(async()=>{if(await api.exportProfile())toast('Profile exported.');});
+$('import-profile').onclick=()=>perform(()=>api.importProfile());
+$('discord').onclick=()=>perform(()=>api.stream({discord:!state.stream.discord}));
+$('obs').onclick=()=>perform(()=>api.stream({obs:!state.stream.obs}));
 $('settings').onclick=()=>$('settings-dialog').showModal();
 // Activision's character poster for the current game, in posters/<game>.jpg.
 function openPoster() {
@@ -347,6 +391,179 @@ $('poster-zoom').onclick=event=>{
 };
 $('posters').onclick=openPoster;
 $('poster-close').onclick=()=>$('poster-dialog').close();
+// Collection: every figure of this game against your library, your progress,
+// what you played and whether the setup is right.
+let catalog=[],hubPanel='figures',selected=null,diagnostics=null;
+const backupCache=new Map();
+const entryKey=c=>`${c.id}:${c.variant}`;
+const owned=c=>state.figures.filter(f=>f.id===c.id && f.variant===c.variant);
+// The dump that says the most: a played save first, then the first by file name.
+const best=list=>[...list].sort((a,b)=>(b.save?.xp ?? -1)-(a.save?.xp ?? -1))[0];
+async function openHub(panel=hubPanel) {
+  hubPanel=panel;
+  if(!catalog.length) catalog=await api.catalog();
+  $('hub').showModal();renderHub();
+  $('hub').querySelector(`[data-panel="${hubPanel}"]`).focus();
+}
+function renderHub() {
+  const game=catalog.filter(c=>c.game===state.game),have=game.filter(c=>owned(c).length);
+  $('hub-title').textContent=`Collection · ${state.games[state.game-1]}`;
+  for(const tab of $('hub').querySelectorAll('[role=tab]')) {
+    const on=tab.dataset.panel===hubPanel;
+    tab.classList.toggle('selected',on);tab.setAttribute('aria-selected',on);
+    $(`hub-${tab.dataset.panel}`).hidden=!on;
+  }
+  $('hub-count').innerHTML=currentTheme()==='fishbet'?`Odds of owning them all: <b>${have.length}</b>/${game.length}`:`<b>${have.length}</b> of ${game.length} in your library`;
+  if(hubPanel==='figures') renderVault(game);
+  if(hubPanel==='progress') renderProgress(game);
+  if(hubPanel==='history') renderHistory();
+  if(hubPanel==='setup') renderChecks();
+}
+function renderVault(game) {
+  const elements=[...new Set(game.map(c=>c.element).filter(Boolean))];
+  const select=$('vault-element'),value=select.value;
+  if(select.dataset.game!==String(state.game)) {
+    select.innerHTML=`<option value="">All elements</option>${elements.map(el=>`<option>${e(el)}</option>`).join('')}`;
+    select.dataset.game=state.game;
+  }
+  select.value=elements.includes(value)?value:'';
+  const query=$('vault-search').value.trim().toLowerCase(),show=$('vault-show').value;
+  const list=game.filter(c=>{
+    const mine=owned(c),f=best(mine);
+    if(select.value && c.element!==select.value) return false;
+    if(query && !`${c.name} ${c.kind} ${c.element}`.toLowerCase().includes(query)) return false;
+    return show==='all' || (show==='owned'?mine.length:show==='missing'?!mine.length:show==='leveling'?f?.save?.state==='ok' && !f.save.maxed:mine.some(m=>m.save?.state==='damaged'));
+  });
+  $('vault-empty').hidden=!!list.length;
+  $('vault').innerHTML=list.map(c=>{
+    const mine=owned(c),f=best(mine);
+    const meta=!mine.length?'Not in your library':mine.some(m=>m.save?.state==='damaged')?'Damaged save':stats(f) || c.kind;
+    return `<button class="vault-item${mine.length?'':' missing'}${fallen(f)?' fallen':''}" data-entry="${entryKey(c)}" data-el="${e(c.element)}" aria-pressed="${selected===entryKey(c)}"><div class="portrait">${f?(f.half==='whole'?portrait(f):halfPortrait(f)):`<span class="placeholder">${sigil(c.element)}</span>`}</div><span>${e(c.name)}</span><small>${e(meta)}${mine.length>1?` · ${mine.length} dumps`:''}</small></button>`;
+  }).join('');
+  for(const tile of $('vault').children) {
+    tile.style.setProperty('--color',colors[tile.dataset.el] || 'var(--gilt)');
+    tile.onclick=()=>{selected=selected===tile.dataset.entry?null:tile.dataset.entry;renderHub();};
+  }
+  orientHalves();
+  renderDetail(game.find(c=>entryKey(c)===selected));
+}
+async function renderDetail(c) {
+  const aside=$('vault-detail');
+  aside.hidden=!c;
+  if(!c) return;
+  const mine=owned(c),kind=[c.element,c.kind].filter(Boolean).join(' ');
+  if(!mine.length) {
+    aside.innerHTML=`<h3>${e(c.name)}</h3><p class="detail-kind">${e(kind)}</p><p class="hub-note">Not in your library yet. Put its dump in the NFC folder and it lights up here.</p>`;
+    return;
+  }
+  aside.innerHTML=`<h3>${e(c.name)}</h3><p class="detail-kind">${e(kind)}</p>`+mine.map(f=>{
+    const s=f.save,rows=[['File',f.key]];
+    if(s?.state==='ok') rows.unshift(['Level',s.maxed?'10 or higher':s.level],['Gold',number(s.gold)],['Hero points',number(s.heroPoints)],...(s.nickname?[['Nickname',s.nickname]]:[]));
+    if(s?.state==='new') rows.unshift(['Save','New figure, never played']);
+    if(s?.state==='damaged') rows.unshift(['Save','Damaged: its checksums don’t match. Restore a backup below.']);
+    if(state.lastPlayed[f.key]) rows.push(['Last played',ago(state.lastPlayed[f.key])]);
+    const load=playable(f) && compatible(f) && f.half!=='bottom';
+    return `<article class="detail-figure" data-key="${e(f.key)}"><dl>${rows.map(([k,v])=>`<dt>${k}</dt><dd>${e(v)}</dd>`).join('')}</dl>
+      <div class="hub-actions">${load?`<button data-load="0" ${fallen(f)?'disabled':''}>Load for Player 1</button><button data-load="1" ${fallen(f)?'disabled':''}>Load for Player 2</button>`:''}<button data-show>Show in folder</button>${state.challenge.nuzlocke && load?`<button data-fallen>${fallen(f)?'Revive':'Mark as fallen'}</button>`:''}</div>
+      <h4>Backups</h4><ol class="backups"><li class="hub-note">Loading…</li></ol></article>`;
+  }).join('');
+  for(const card of aside.querySelectorAll('.detail-figure')) {
+    const key=card.dataset.key,f=figure(key);
+    for(const button of card.querySelectorAll('[data-load]')) button.onclick=()=>perform(async()=>{await api.action({player:Number(button.dataset.load),target:'direct',choice:model(f)});toast(`${name(f)} is on the portal.`);});
+    card.querySelector('[data-show]').onclick=()=>perform(()=>api.showFigure(key));
+    card.querySelector('[data-fallen]')?.addEventListener('click',()=>perform(()=>api.challenge({key,fallen:!fallen(f)})));
+    const list=card.querySelector('.backups');
+    try {
+      // Backups only change when a figure is loaded or restored.
+      const stamp=`${key}|${state.history.length}|${f.mtime}`;
+      if(!backupCache.has(stamp)) backupCache.set(stamp,await api.backups(key));
+      const backups=backupCache.get(stamp);
+      list.innerHTML=backups.length?backups.map(b=>`<li><time>${e(new Date(b.at).toLocaleString())}</time><button data-name="${e(b.name)}">Restore</button></li>`).join(''):'<li class="hub-note">None yet. A backup is made each time this figure goes on the portal.</li>';
+      // Restoring asks twice with the same button, which a controller can do too.
+      for(const button of list.querySelectorAll('button')) button.onclick=()=>perform(async()=>{
+        if(!button.classList.contains('confirm')) {
+          button.classList.add('confirm');button.textContent='Restore this save?';
+          setTimeout(()=>{button.classList.remove('confirm');button.textContent='Restore';},5000);return;
+        }
+        await api.restoreBackup({key,name:button.dataset.name});
+        toast(`${name(f)} restored. The file it replaced is kept as a backup.`);
+      });
+    } catch(error) {list.innerHTML=`<li class="hub-note">${e(clean(error.message))}</li>`;}
+  }
+}
+// A whole figure loads alone; a Swap Force half brings its matching other half.
+function model(f) {
+  if(f.half==='whole') return {top:f.key,bottom:null};
+  const bottom=state.figures.find(x=>x.id===f.id-1000 && x.variant===f.variant);
+  return {top:f.key,bottom:bottom?.key ?? null};
+}
+function renderProgress(game) {
+  const mine=state.figures.filter(f=>f.info?.game===state.game),played=mine.filter(f=>f.save?.state==='ok');
+  const rows=[['In your library',`${game.filter(c=>owned(c).length).length} of ${game.length}`],['Level 10 or higher',`${played.filter(f=>f.save.maxed).length} of ${played.length} played`],
+    ['Gold on your figures',number(played.reduce((n,f)=>n+f.save.gold,0))],['Hero points',number(played.reduce((n,f)=>n+f.save.heroPoints,0))]];
+  $('ledger').innerHTML=rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  const elements=[...new Set(game.map(c=>c.element).filter(Boolean))];
+  $('meters').innerHTML=elements.map(el=>{
+    const all=game.filter(c=>c.element===el),have=all.filter(c=>owned(c).length).length;
+    return `<div class="meter" data-el="${e(el)}" data-v="${all.length?have/all.length:0}"><span class="meter-label">${colors[el]?sigil(el):''}${e(el)}</span><i role="meter" aria-valuemin="0" aria-valuemax="${all.length}" aria-valuenow="${have}" aria-label="${e(el)} figures owned"></i><b>${have}/${all.length}</b></div>`;
+  }).join('');
+  // The page's CSP blocks inline style attributes; set the fill from script.
+  for(const meter of $('meters').children) {meter.style.setProperty('--v',meter.dataset.v);meter.style.setProperty('--color',colors[meter.dataset.el] || 'var(--gilt)');}
+  $('nuzlocke').setAttribute('aria-pressed',state.challenge.nuzlocke);
+  const down=state.challenge.fallen.map(figure).filter(Boolean);
+  $('revive-all').disabled=!down.length;
+  $('fallen').textContent=!state.challenge.nuzlocke?'Off. Turn it on to start marking fallen Skylanders from their card in Figures.':down.length?`Fallen: ${down.map(name).join(', ')}.`:'Nobody has fallen yet.';
+  const counts={};
+  for(const h of state.history) if(h.game===state.game && figure(h.key)) counts[h.key]=(counts[h.key]||0)+1;
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  $('most-played').innerHTML=top.length?top.map(([key,n])=>`<li><span>${e(name(figure(key)))}</span><b>${n} ${n===1?'time':'times'}</b></li>`).join(''):'<li class="hub-note">Load a Skylander and it shows up here.</li>';
+}
+function renderHistory() {
+  const rows=state.history.filter(h=>h.game===state.game);
+  $('history').innerHTML=rows.length?rows.map(h=>{
+    const f=figure(h.key);
+    return `<li data-el="${e(f?.info?.element || '')}"><time>${e(ago(h.at))}</time><span class="history-who">${h.player===null?'Accessory':`Player ${h.player+1}`}</span><b>${e(f?name(f):h.name)}</b>${f?.info?`<button data-key="${e(h.key)}">Backups</button>`:''}</li>`;
+  }).join(''):'<li class="hub-note">Nothing played in this game yet.</li>';
+  for(const button of $('history').querySelectorAll('button')) button.onclick=()=>{
+    const f=figure(button.dataset.key);selected=`${f.id}:${f.variant}`;
+    $('vault-show').value='all';$('vault-search').value='';$('vault-element').value='';hubPanel='figures';renderHub();
+    $('vault').querySelector('[aria-pressed=true]')?.scrollIntoView({block:'nearest'});
+  };
+}
+async function renderChecks() {
+  if(!diagnostics) {$('checks').innerHTML='<li class="hub-note">Checking…</li>';diagnostics=await api.diagnostics().catch(error=>({error:clean(error.message)}));}
+  const d=diagnostics;
+  if(d.error) {$('checks').innerHTML=`<li class="hub-note">${e(d.error)}</li>`;return;}
+  const list=keys=>keys.slice(0,6).map(e).join(', ')+(keys.length>6?`, and ${keys.length-6} more`:'');
+  const per=state.games.map((g,i)=>d.counts[i]?`${d.counts[i]} ${g}`:'').filter(Boolean).join(', ');
+  const rows=[
+    [d.cemu?'ok':'bad','Cemu next to Dè PerPortal',d.cemu?'Found the Cemu executable.':'Put Dè PerPortal and its release files in the folder with your Cemu executable.'],
+    [d.running?'ok':'warn','Cemu is running',d.running?'Connected to Cemu.':'Start Cemu to use the portal.',d.running?null:['Launch Cemu','launch']],
+    ...(d.running?[[d.supported?'ok':'bad','Supported Cemu build',d.supported?'This is the skylandersNFC Cemu build.':'Use the skylandersNFC Cemu-Skylanders-Emulated-Portal build; other builds can’t be controlled.']]:[]),
+    ['info','Cemu’s portal and language','The emulated portal must be turned on, and Cemu must use its English interface.',['Enable Cemu portal','enable']],
+    [d.nfc && d.total?'ok':'bad','NFC folder',d.nfc?(d.total?`${d.total} figures: ${per}.`:'The NFC folder is empty. Put your figure dumps in it.'):'Make a folder named NFC next to Dè PerPortal and put your figure dumps in it.',['Rescan','rescan']],
+    [d.damaged.length?'bad':'ok','Figure saves',d.damaged.length?`${d.damaged.length} save${d.damaged.length===1?' fails':'s fail'} its checksum: ${list(d.damaged)}. Restore a backup from its card.`:'Every save that was read passed its checksum.',d.damaged.length?['Show damaged','damaged']:null],
+    [d.duplicates.length?'warn':'ok','Duplicate dumps',d.duplicates.length?`These files are copies of the same figure, so only one of each can be on the portal: ${d.duplicates.map(g=>g.map(e).join(' = ')).join('; ')}.`:'No figure appears twice.'],
+    [d.misplaced.length?'warn':'ok','Folders',d.misplaced.length?`These figures are newer than the game their folder is named after, so that game can’t use them: ${list(d.misplaced)}.`:'No figure sits in a folder for a game older than itself.'],
+    [d.unknown?'warn':'ok','Recognized figures',d.unknown?`${d.unknown} dump${d.unknown===1?' isn’t':'s aren’t'} in the figure list. See Library scan details in Settings.`:'Every dump is a known figure.'],
+    [d.art?'ok':'warn','Character artwork',d.art?'Portraits are available.':'Portraits are optional, about 50 MB.',d.art?null:['Download art','art']]];
+  $('checks').innerHTML=rows.map(([status,title,text,action])=>`<li class="check-row" data-status="${status}"><i class="check-mark" aria-label="${{ok:'Fine',warn:'Worth a look',bad:'Needs fixing',info:'Note'}[status]}">${{ok:'✓',warn:'!',bad:'✕',info:'i'}[status]}</i><div><b>${title}</b><p>${text}</p></div>${action?`<button data-do="${action[1]}">${action[0]}</button>`:''}</li>`).join('');
+  const actions={launch:()=>api.launch(),enable:async()=>{await api.enable();toast('Cemu portal emulation enabled.');},rescan:()=>api.rescan(),art:()=>api.artwork(),
+    damaged:()=>{$('vault-show').value='damaged';hubPanel='figures';renderHub();}};
+  for(const button of $('checks').querySelectorAll('button')) button.onclick=()=>perform(async()=>{await actions[button.dataset.do]();if(button.dataset.do!=='damaged'){diagnostics=null;renderHub();}});
+}
+for(const tab of $('hub').querySelectorAll('[role=tab]')) tab.onclick=()=>{hubPanel=tab.dataset.panel;if(hubPanel==='setup')diagnostics=null;renderHub();};
+$('hub').onkeydown=event=>{
+  // Arrow keys move between tabs while a tab has focus.
+  const tabs=[...$('hub').querySelectorAll('[role=tab]')],i=tabs.indexOf(document.activeElement);
+  if(i<0 || !['ArrowLeft','ArrowRight'].includes(event.key)) return;
+  const next=tabs[(i+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length];next.click();next.focus();
+};
+$('vault-search').oninput=renderHub;$('vault-element').onchange=renderHub;$('vault-show').onchange=renderHub;
+$('nuzlocke').onclick=()=>perform(()=>api.challenge({nuzlocke:!state.challenge.nuzlocke}));
+$('revive-all').onclick=()=>perform(()=>api.challenge({reset:true}));
+$('collection').onclick=()=>perform(()=>openHub());
+$('hub-close').onclick=()=>$('hub').close();
 $('to-game').onclick=()=>perform(()=>api.toGame());
 $('overlay').onclick=()=>perform(()=>api.overlay());
 $('settings-close').onclick=()=>$('settings-dialog').close();
@@ -406,6 +623,11 @@ setInterval(()=>{
   // B backs out: first out of a dialog, then out of the GUI to the game.
   if(pressed.has('B')) dialog?dialog.close():perform(()=>api.toGame());
   if(!dialog && (pressed.has('L1') || pressed.has('R1'))) $(`tab-${pressed.has('R1')?1:0}`).click();
+  // In Collection, L1/R1 step through its tabs.
+  if(dialog?.id==='hub' && (pressed.has('L1') || pressed.has('R1'))) {
+    const tabs=[...dialog.querySelectorAll('[role=tab]')],i=tabs.findIndex(t=>t.dataset.panel===hubPanel);
+    const next=tabs[(i+(pressed.has('R1')?1:-1)+tabs.length)%tabs.length];next.click();next.focus();
+  }
   if(pressed.has('VIEW')) perform(()=>api.toGame());
 },33);
 addEventListener('mousemove',()=>document.body.classList.remove('pad'));
@@ -474,16 +696,16 @@ function fillWins() {
   $('fb-wins').innerHTML=wins+wins; // twice, so the marquee loops without a gap
 }
 const spinning=[false,false];
+// The reel only shows names; the pick itself is the same as Random and Alt+D.
 function spin(p) {
-  const bottoms=state.figures.filter(f=>compatible(f) && f.half==='bottom');
-  const pool=state.figures.filter(f=>compatible(f) && playable(f) && (f.half==='whole' || (f.half==='top' && bottoms.length)));
+  const pool=state.figures.filter(f=>compatible(f) && playable(f) && f.half!=='bottom');
   if(!pool.length) {toast('No compatible Skylanders in your NFC folder to spin.');return;}
-  const top=pick(pool),bottom=top.half==='top'?pick(bottoms):null,button=$(`spin-${p}`),label=button.textContent;
+  const button=$(`spin-${p}`),label=button.textContent;
   spinning[p]=true;button.disabled=true;button.classList.add('reeling');
   const reel=setInterval(()=>button.textContent=name(pick(pool)),70);
   setTimeout(()=>{
     clearInterval(reel);spinning[p]=false;button.classList.remove('reeling');button.textContent=label;button.disabled=state.busy;
-    perform(()=>api.action({player:p,target:'direct',choice:{top:top.key,bottom:bottom?.key ?? null}}));
+    perform(()=>api.random(p));
   },matchMedia('(prefers-reduced-motion: reduce)').matches?0:1200);
 }
 for(let p=0;p<2;p++) $(`spin-${p}`).onclick=()=>spin(p);
