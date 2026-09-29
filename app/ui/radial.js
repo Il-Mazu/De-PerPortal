@@ -40,6 +40,9 @@ function render() {
   $('dots').replaceChildren(...state.tabs.map((_,i)=>{const dot=document.createElement('i');if(i===tab)dot.className='on';return dot;}));
   $('label').textContent=item.label;
   $('detail').textContent=item.detail;
+  // Player rings keep their default in the centre, on Y / Triangle.
+  $('home').hidden=!t.home;
+  if(t.home) {$('home').replaceChildren(hint('Y',t.home.assigned?`Default · ${t.home.detail}`:'No default set'));$('home').classList.toggle('unset',!t.home.assigned);}
   $('hints').replaceChildren(...(t.twoPlayer?[hint('A','Player 1'),hint('X','Player 2')]:[hint('A','Load')]),hint('B','Close'));
 }
 function setHold(value) {
@@ -73,6 +76,7 @@ function poll() {
   const choice={tab,index};
   if(pressed.has('A')) pending=()=>window.radial.pick({...choice,alt:false});
   else if(pressed.has('X') && t.twoPlayer) pending=()=>window.radial.pick({...choice,alt:true});
+  else if(pressed.has('Y') && t.home?.assigned) pending=()=>window.radial.pick({tab,home:true});
   else if(pressed.has('B')) pending=()=>window.radial.close();
 }
 window.radial.onState(next=>{state=next;render();});

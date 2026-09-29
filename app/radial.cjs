@@ -12,7 +12,8 @@ function tabs(manager) {
   const s=manager.state(),figure=key=>s.figures.find(f=>f.key===key);
   const name=c=>c?.top?[c.top,c.bottom].filter(Boolean).map(k=>figure(k)?.info?.name?.replace(/ \((Top|Bottom)\)$/,'') || 'Unknown figure').join(' / '):'Not assigned';
   const elements=s.elements.filter(e=>s.game>=4 || !['Light','Dark'].includes(e));
-  const list=[0,1].map(p=>({title:`Player ${p+1}`,items:elements.map(el=>({label:el,detail:name(s.profile.players[p].elements[el]),el,hotkey:{player:p,key:elementKeys[s.elements.indexOf(el)]}}))}));
+  // The centre of each player ring returns to that player's default, like Alt+0.
+  const list=[0,1].map(p=>({title:`Player ${p+1}`,home:{label:'Default',detail:name(s.profile.players[p].favorite),assigned:!!s.profile.players[p].favorite,hotkey:{player:p,key:'0'}},items:elements.map(el=>({label:el,detail:name(s.profile.players[p].elements[el]),el,hotkey:{player:p,key:elementKeys[s.elements.indexOf(el)]}}))}));
   if(s.game===3) list.push({title:'Perks',twoPlayer:true,items:s.perks.map((perk,i)=>({label:perk.name,detail:'Movement base',badge:i,hotkey:{key:perk.key}}))});
   if(s.game===4) {
     const villains=manager.figures.filter(f=>f.info?.kind==='Trap' && manager.trapName(f)).sort((a,b)=>manager.trapName(a).localeCompare(manager.trapName(b)));
@@ -61,8 +62,8 @@ function createRadial(manager,mainWindow,freeze,raise) {
     if(mainWindow.isMinimized())mainWindow.restore();
     mainWindow.show();mainWindow.setAlwaysOnTop(true);mainWindow.focus();raise?.();
   }
-  async function pick({tab,index,alt}) {
-    const t=tabs(manager)[tab],item=t?.items?.[index];
+  async function pick({tab,index,alt,home}) {
+    const t=tabs(manager)[tab],item=home?t?.home:t?.items?.[index];
     if(!item)return;
     await hide();
     if(item.villain)manager.selectedTrap=item.villain;

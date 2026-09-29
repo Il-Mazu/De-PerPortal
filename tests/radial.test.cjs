@@ -6,7 +6,7 @@ const model=require('../app/model.cjs');
 
 function fakeManager(game,extra={}) {
   const figures=[{key:'spyro.sky',info:{name:'Spyro',kind:'Skylander',element:'Magic'}},{key:'jet.sky',info:{name:'Jet-Vac',kind:'Vehicle'}}];
-  const players=[0,1].map(p=>({elements:{Magic:p?null:{top:'spyro.sky',bottom:null}}}));
+  const players=[0,1].map(p=>({elements:{Magic:p?null:{top:'spyro.sky',bottom:null}},favorite:p?null:extra.favorite}));
   return {figures:extra.figures||[],trapName:extra.trapName||(()=>null),
     state:()=>({game,figures,elements:model.elements,perks:model.perks,profile:{players},vehicleKeys:{Q:'Sky',W:'Land',E:'Sea'},vehicleShortcuts:{Sky:{key:'jet.sky'},Land:{key:null},Sea:{key:null}}})};
 }
@@ -17,6 +17,9 @@ test('radial tabs follow each game and map to the keyboard shortcuts',()=>{
   assert.equal(giants[0].items.length,8,'Light and Dark arrive with Trap Team');
   assert.deepEqual(giants[0].items[0],{label:'Magic',detail:'Spyro',el:'Magic',hotkey:{player:0,key:'1'}});
   assert.equal(giants[1].items[0].detail,'Not assigned');
+  assert.deepEqual(tabs(fakeManager(2,{favorite:{top:'spyro.sky',bottom:null}}))[0].home,{label:'Default',detail:'Spyro',assigned:true,hotkey:{player:0,key:'0'}});
+  assert.equal(giants[1].home.detail,'Not assigned');
+  assert.equal(tabs(fakeManager(3))[2].home,undefined,'only player rings have a default');
   assert.deepEqual(tabs(fakeManager(3))[2].items[0].hotkey,{key:'Q'});
   assert.equal(tabs(fakeManager(3))[2].twoPlayer,true);
   const trap={key:'t.sky',info:{kind:'Trap',element:'Fire'}};
