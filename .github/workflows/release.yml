@@ -24,6 +24,10 @@ jobs:
         shell: cmd
         run: build.cmd
       - run: npm ci
+      # npm skips Electron's install script, so Electron downloads itself on
+      # first require. Do that once here; parallel test files would race.
+      - name: Install Electron binary
+        run: node -e "require('electron')"
       - run: npm test
       - run: npm run dist
       - name: Package checksum
