@@ -110,6 +110,8 @@ else {
       stream:data=>manager.setStream(data),
       'show-figure':key=>shell.showItemInFolder(manager.figurePath(key)),
       'open-issues':()=>shell.openExternal('https://github.com/Il-Mazu/De-PerPortal/issues'),
+      notes:async()=>({version:app.getVersion(),sections:require('./notes.cjs').render(await fs.readFile(path.join(__dirname,'../RELEASE_NOTES.md'),'utf8'))}),
+      'open-site':()=>shell.openExternal(require('./notes.cjs').SITE),
       'export-profile':async()=>{
         const game=manager.state().games[manager.game-1];
         const r=await dialog.showSaveDialog(win,{title:'Export profile',defaultPath:`${game} profile.json`,filters:[{name:'Dè PerPortal profile',extensions:['json']}]});

@@ -18,6 +18,15 @@ const {installArt}=require('../app/artwork.cjs');
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const selectGame=async value=>{await page.selectOption('#game',value);await page.waitForFunction(game=>document.body.dataset.game===game,value);};
   await page.locator('#library-count').filter({hasText:'32 figures'}).waitFor();
+  // A fresh install shows the patch notes once, for the version in package.json.
+  await page.locator('#notes-dialog[open]').waitFor();
+  assert.equal(await page.locator('#notes-title').textContent(),`What's new in ${require('../package.json').version}`);
+  assert.equal(await page.locator('#notes-body [data-site]').count(),1);
+  await page.locator('#notes-ok').click();
+  await page.locator('#settings').click();
+  await page.locator('#open-notes').click();
+  await page.locator('#notes-dialog[open]').waitFor();
+  await page.locator('#notes-close').click();
   await selectGame('3');
   assert.equal(await page.locator('#perks-section').isVisible(),true);
   assert.equal(await page.locator('#perks .perk-card').count(),8);

@@ -25,5 +25,7 @@ contextBridge.exposeInMainWorld('dePerPortal',{
   importProfile:()=>ipcRenderer.invoke('import-profile'),
   showFigure:key=>ipcRenderer.invoke('show-figure',key),
   openIssues:()=>ipcRenderer.invoke('open-issues'),
+  notes:()=>ipcRenderer.invoke('notes'),
+  openSite:()=>ipcRenderer.invoke('open-site'),
   onState:callback=>ipcRenderer.on('state',(_,state)=>callback(state))
 });

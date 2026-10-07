@@ -1,3 +1,14 @@
+# Dè PerPortal 2.1.0
+
+- **New:** patch notes. After an update, Dè PerPortal shows what changed the first time it starts. Read them again any time under **Settings** → **About** → **Patch notes**; older versions are folded underneath. With a controller, move up and down to scroll and press B to close.
+- **New:** Dè PerPortal has a website at https://il-mazu.github.io/De-PerPortal/. It's built like a Skylanders starter pack. Try the portal in its window with a click, the number keys or by holding L3 + R3 on a controller, then scroll to turn the box over. **Website** in **Settings** opens it in your browser.
+
+## Validation
+
+A unit test checks that the notes turn into escaped HTML one version at a time and that the newest notes match the app's version. The website was checked in Chromium on desktop and phone sizes. The patch notes dialog has not been tried on Windows yet.
+
+---
+
 # Dè PerPortal 2.0.0
 
 - **New:** automatic backups. Every figure is copied to `de-perportal-data/backups` before it goes on the portal, keeping the last 10 versions of each. Restore one from the figure's card in **Collection**; the file it replaces is backed up too.

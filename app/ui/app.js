@@ -567,6 +567,25 @@ $('hub-close').onclick=()=>$('hub').close();
 $('to-game').onclick=()=>perform(()=>api.toGame());
 $('overlay').onclick=()=>perform(()=>api.overlay());
 $('settings-close').onclick=()=>$('settings-dialog').close();
+// Patch notes: from RELEASE_NOTES.md, shown once after each new version and from Settings.
+let notes;
+async function openNotes() {
+  notes ||= await api.notes();
+  $('notes-title').textContent=`What's new in ${notes.version}`;
+  $('notes-body').innerHTML=notes.sections.map((s,i)=>i?`<details><summary>Version ${e(s.version)}</summary>${s.html}</details>`:`<section>${s.html}</section>`).join('');
+  $('settings-dialog').close();
+  $('notes-dialog').showModal();$('notes-body').scrollTop=0;$('notes-ok').focus();
+  try {localStorage.setItem('notes-seen',notes.version);} catch {}
+}
+$('notes-body').onclick=event=>{if(event.target.closest('[data-site]'))perform(()=>api.openSite());};
+$('notes-close').onclick=$('notes-ok').onclick=()=>$('notes-dialog').close();
+$('open-notes').onclick=()=>perform(openNotes);
+$('open-site').onclick=()=>perform(()=>api.openSite());
+api.notes().then(n=>{
+  notes=n;$('about-version').textContent=`Dè PerPortal ${n.version}`;
+  let seen;try {seen=localStorage.getItem('notes-seen');} catch {}
+  if(seen!==n.version && !document.querySelector('dialog[open]')) openNotes();
+});
 $('game').onchange=()=>perform(()=>api.game(Number($('game').value)));
 $('launch').onclick=()=>perform(()=>api.launch());
 $('enable').onclick=()=>perform(async()=>{await api.enable();toast('Cemu portal emulation enabled.');});
@@ -617,6 +636,7 @@ setInterval(()=>{
   const panning=dialog?.id==='poster-dialog' && $('poster-view').classList.contains('zoomed');
   for(const direction of ['UP','DOWN','LEFT','RIGHT']) if(pressed.has(direction)) {
     if(panning) $('poster-view').scrollBy(...{UP:[0,-160],DOWN:[0,160],LEFT:[-160,0],RIGHT:[160,0]}[direction]);
+    else if(dialog?.id==='notes-dialog' && (direction==='UP' || direction==='DOWN')) $('notes-body').scrollBy(0,direction==='UP'?-160:160);
     else moveFocus(direction);
   }
   if(pressed.has('A')) activate(focusables().includes(document.activeElement)?document.activeElement:null);

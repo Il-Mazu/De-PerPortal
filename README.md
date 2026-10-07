@@ -4,7 +4,7 @@
 
 A portable Windows companion for the Cemu Skylanders portal. Choose figures for two players, save a default for each game, and switch characters with keyboard shortcuts or a controller.
 
-[Download for Windows](https://github.com/Il-Mazu/De-PerPortal/releases/latest)
+[Download for Windows](https://github.com/Il-Mazu/De-PerPortal/releases/latest) · [Website](https://il-mazu.github.io/De-PerPortal/)
 
 ## Features
 
@@ -22,6 +22,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - A Collection with every figure of the game, your progress per element, what you played, and a setup check.
 - A random pick, a Nuzlocke challenge, and an elemental gate helper for each level (beta).
 - Profile import and export, a Discord status and an OBS overlay.
+- Patch notes after each update, and again any time from Settings.
 
 ## Download and setup
 
