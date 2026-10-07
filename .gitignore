@@ -9,3 +9,9 @@
 *.dump
 *.dmp
 /skyportal-data/
+/.impeccable/review/
+/.impeccable/mocks/
+/.impeccable/build/
+/.impeccable/config.local.json
+/.impeccable/hook.cache.json
+/.impeccable/questions/

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dè PerPortal: swap Skylanders on Cemu from the couch</title>
+<meta name="description" content="A free two-player portal for the Cemu Skylanders build. Load figures with a click, a keyboard shortcut or your controller, and keep every save backed up.">
+<meta name="theme-color" content="#0b1446">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dè PerPortal">
+<meta property="og:description" content="Swap Skylanders on Cemu without leaving the couch. Free, two players, controller ready.">
+<meta property="og:image" content="https://il-mazu.github.io/De-PerPortal/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<link rel="preload" href="assets/fonts/lilita-one.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/nunito.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/portal.webp" as="image">
+<link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#back">Skip to what it does</a>
+
+<nav class="nav" aria-label="Main">
+  <a class="nav-brand" href="#top"><img src="assets/icon.png" alt="" width="32" height="32"><span>Dè PerPortal</span></a>
+  <div class="nav-links">
+    <a href="#controller">Controls</a>
+    <a href="#saves">Saves</a>
+    <a href="#games">Games</a>
+    <a href="#themes">Themes</a>
+    <a href="#tinker">How it works</a>
+    <a class="nav-gh" href="https://github.com/Il-Mazu/De-PerPortal" aria-label="Source on GitHub"><i class="ph ph-github-logo" aria-hidden="true"></i></a>
+  </div>
+</nav>
+
+<main>
+<!-- The box: front sells it, scrolling turns it over to the back. -->
+<section class="stage" id="top" aria-label="Dè PerPortal">
+  <div class="pin">
+    <div class="box" id="box">
+      <article class="face front">
+        <div class="burst" aria-hidden="true"></div>
+        <div class="band"><span><i class="ph ph-game-controller" aria-hidden="true"></i> Windows edition</span><span>For the Cemu Skylanders build</span></div>
+
+        <div class="front-copy">
+          <img class="logo" src="assets/logo.webp" alt="Skylanders Dè PerPortal" width="900" height="453">
+          <h1>Swap Skylanders without leaving the couch.</h1>
+          <p class="lede">A free portal for two players on Cemu. Load figures with a click, a shortcut or your controller.</p>
+          <div class="ctas">
+            <a class="btn gilt" data-download href="https://github.com/Il-Mazu/De-PerPortal/releases/latest"><i class="ph ph-download-simple" aria-hidden="true"></i>Download for Windows</a>
+            <a class="btn plain" href="https://github.com/Il-Mazu/De-PerPortal"><i class="ph ph-github-logo" aria-hidden="true"></i>Source on GitHub</a>
+          </div>
+          <p class="version" data-version>Free and open source, GPL-2.0-or-later</p>
+        </div>
+
+        <div class="window" id="window">
+          <div class="window-art" aria-hidden="true"></div>
+          <div class="ribbon" aria-hidden="true">Two-player pack</div>
+          <div class="scene" id="scene">
+            <div class="aura a1" aria-hidden="true"></div><div class="aura a2" aria-hidden="true"></div>
+            <ol class="dial" id="dial" aria-label="Elements"></ol>
+            <div class="portal-wrap">
+              <img class="portal" id="portal" src="assets/portal.webp" alt="The Portal of Power" width="578" height="360">
+              <div class="flash" id="flash" aria-hidden="true"></div>
+              <div class="fig p1" id="fig1" data-el="Magic"><span class="sigil"></span><b class="tag">P1</b></div>
+              <div class="fig p2" id="fig2" data-el="Fire"><span class="sigil"></span><b class="tag">P2</b></div>
+            </div>
+            <div class="hold" id="hold" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/></svg><span>Keep holding</span></div>
+          </div>
+          <div class="players" role="tablist" aria-label="Player">
+            <button role="tab" class="pl on" data-p="0" aria-selected="true"><kbd>LB</kbd>Player 1</button>
+            <button role="tab" class="pl" data-p="1" aria-selected="false">Player 2<kbd>RB</kbd></button>
+          </div>
+          <p class="try" id="try">Click a sigil, press <kbd>1</kbd> to <kbd>9</kbd> (add <kbd>Shift</kbd> for Player 2) or hold <kbd>L3</kbd>+<kbd>R3</kbd> on a controller.</p>
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
+          <div class="sheen" aria-hidden="true"></div>
+        </div>
+
+        <ul class="includes" aria-label="In the box">
+          <li><i class="ph ph-game-controller" aria-hidden="true"></i>Quick swap dial</li>
+          <li><i class="ph ph-keyboard" aria-hidden="true"></i>Shortcuts that work in game</li>
+          <li><i class="ph ph-shield-check" aria-hidden="true"></i>Automatic save backups</li>
+          <li><i class="ph ph-palette" aria-hidden="true"></i>13 themes</li>
+        </ul>
+        <div class="rating" aria-label="License: GPL 2.0 or later"><b>GPL</b><span>2.0+</span></div>
+      </article>
+
+      <div class="side left" aria-hidden="true"><img src="assets/logo.webp" alt=""></div>
+      <div class="side right" aria-hidden="true"><span>Dè PerPortal</span></div>
+
+      <article class="face back" id="back" aria-labelledby="back-h">
+        <div class="back-grid">
+          <div class="back-copy">
+            <h2 id="back-h">Your Portal of Power, rebuilt for Cemu.</h2>
+            <p>Pick figures from your NFC dumps and put them on Cemu's emulated portal, for Player 1 and Player 2, without opening a single menu.</p>
+            <ul class="feats">
+              <li><i class="ph ph-users" aria-hidden="true"></i><span><b>Two players, equal.</b> Each has a default, three presets per game and their own shortcuts.</span></li>
+              <li><i class="ph ph-game-controller" aria-hidden="true"></i><span><b>Never get up.</b> Hold L3 + R3 and a dial opens over the game.</span></li>
+              <li><i class="ph ph-shield-check" aria-hidden="true"></i><span><b>Saves stay safe.</b> Every figure is copied before it touches the portal.</span></li>
+              <li><i class="ph ph-cards" aria-hidden="true"></i><span><b>Know your collection.</b> Levels, gold and what you are still missing.</span></li>
+            </ul>
+          </div>
+          <figure class="shot">
+            <img src="assets/themes/default.webp" alt="The Dè PerPortal window: both players' defaults on the sides, Boom Jet and Eruptor on the portal in the middle" width="960" height="600" loading="lazy">
+            <span class="callout c1">Each player's default, one press away</span>
+            <span class="callout c2">Both players on the portal</span>
+            <span class="callout c3">Sidekicks, traps and vehicles get their own slot</span>
+          </figure>
+        </div>
+        <div class="back-foot">
+          <ol class="el-strip" aria-label="All ten elements supported"></ol>
+          <p class="fine">Not affiliated with Activision. Requires the supported Cemu Skylanders build and your own figure dumps. No figures included.</p>
+          <div class="barcode" aria-label="SHA-256 of the supported Cemu build"><div class="bars" data-hash="65e22a4ec27915d60d71689c45a27eb7bf329d17bde6719b79ada561744ee280"></div><code>65e22a4e…ee280</code></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="panel">
+<!-- Controller -->
+<section class="sec controller" id="controller" aria-labelledby="ctl-h">
+  <div class="wrap ctl-grid">
+    <div class="ctl-copy">
+      <h2 id="ctl-h">Hold both sticks. Pick. Keep playing.</h2>
+      <p>Press L3 and R3 together while a Skylanders game runs. Cemu freezes, the dial opens over it, and the game picks up again the moment you let go.</p>
+      <button class="holdbtn" id="holdbtn" type="button" aria-describedby="hold-help">
+        <span class="holdbtn-ring" aria-hidden="true"></span>
+        <span class="holdbtn-label">Press and hold</span>
+      </button>
+      <p class="help" id="hold-help">Hold the button, the space bar or your controller's L3 + R3.</p>
+    </div>
+    <ol class="timeline" id="timeline">
+      <li data-t="0"><b>0 s</b><span>Press both sticks</span><small>L3 + R3 on Xbox and PlayStation pads, including Parsec and Steam virtual ones.</small></li>
+      <li data-t="2"><b>2 s</b><span>The quick swap dial opens</span><small>Point a stick at an element, press A (Cross on PlayStation). LB / RB switch player, or open perks, traps and vehicles.</small></li>
+      <li data-t="5"><b>5 s</b><span>The full window comes up</span><small>Every screen and dialog works with only the stick, A and B (Cross and Circle on PlayStation).</small></li>
+    </ol>
+  </div>
+
+  <div class="wrap keys" aria-labelledby="keys-h">
+    <h3 id="keys-h">Rather use the keyboard? These work while Cemu has focus.</h3>
+    <ul class="keylist">
+      <li><span class="combo"><kbd>Alt</kbd><kbd>1</kbd>…<kbd>9</kbd><kbd>-</kbd></span><span>Load Player 1's Skylander for that element</span></li>
+      <li><span class="combo"><kbd>Alt</kbd><kbd>Shift</kbd><kbd>1</kbd>…<kbd>-</kbd></span><span>The same for Player 2</span></li>
+      <li><span class="combo"><kbd>Alt</kbd><kbd>0</kbd></span><span>Put Player 1's default back</span></li>
+      <li><span class="combo"><kbd>Alt</kbd><kbd>←</kbd><kbd>→</kbd></span><span>Step through the presets</span></li>
+      <li><span class="combo"><kbd>Alt</kbd><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd></span><span>Swap Force perk bases, SuperChargers vehicles</span></li>
+      <li><span class="combo"><kbd>Alt</kbd><kbd>D</kbd></span><span>A random Skylander <em class="untested">not yet tried on Windows</em></span></li>
+      <li class="whale"><span class="combo"><kbd>Alt</kbd><kbd>T</kbd></span><span>Thumpback. Try <kbd>T</kbd> on this page.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Saves -->
+<section class="sec saves" id="saves" aria-labelledby="saves-h">
+  <div class="wrap saves-grid">
+    <div class="saves-copy">
+      <h2 id="saves-h">Every figure is backed up before it touches the portal.</h2>
+      <p>Dè PerPortal keeps the last 10 versions of each figure. Press Restore twice to put an older save back; the one it replaces is kept too.</p>
+    </div>
+    <div class="stack" id="stack" aria-label="Backups of Gill Grunt, newest first"></div>
+    <div class="warn" role="note">
+      <i class="ph ph-warning" aria-hidden="true"></i>
+      <p><b>Gill Grunt left the portal without saving.</b> Cemu only writes progress when the game saves. After 3 minutes without a save, you get this warning, so you know to save before swapping.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Collection -->
+<section class="sec collection" aria-labelledby="col-h">
+  <div class="wrap">
+    <h2 id="col-h">Collect them all. Then see what's missing.</h2>
+    <p class="sub">Collection lists every figure of the game. Yours light up in their element's colour, with the level, gold and hero points read from their own save.</p>
+    <div class="col-board">
+      <div class="col-grid" id="colgrid" aria-label="A sample library: lit slots are figures you own, dark slots are missing"></div>
+      <aside class="col-side">
+        <p class="sample">Sample library</p>
+        <dl class="figcard" id="figcard">
+          <dt>Figure</dt><dd data-k="name">Stealth Elf</dd>
+          <dt>Level</dt><dd data-k="level">10+</dd>
+          <dt>Gold</dt><dd data-k="gold">48,210</dd>
+          <dt>Hero points</dt><dd data-k="hp">12</dd>
+        </dl>
+        <ul class="extras">
+          <li><i class="ph ph-dice-five" aria-hidden="true"></i><span><b>Random</b> picks a Skylander that isn't on the portal yet.</span></li>
+          <li><i class="ph ph-skull" aria-hidden="true"></i><span><b>Nuzlocke rules.</b> Mark a Skylander as fallen and it can't be loaded until you revive it.</span></li>
+          <li><i class="ph ph-lightning" aria-hidden="true"></i><span><b>Elemental gates</b> <em class="beta">beta</em>. Choose your level and the elements it has gates for light up.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- Games -->
+<section class="sec games" id="games" aria-labelledby="games-h">
+  <div class="wrap">
+    <h2 id="games-h">Six games. One portal.</h2>
+    <div class="game-tabs" role="tablist" aria-label="Games" id="gametabs"></div>
+    <div class="game-stage">
+      <figure class="poster"><img id="gposter" src="assets/posters/1.webp" alt="" width="474" height="343" loading="lazy"></figure>
+      <div class="game-info" role="tabpanel" id="gpanel" aria-live="polite">
+        <img class="game-portal" id="gportal" src="assets/portal.webp" alt="" loading="lazy">
+        <h3 id="gname"></h3>
+        <p id="gtext"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Themes -->
+<section class="sec themes" id="themes" aria-labelledby="th-h">
+  <div class="wrap">
+    <h2 id="th-h">Thirteen looks. One of them is a fast-food kiosk.</h2>
+    <p class="sub">A theme for every game, one that follows the game you pick, and a few that are just jokes. The ice cream machine is broken.</p>
+  </div>
+  <div class="reel" id="reel" tabindex="0" aria-label="Themes, scroll sideways"></div>
+  <div class="wrap reel-nav">
+    <button class="round" id="prev" type="button" aria-label="Previous theme"><i class="ph ph-caret-left" aria-hidden="true"></i></button>
+    <p class="reel-about" id="reelabout" aria-live="polite"></p>
+    <button class="round" id="next" type="button" aria-label="Next theme"><i class="ph ph-caret-right" aria-hidden="true"></i></button>
+  </div>
+</section>
+
+<!-- Developers -->
+<section class="sec tinker" id="tinker" aria-labelledby="tk-h">
+  <div class="wrap tk-grid">
+    <div>
+      <h2 id="tk-h">How it works, for the curious.</h2>
+      <p class="sub">An Electron window for the interface and a small native Windows helper, written in C, that works Cemu's Emulated USB Devices dialog for you.</p>
+      <dl class="facts">
+        <div><dt><i class="ph ph-fingerprint" aria-hidden="true"></i>Checks before it touches anything</dt><dd>The helper hashes Cemu's executable and only changes portal rows on the supported build.</dd></div>
+        <div><dt><i class="ph ph-seal-check" aria-hidden="true"></i>Verified updates</dt><dd>Each start checks GitHub Releases, downloads the new ZIP and compares it to the release's SHA-256 before installing.</dd></div>
+        <div><dt><i class="ph ph-video-camera" aria-hidden="true"></i>OBS overlay</dt><dd>A Browser Source page at <code>127.0.0.1:47831</code> shows what's on your portal. Only your computer can reach it.</dd></div>
+        <div><dt><i class="ph ph-discord-logo" aria-hidden="true"></i>Discord status and profiles</dt><dd>Show your game and figures on Discord, and export or import a game's defaults, presets and shortcuts.</dd></div>
+      </dl>
+    </div>
+    <div class="code-col">
+      <figure class="code">
+        <figcaption><i class="ph ph-code" aria-hidden="true"></i>Build it yourself (x64 Visual Studio prompt)</figcaption>
+<pre><code><span class="c">rem Windows controller, then the app</span>
+npm ci
+build.cmd
+npm test
+npm run dist</code></pre>
+      </figure>
+      <p class="honest"><i class="ph ph-warning" aria-hidden="true"></i>Honest note: Alt + D, Alt + G and the Discord status are new in 2.0 and haven't been tried on Windows yet. Unit tests, Playwright UI tests and Wine smoke tests run on every release.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Setup -->
+<section class="sec setup" id="setup" aria-labelledby="su-h">
+  <div class="wrap">
+    <h2 id="su-h">Set up in three steps.</h2>
+    <ol class="steps">
+      <li><h3>Download the ZIP</h3><p>Get the latest release for Windows x64. Node.js and developer tools are not needed.</p></li>
+      <li><h3>Extract it next to Cemu</h3><p>Put <b>all</b> of it beside the Cemu executable and run <b>Dè PerPortal.exe</b>.</p></li>
+      <li><h3>Add your figures</h3><p>Put your dumps in an <b>NFC</b> folder beside it. Subfolders are fine.</p></li>
+    </ol>
+    <div class="cemu">
+      <p>Dè PerPortal needs the <a href="https://github.com/skylandersNFC/Cemu-Skylanders-Emulated-Portal">Cemu Skylanders build</a> with Cemu's English interface. Its SHA-256 is:</p>
+      <div class="hash"><code id="hash">65e22a4ec27915d60d71689c45a27eb7bf329d17bde6719b79ada561744ee280</code><button class="copy" id="copy" type="button"><i class="ph ph-copy" aria-hidden="true"></i><span>Copy</span></button></div>
+    </div>
+    <div class="final">
+      <a class="btn gilt big" data-download href="https://github.com/Il-Mazu/De-PerPortal/releases/latest"><i class="ph ph-download-simple" aria-hidden="true"></i>Download for Windows</a>
+      <p data-version>Free and open source, GPL-2.0-or-later</p>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <p class="hail">Hail to the Whale!</p>
+    <p>Dè PerPortal is an unofficial fan project and is not affiliated with or endorsed by Activision. Skylanders, its logos, portals, posters and element symbols are © Activision Publishing, Inc. and are not covered by the code license. The code is <a href="https://github.com/Il-Mazu/De-PerPortal/blob/main/LICENSE">GPL-2.0-or-later</a>.</p>
+    <p><a href="https://github.com/Il-Mazu/De-PerPortal">GitHub</a> · <a href="https://github.com/Il-Mazu/De-PerPortal/releases">Releases</a> · <a href="https://github.com/Il-Mazu/De-PerPortal/issues">Report a problem</a></p>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>

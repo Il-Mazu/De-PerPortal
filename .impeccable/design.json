@@ -1,0 +1,742 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T04:05:46+00:00",
+  "title": "Design System: Dè PerPortal",
+  "extensions": {
+    "colorMeta": {
+      "gilt": {
+        "role": "primary",
+        "displayName": "Gilt Foil",
+        "canonical": "oklch(84.8% 0.144 86.6)",
+        "tonalRamp": [
+          "oklch(15% 0.078 86.6)",
+          "oklch(25% 0.102 86.6)",
+          "oklch(35% 0.126 86.6)",
+          "oklch(47% 0.144 86.6)",
+          "oklch(60% 0.144 86.6)",
+          "oklch(72% 0.133 86.6)",
+          "oklch(84% 0.104 86.6)",
+          "oklch(95% 0.078 86.6)"
+        ]
+      },
+      "gilt-hi": {
+        "role": "primary",
+        "displayName": "Gilt Highlight",
+        "canonical": "oklch(95.6% 0.074 95.9)",
+        "tonalRamp": [
+          "oklch(15% 0.055 95.9)",
+          "oklch(25% 0.067 95.9)",
+          "oklch(35% 0.074 95.9)",
+          "oklch(47% 0.074 95.9)",
+          "oklch(60% 0.074 95.9)",
+          "oklch(72% 0.074 95.9)",
+          "oklch(84% 0.068 95.9)",
+          "oklch(95% 0.055 95.9)"
+        ]
+      },
+      "gilt-lo": {
+        "role": "primary",
+        "displayName": "Gilt Shadow",
+        "canonical": "oklch(54.9% 0.111 70.1)",
+        "tonalRamp": [
+          "oklch(15% 0.067 70.1)",
+          "oklch(25% 0.086 70.1)",
+          "oklch(35% 0.104 70.1)",
+          "oklch(47% 0.111 70.1)",
+          "oklch(60% 0.111 70.1)",
+          "oklch(72% 0.110 70.1)",
+          "oklch(84% 0.088 70.1)",
+          "oklch(95% 0.067 70.1)"
+        ]
+      },
+      "gilt-ledge": {
+        "role": "primary",
+        "displayName": "Gilt Ledge",
+        "canonical": "oklch(49.7% 0.104 65.4)",
+        "tonalRamp": [
+          "oklch(15% 0.065 65.4)",
+          "oklch(25% 0.082 65.4)",
+          "oklch(35% 0.100 65.4)",
+          "oklch(47% 0.104 65.4)",
+          "oklch(60% 0.104 65.4)",
+          "oklch(72% 0.104 65.4)",
+          "oklch(84% 0.084 65.4)",
+          "oklch(95% 0.065 65.4)"
+        ]
+      },
+      "gilt-ink": {
+        "role": "primary",
+        "displayName": "Gilt Ink",
+        "canonical": "oklch(26.7% 0.061 58.5)",
+        "tonalRamp": [
+          "oklch(15% 0.050 58.5)",
+          "oklch(25% 0.060 58.5)",
+          "oklch(35% 0.061 58.5)",
+          "oklch(47% 0.061 58.5)",
+          "oklch(60% 0.061 58.5)",
+          "oklch(72% 0.061 58.5)",
+          "oklch(84% 0.061 58.5)",
+          "oklch(95% 0.050 58.5)"
+        ]
+      },
+      "parchment": {
+        "role": "secondary",
+        "displayName": "Parchment",
+        "canonical": "oklch(92.8% 0.057 88.2)",
+        "tonalRamp": [
+          "oklch(15% 0.049 88.2)",
+          "oklch(25% 0.057 88.2)",
+          "oklch(35% 0.057 88.2)",
+          "oklch(47% 0.057 88.2)",
+          "oklch(60% 0.057 88.2)",
+          "oklch(72% 0.057 88.2)",
+          "oklch(84% 0.057 88.2)",
+          "oklch(95% 0.049 88.2)"
+        ]
+      },
+      "cream-print": {
+        "role": "secondary",
+        "displayName": "Cream Print",
+        "canonical": "oklch(97.3% 0.038 92.2)",
+        "tonalRamp": [
+          "oklch(15% 0.038 92.2)",
+          "oklch(25% 0.038 92.2)",
+          "oklch(35% 0.038 92.2)",
+          "oklch(47% 0.038 92.2)",
+          "oklch(60% 0.038 92.2)",
+          "oklch(72% 0.038 92.2)",
+          "oklch(84% 0.038 92.2)",
+          "oklch(95% 0.038 92.2)"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Night",
+        "canonical": "oklch(18.4% 0.075 270.0)",
+        "tonalRamp": [
+          "oklch(15% 0.055 270.0)",
+          "oklch(25% 0.067 270.0)",
+          "oklch(35% 0.075 270.0)",
+          "oklch(47% 0.075 270.0)",
+          "oklch(60% 0.075 270.0)",
+          "oklch(72% 0.075 270.0)",
+          "oklch(84% 0.069 270.0)",
+          "oklch(95% 0.055 270.0)"
+        ]
+      },
+      "lapis": {
+        "role": "neutral",
+        "displayName": "Lapis",
+        "canonical": "oklch(22.3% 0.094 269.2)",
+        "tonalRamp": [
+          "oklch(15% 0.061 269.2)",
+          "oklch(25% 0.077 269.2)",
+          "oklch(35% 0.093 269.2)",
+          "oklch(47% 0.094 269.2)",
+          "oklch(60% 0.094 269.2)",
+          "oklch(72% 0.094 269.2)",
+          "oklch(84% 0.078 269.2)",
+          "oklch(95% 0.061 269.2)"
+        ]
+      },
+      "lapis-2": {
+        "role": "neutral",
+        "displayName": "Lapis 2",
+        "canonical": "oklch(29.2% 0.128 270.1)",
+        "tonalRamp": [
+          "oklch(15% 0.073 270.1)",
+          "oklch(25% 0.094 270.1)",
+          "oklch(35% 0.115 270.1)",
+          "oklch(47% 0.128 270.1)",
+          "oklch(60% 0.128 270.1)",
+          "oklch(72% 0.122 270.1)",
+          "oklch(84% 0.096 270.1)",
+          "oklch(95% 0.073 270.1)"
+        ]
+      },
+      "lapis-3": {
+        "role": "neutral",
+        "displayName": "Lapis 3",
+        "canonical": "oklch(36.4% 0.147 271.1)",
+        "tonalRamp": [
+          "oklch(15% 0.079 271.1)",
+          "oklch(25% 0.104 271.1)",
+          "oklch(35% 0.128 271.1)",
+          "oklch(47% 0.147 271.1)",
+          "oklch(60% 0.147 271.1)",
+          "oklch(72% 0.136 271.1)",
+          "oklch(84% 0.106 271.1)",
+          "oklch(95% 0.079 271.1)"
+        ]
+      },
+      "app-night": {
+        "role": "neutral",
+        "displayName": "App Night",
+        "canonical": "oklch(20.5% 0.074 271.5)",
+        "tonalRamp": [
+          "oklch(15% 0.055 271.5)",
+          "oklch(25% 0.067 271.5)",
+          "oklch(35% 0.074 271.5)",
+          "oklch(47% 0.074 271.5)",
+          "oklch(60% 0.074 271.5)",
+          "oklch(72% 0.074 271.5)",
+          "oklch(84% 0.068 271.5)",
+          "oklch(95% 0.055 271.5)"
+        ]
+      },
+      "app-lapis": {
+        "role": "neutral",
+        "displayName": "App Lapis",
+        "canonical": "oklch(29.7% 0.108 271.2)",
+        "tonalRamp": [
+          "oklch(15% 0.066 271.2)",
+          "oklch(25% 0.084 271.2)",
+          "oklch(35% 0.102 271.2)",
+          "oklch(47% 0.108 271.2)",
+          "oklch(60% 0.108 271.2)",
+          "oklch(72% 0.107 271.2)",
+          "oklch(84% 0.086 271.2)",
+          "oklch(95% 0.066 271.2)"
+        ]
+      },
+      "app-lapis-hi": {
+        "role": "neutral",
+        "displayName": "App Lapis Hi",
+        "canonical": "oklch(38.7% 0.137 270.3)",
+        "tonalRamp": [
+          "oklch(15% 0.076 270.3)",
+          "oklch(25% 0.099 270.3)",
+          "oklch(35% 0.121 270.3)",
+          "oklch(47% 0.137 270.3)",
+          "oklch(60% 0.137 270.3)",
+          "oklch(72% 0.128 270.3)",
+          "oklch(84% 0.101 270.3)",
+          "oklch(95% 0.076 270.3)"
+        ]
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Inset Well",
+        "canonical": "oklch(19.1% 0.071 271.9)",
+        "tonalRamp": [
+          "oklch(15% 0.054 271.9)",
+          "oklch(25% 0.065 271.9)",
+          "oklch(35% 0.071 271.9)",
+          "oklch(47% 0.071 271.9)",
+          "oklch(60% 0.071 271.9)",
+          "oklch(72% 0.071 271.9)",
+          "oklch(84% 0.067 271.9)",
+          "oklch(95% 0.054 271.9)"
+        ]
+      },
+      "ink-ledge": {
+        "role": "neutral",
+        "displayName": "Ink Ledge",
+        "canonical": "oklch(14.5% 0.044 271.7)",
+        "tonalRamp": [
+          "oklch(15% 0.044 271.7)",
+          "oklch(25% 0.044 271.7)",
+          "oklch(35% 0.044 271.7)",
+          "oklch(47% 0.044 271.7)",
+          "oklch(60% 0.044 271.7)",
+          "oklch(72% 0.044 271.7)",
+          "oklch(84% 0.044 271.7)",
+          "oklch(95% 0.044 271.7)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Text",
+        "canonical": "oklch(96.0% 0.019 276.3)",
+        "tonalRamp": [
+          "oklch(15% 0.019 276.3)",
+          "oklch(25% 0.019 276.3)",
+          "oklch(35% 0.019 276.3)",
+          "oklch(47% 0.019 276.3)",
+          "oklch(60% 0.019 276.3)",
+          "oklch(72% 0.019 276.3)",
+          "oklch(84% 0.019 276.3)",
+          "oklch(95% 0.019 276.3)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "oklch(77.8% 0.067 275.2)",
+        "tonalRamp": [
+          "oklch(15% 0.052 275.2)",
+          "oklch(25% 0.063 275.2)",
+          "oklch(35% 0.067 275.2)",
+          "oklch(47% 0.067 275.2)",
+          "oklch(60% 0.067 275.2)",
+          "oklch(72% 0.067 275.2)",
+          "oklch(84% 0.064 275.2)",
+          "oklch(95% 0.052 275.2)"
+        ]
+      },
+      "muted-print": {
+        "role": "neutral",
+        "displayName": "Muted Print",
+        "canonical": "oklch(80.5% 0.059 275.3)",
+        "tonalRamp": [
+          "oklch(15% 0.050 275.3)",
+          "oklch(25% 0.059 275.3)",
+          "oklch(35% 0.059 275.3)",
+          "oklch(47% 0.059 275.3)",
+          "oklch(60% 0.059 275.3)",
+          "oklch(72% 0.059 275.3)",
+          "oklch(84% 0.059 275.3)",
+          "oklch(95% 0.050 275.3)"
+        ]
+      },
+      "element-magic": {
+        "role": "tertiary",
+        "displayName": "Element Magic",
+        "canonical": "oklch(67.1% 0.199 307.7)",
+        "tonalRamp": [
+          "oklch(15% 0.096 307.7)",
+          "oklch(25% 0.130 307.7)",
+          "oklch(35% 0.163 307.7)",
+          "oklch(47% 0.199 307.7)",
+          "oklch(60% 0.199 307.7)",
+          "oklch(72% 0.173 307.7)",
+          "oklch(84% 0.133 307.7)",
+          "oklch(95% 0.096 307.7)"
+        ]
+      },
+      "element-water": {
+        "role": "tertiary",
+        "displayName": "Element Water",
+        "canonical": "oklch(70.8% 0.147 244.1)",
+        "tonalRamp": [
+          "oklch(15% 0.079 244.1)",
+          "oklch(25% 0.103 244.1)",
+          "oklch(35% 0.128 244.1)",
+          "oklch(47% 0.147 244.1)",
+          "oklch(60% 0.147 244.1)",
+          "oklch(72% 0.135 244.1)",
+          "oklch(84% 0.106 244.1)",
+          "oklch(95% 0.079 244.1)"
+        ]
+      },
+      "element-tech": {
+        "role": "tertiary",
+        "displayName": "Element Tech",
+        "canonical": "oklch(78.2% 0.158 72.3)",
+        "tonalRamp": [
+          "oklch(15% 0.083 72.3)",
+          "oklch(25% 0.109 72.3)",
+          "oklch(35% 0.136 72.3)",
+          "oklch(47% 0.158 72.3)",
+          "oklch(60% 0.158 72.3)",
+          "oklch(72% 0.144 72.3)",
+          "oklch(84% 0.112 72.3)",
+          "oklch(95% 0.083 72.3)"
+        ]
+      },
+      "element-fire": {
+        "role": "tertiary",
+        "displayName": "Element Fire",
+        "canonical": "oklch(70.4% 0.192 37.1)",
+        "tonalRamp": [
+          "oklch(15% 0.094 37.1)",
+          "oklch(25% 0.126 37.1)",
+          "oklch(35% 0.158 37.1)",
+          "oklch(47% 0.192 37.1)",
+          "oklch(60% 0.192 37.1)",
+          "oklch(72% 0.167 37.1)",
+          "oklch(84% 0.129 37.1)",
+          "oklch(95% 0.094 37.1)"
+        ]
+      },
+      "element-earth": {
+        "role": "tertiary",
+        "displayName": "Element Earth",
+        "canonical": "oklch(65.0% 0.102 68.2)",
+        "tonalRamp": [
+          "oklch(15% 0.064 68.2)",
+          "oklch(25% 0.081 68.2)",
+          "oklch(35% 0.098 68.2)",
+          "oklch(47% 0.102 68.2)",
+          "oklch(60% 0.102 68.2)",
+          "oklch(72% 0.102 68.2)",
+          "oklch(84% 0.083 68.2)",
+          "oklch(95% 0.064 68.2)"
+        ]
+      },
+      "element-life": {
+        "role": "tertiary",
+        "displayName": "Element Life",
+        "canonical": "oklch(77.7% 0.205 139.1)",
+        "tonalRamp": [
+          "oklch(15% 0.098 139.1)",
+          "oklch(25% 0.133 139.1)",
+          "oklch(35% 0.167 139.1)",
+          "oklch(47% 0.205 139.1)",
+          "oklch(60% 0.205 139.1)",
+          "oklch(72% 0.177 139.1)",
+          "oklch(84% 0.136 139.1)",
+          "oklch(95% 0.098 139.1)"
+        ]
+      },
+      "element-air": {
+        "role": "tertiary",
+        "displayName": "Element Air",
+        "canonical": "oklch(85.7% 0.090 228.5)",
+        "tonalRamp": [
+          "oklch(15% 0.060 228.5)",
+          "oklch(25% 0.075 228.5)",
+          "oklch(35% 0.090 228.5)",
+          "oklch(47% 0.090 228.5)",
+          "oklch(60% 0.090 228.5)",
+          "oklch(72% 0.090 228.5)",
+          "oklch(84% 0.077 228.5)",
+          "oklch(95% 0.060 228.5)"
+        ]
+      },
+      "element-undead": {
+        "role": "tertiary",
+        "displayName": "Element Undead",
+        "canonical": "oklch(71.2% 0.067 295.6)",
+        "tonalRamp": [
+          "oklch(15% 0.052 295.6)",
+          "oklch(25% 0.064 295.6)",
+          "oklch(35% 0.067 295.6)",
+          "oklch(47% 0.067 295.6)",
+          "oklch(60% 0.067 295.6)",
+          "oklch(72% 0.067 295.6)",
+          "oklch(84% 0.065 295.6)",
+          "oklch(95% 0.052 295.6)"
+        ]
+      },
+      "element-light": {
+        "role": "tertiary",
+        "displayName": "Element Light",
+        "canonical": "oklch(91.6% 0.142 96.3)",
+        "tonalRamp": [
+          "oklch(15% 0.077 96.3)",
+          "oklch(25% 0.101 96.3)",
+          "oklch(35% 0.125 96.3)",
+          "oklch(47% 0.142 96.3)",
+          "oklch(60% 0.142 96.3)",
+          "oklch(72% 0.132 96.3)",
+          "oklch(84% 0.103 96.3)",
+          "oklch(95% 0.077 96.3)"
+        ]
+      },
+      "element-dark": {
+        "role": "tertiary",
+        "displayName": "Element Dark",
+        "canonical": "oklch(57.8% 0.171 289.9)",
+        "tonalRamp": [
+          "oklch(15% 0.087 289.9)",
+          "oklch(25% 0.116 289.9)",
+          "oklch(35% 0.144 289.9)",
+          "oklch(47% 0.171 289.9)",
+          "oklch(60% 0.171 289.9)",
+          "oklch(72% 0.153 289.9)",
+          "oklch(84% 0.118 289.9)",
+          "oklch(95% 0.087 289.9)"
+        ]
+      },
+      "ok": {
+        "role": "neutral",
+        "displayName": "Ok",
+        "canonical": "oklch(76.8% 0.177 145.1)",
+        "tonalRamp": [
+          "oklch(15% 0.089 145.1)",
+          "oklch(25% 0.118 145.1)",
+          "oklch(35% 0.148 145.1)",
+          "oklch(47% 0.177 145.1)",
+          "oklch(60% 0.177 145.1)",
+          "oklch(72% 0.157 145.1)",
+          "oklch(84% 0.121 145.1)",
+          "oklch(95% 0.089 145.1)"
+        ]
+      },
+      "bad": {
+        "role": "neutral",
+        "displayName": "Bad",
+        "canonical": "oklch(70.9% 0.183 27.7)",
+        "tonalRamp": [
+          "oklch(15% 0.091 27.7)",
+          "oklch(25% 0.122 27.7)",
+          "oklch(35% 0.152 27.7)",
+          "oklch(47% 0.183 27.7)",
+          "oklch(60% 0.183 27.7)",
+          "oklch(72% 0.161 27.7)",
+          "oklch(84% 0.125 27.7)",
+          "oklch(95% 0.091 27.7)"
+        ]
+      },
+      "ember": {
+        "role": "neutral",
+        "displayName": "Ember Warning",
+        "canonical": "oklch(82.5% 0.125 63.1)",
+        "tonalRamp": [
+          "oklch(15% 0.072 63.1)",
+          "oklch(25% 0.093 63.1)",
+          "oklch(35% 0.114 63.1)",
+          "oklch(47% 0.125 63.1)",
+          "oklch(60% 0.125 63.1)",
+          "oklch(72% 0.120 63.1)",
+          "oklch(84% 0.095 63.1)",
+          "oklch(95% 0.072 63.1)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Box-front headline beside the logo."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings on the site's back panel."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Step and card titles."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Buttons, tabs, tags, toasts, callouts."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Site reading text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Small print, stat terms, chips, keycaps."
+      },
+      "app-display": {
+        "displayName": "App Display",
+        "purpose": "App window title lettering in gilt foil."
+      },
+      "app-title": {
+        "displayName": "App Title",
+        "purpose": "App card and section titles in parchment."
+      },
+      "app-body": {
+        "displayName": "App Body",
+        "purpose": "Dense app UI text."
+      }
+    },
+    "shadows": [
+      {
+        "name": "box-drop",
+        "value": "0 30px 70px #000a, 0 8px 18px #0008",
+        "purpose": "The box and back panel."
+      },
+      {
+        "name": "card-inset",
+        "value": "inset 0 0 0 6px #0a0f3355, inset 0 0 60px #0007",
+        "purpose": "Darkened printed edge inside the rim."
+      },
+      {
+        "name": "gilt-ledge",
+        "value": "inset 0 1px 0 #fff8, inset 0 0 0 1.5px #fff1b8aa, 0 4px 0 #8a5410, 0 10px 22px #0008",
+        "purpose": "Gilt buttons at rest; collapses to 1px on press."
+      },
+      {
+        "name": "lapis-ledge",
+        "value": "0 3px 0 #05081c, inset 0 1px 0 #ffffff30",
+        "purpose": "App buttons and coins; collapses to 1px on press."
+      },
+      {
+        "name": "element-glow",
+        "value": "0 0 18px var(--c)",
+        "purpose": "Hovered or selected coins, owned slots, gate cards."
+      },
+      {
+        "name": "keyline",
+        "value": "inset 0 0 0 1.5px #f6c64f55",
+        "purpose": "Wells, tracks and quiet cards."
+      },
+      {
+        "name": "lettering-ledge",
+        "value": "text-shadow: 0 3px 0 #05081c",
+        "purpose": "Display lettering on the site."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Rises, slides, card swaps, button lifts."
+      },
+      {
+        "name": "spring",
+        "value": "cubic-bezier(.3,1.5,.5,1)",
+        "purpose": "Coins popping, figures dropping, toasts, scale-ups (app uses .3,1.6,.5,1 and .2,1.4,.4,1)."
+      },
+      {
+        "name": "sky-drift",
+        "value": "240s linear infinite",
+        "purpose": "Painted cloud layer; the only always-on loop on the site."
+      },
+      {
+        "name": "press",
+        "value": "150 to 180ms",
+        "purpose": "Button press and hover transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "site-sm",
+        "value": "640px"
+      },
+      {
+        "name": "app-sm",
+        "value": "760px"
+      },
+      {
+        "name": "site-nav",
+        "value": "860px"
+      },
+      {
+        "name": "site-md",
+        "value": "999px"
+      },
+      {
+        "name": "app-md",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Gilt Button",
+      "kind": "button",
+      "refersTo": "button-gilt",
+      "description": "Primary action on the site: gilt foil pill on a ledge that collapses when pressed.",
+      "html": "<button class=\"ds-btn-gilt\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 256 256\" fill=\"currentColor\"><path d=\"M232 136v64a8 8 0 0 1-8 8H32a8 8 0 0 1-8-8v-64a8 8 0 0 1 16 0v56h176v-56a8 8 0 0 1 16 0Zm-109.66 5.66a8 8 0 0 0 11.32 0l40-40a8 8 0 0 0-11.32-11.32L136 116.69V32a8 8 0 0 0-16 0v84.69L93.66 90.34a8 8 0 0 0-11.32 11.32Z\"/></svg>Download for Windows</button>",
+      "css": ".ds-btn-gilt{display:inline-flex;align-items:center;gap:.55em;padding:.78em 1.35em;border:0;border-radius:99px;cursor:pointer;font:400 1.08rem/1 'Lilita One',Nunito,sans-serif;letter-spacing:.01em;color:#3b1d02;background:linear-gradient(180deg,#ffe48a,#f6c64f 45%,#e09a26);box-shadow:inset 0 1px 0 #fff8,inset 0 0 0 1.5px #fff1b8aa,0 4px 0 #8a5410,0 10px 22px #0008;transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s cubic-bezier(.16,1,.3,1)}.ds-btn-gilt:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 #fff8,inset 0 0 0 1.5px #fff1b8aa,0 6px 0 #8a5410,0 16px 28px #000a}.ds-btn-gilt:active{transform:translateY(3px);box-shadow:inset 0 1px 0 #fff8,0 1px 0 #8a5410,0 4px 10px #0008}.ds-btn-gilt:focus-visible{outline:3px solid #f6c64f;outline-offset:3px}"
+    },
+    {
+      "name": "Plain Button",
+      "kind": "button",
+      "refersTo": "button-plain",
+      "description": "Secondary action on the site: dark well pill with a keyline that turns gilt on hover.",
+      "html": "<button class=\"ds-btn-plain\">Source on GitHub</button>",
+      "css": ".ds-btn-plain{display:inline-flex;align-items:center;padding:.78em 1.35em;border:0;border-radius:99px;cursor:pointer;font:400 1.08rem/1 'Lilita One',Nunito,sans-serif;color:#eef1ff;background:#0a0f33b3;box-shadow:inset 0 0 0 1.5px #aab4e266;transition:background-color .18s,box-shadow .18s,transform .18s}.ds-btn-plain:hover{color:#fff;background:#141c55;box-shadow:inset 0 0 0 1.5px #f6c64f}.ds-btn-plain:active{transform:translateY(2px)}.ds-btn-plain:focus-visible{outline:3px solid #f6c64f;outline-offset:3px}"
+    },
+    {
+      "name": "App Button",
+      "kind": "button",
+      "refersTo": "button-app",
+      "description": "Default app control: lapis gradient inside the gilt rim on an ink ledge.",
+      "html": "<button class=\"ds-btn-app\">Settings</button>",
+      "css": ".ds-btn-app{cursor:pointer;border:1.5px solid transparent;border-radius:10px;padding:8px 14px;font:700 14px/1.45 Nunito,sans-serif;color:#eef1ff;background:linear-gradient(180deg,#34479e,#1d2866) padding-box,linear-gradient(165deg,#fff1b8,#f6c64f 30%,#9a6415 55%,#e7b347 80%,#fff1b8) border-box;box-shadow:0 3px 0 #05081c,inset 0 1px 0 #ffffff30;transition:transform .15s,filter .15s,box-shadow .15s}.ds-btn-app:hover{filter:brightness(1.18);transform:translateY(-1px)}.ds-btn-app:active{transform:translateY(2px);box-shadow:0 1px 0 #05081c}.ds-btn-app:focus-visible{outline:3px solid #fff1b8;outline-offset:3px}"
+    },
+    {
+      "name": "Game Tab",
+      "kind": "chip",
+      "refersTo": "tab",
+      "description": "Pill tabs; the selected tab takes the gilt foil.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab\" aria-selected=\"true\">Trap Team</button><button class=\"ds-tab\">Giants</button></div>",
+      "css": ".ds-tabs{display:flex;gap:8px}.ds-tab{border:0;cursor:pointer;padding:10px 18px;border-radius:99px;font:400 1.02rem/1 'Lilita One',Nunito,sans-serif;color:#b4bde6;background:#0a0f3399;box-shadow:inset 0 0 0 1.5px #aab4e233;transition:color .2s,box-shadow .2s}.ds-tab:hover{color:#fff;box-shadow:inset 0 0 0 1.5px #f6c64f}.ds-tab[aria-selected=true]{color:#3b1d02;background:linear-gradient(180deg,#ffe48a,#f6c64f 55%,#d9962a);box-shadow:0 3px 0 #8a5410}.ds-tab:focus-visible{outline:3px solid #f6c64f;outline-offset:3px}"
+    },
+    {
+      "name": "Beta Chip",
+      "kind": "chip",
+      "description": "Honest label for beta or untested features.",
+      "html": "<span class=\"ds-beta\">untested</span>",
+      "css": ".ds-beta{display:inline-block;padding:1px 8px;border-radius:99px;font:800 .76rem/1.6 Nunito,sans-serif;color:#ffd9a8;background:#ff8a3d26;box-shadow:inset 0 0 0 1px #ff9a5266}"
+    },
+    {
+      "name": "App Input",
+      "kind": "input",
+      "refersTo": "input-app",
+      "description": "Search and fields in the app: dark well inside the gilt rim.",
+      "html": "<input class=\"ds-input\" type=\"search\" placeholder=\"Search figures\">",
+      "css": ".ds-input{border:1.5px solid transparent;border-radius:10px;padding:8px 12px;font:700 14px/1.45 Nunito,sans-serif;color:#eef1ff;background:linear-gradient(#0e1440,#18215a) padding-box,linear-gradient(165deg,#fff1b8,#f6c64f 30%,#9a6415 55%,#e7b347 80%,#fff1b8) border-box;box-shadow:inset 0 2px 6px #0008}.ds-input::placeholder{color:#aab4e2}.ds-input:focus-visible{outline:3px solid #fff1b8;outline-offset:3px}"
+    },
+    {
+      "name": "Keycap",
+      "kind": "custom",
+      "refersTo": "kbd",
+      "description": "Every keyboard or controller shortcut, on every surface.",
+      "html": "<span class=\"ds-keys\"><kbd class=\"ds-kbd\">Alt</kbd> + <kbd class=\"ds-kbd\">1</kbd></span>",
+      "css": ".ds-keys{color:#eef1ff;font:500 15px Nunito,sans-serif}.ds-kbd{display:inline-block;min-width:1.7em;padding:.1em .45em;border-radius:6px;font:800 .78em/1.4 Nunito,sans-serif;text-align:center;color:#3b2604;background:linear-gradient(180deg,#fff3c4,#e9b84a);box-shadow:0 2px 0 #7a4c0e,0 3px 6px #0006}"
+    },
+    {
+      "name": "Element Coin",
+      "kind": "custom",
+      "refersTo": "coin",
+      "description": "Signature: an element coin with a gilt keyline; it springs up and glows in its element when hovered or selected.",
+      "html": "<div class=\"ds-coins\"><button class=\"ds-coin\" style=\"--c:#68d445\" aria-label=\"Life\"><i></i></button><button class=\"ds-coin on\" style=\"--c:#3fa9f5\" aria-label=\"Water\"><i></i></button><button class=\"ds-coin\" style=\"--c:#ff6a3d\" aria-label=\"Fire\"><i></i></button></div>",
+      "css": ".ds-coins{display:flex;gap:16px;padding:12px}.ds-coin{--s:1;width:58px;height:58px;border:0;padding:0;border-radius:50%;cursor:pointer;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--c) 35%,#2a3a8c),#0c1238 75%);box-shadow:inset 0 0 0 1.5px #f6c64f99,0 3px 0 #05081c,0 6px 12px #0007;transform:scale(var(--s));transition:transform .2s cubic-bezier(.3,1.5,.5,1),box-shadow .2s}.ds-coin i{width:40%;aspect-ratio:1;border-radius:50%;background:linear-gradient(170deg,#fff,var(--c) 45%,color-mix(in srgb,var(--c) 55%,#000))}.ds-coin:hover{--s:1.18;box-shadow:inset 0 0 0 2px #fff1b8,0 0 18px var(--c),0 3px 0 #05081c}.ds-coin.on{box-shadow:inset 0 0 0 2.5px #fff1b8,0 0 0 3px color-mix(in srgb,var(--c) 70%,transparent),0 0 22px var(--c)}.ds-coin:active{--s:.94}.ds-coin:focus-visible{outline:3px solid #f6c64f;outline-offset:4px}"
+    },
+    {
+      "name": "Gilt-Rimmed Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The box and back panel: lapis card inside a 3px gilt foil rim with a darkened printed edge.",
+      "html": "<section class=\"ds-panel\"><h2>Set up in three steps.</h2><p>Extract the ZIP next to Cemu, add your NFC dumps, press play.</p></section>",
+      "css": ".ds-panel{max-width:560px;padding:34px 36px;border-radius:28px;border:3px solid transparent;color:#eef1ff;font:500 17px/1.6 Nunito,sans-serif;background:linear-gradient(180deg,#1b2678,#16206a 30%,#0b1446) padding-box,linear-gradient(165deg,#fff1b8,#f6c64f 30%,#9a6415 55%,#e7b347 80%,#fff1b8) border-box;box-shadow:inset 0 0 0 6px #0a0f3355,0 30px 70px #000a}.ds-panel h2{margin:0 0 12px;font:400 2.2rem/1.04 'Lilita One',Nunito,sans-serif;color:#fff6da;text-shadow:0 3px 0 #05081c}.ds-panel p{margin:0;color:#d3d9f6}"
+    },
+    {
+      "name": "Site Nav",
+      "kind": "nav",
+      "description": "Fixed bar fading from night; muted pill links light up on hover.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-brand\" href=\"#\">Dè PerPortal</a><div><a class=\"ds-link\" href=\"#\">Controller</a><a class=\"ds-link\" href=\"#\">Saves</a><a class=\"ds-link\" href=\"#\">Games</a></div></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 20px;background:linear-gradient(#070d33e6,#070d3300)}.ds-brand{color:#eef1ff;text-decoration:none;font:400 1.2rem/1 'Lilita One',Nunito,sans-serif}.ds-link{color:#b4bde6;text-decoration:none;font:700 .95rem Nunito,sans-serif;padding:8px 12px;border-radius:99px;transition:color .15s,background-color .15s}.ds-link:hover{color:#fff;background:#ffffff12}.ds-link:focus-visible{outline:3px solid #f6c64f;outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Dè Dusk over Skylands",
+    "overview": "Everything happens at dusk over a painted sky. Lapis panels sit on a drifting cloud field, every container wears a gilt foil rim, and the portal is the light source: whatever stands on it lights the surface in its element's colour. The world is a toy and a game menu at once. Things are chunky, tactile and pressable; buttons have a physical ledge under them and sink when pressed, coins pop, figures drop onto the portal with a flash.\n\nThe app (`app/ui/style.css`, `app/ui/radial.css`) is the incumbent and densest expression: 14px Nunito, 10px-radius rimmed controls, element-coloured coins and cards. The public site (`site/`) prints the same world on toy-box card at couch-to-billboard scale: 17px body, 28px box corners, sunburst rays, a parchment rating box and barcode. Both share the rim, the gilt, the parchment, the element palette, the sigils and the two typefaces; those shared parts are the system. Box-specific props (ribbon, platform band, barcode, rating box, the turn-over on scroll) belong to the landing page, not to future surfaces.\n\nDensity is low and targets are big, because the product is read from a couch on a TV. Colour outside lapis and gilt comes only from the ten elements, the two players (who take their colour from their figure's element), and a small set of status hues.",
+    "keyCharacteristics": [
+      "Deep lapis ground under a slowly drifting painted cloud texture (screen-blended, 240s linear drift).",
+      "Gilt foil rim (`--rim`, a 165deg gilt-hi / gilt / gilt-lo / gilt-hi gradient) as the border of every significant container.",
+      "Gilt marks what you can press; parchment carries small print and labels.",
+      "Element colours and sigils are the only other hues, always tied to an element.",
+      "Lilita One for everything printed big, Nunito for everything read.",
+      "Physical, springy motion with overshoot; reduced motion is honoured everywhere."
+    ],
+    "rules": [
+      {
+        "name": "The Gilt Primary Rule",
+        "body": "Among controls, a gilt foil fill marks only the primary action or the current selection; every other control stays lapis or well. Outside controls, foil fills appear only as packaging trim (platform band, ribbon, feature medallions), never as a background for reading text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Elements Only Rule",
+        "body": "The only hues besides lapis, gilt and parchment are the ten element colours, and each one appears because an element is present.",
+        "section": "colors"
+      },
+      {
+        "name": "The Printed Big Rule",
+        "body": "Anything meant to be read from across the room is Lilita One at weight 400; Nunito never sets a heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Lettering Ledge Rule",
+        "body": "Display lettering sits on a hard ink ledge: on the site cream-print with `text-shadow: 0 3px 0` ink-ledge; in the app gilt foil lettering (gilt-hi to gilt to #d98d1d clipped to the text) with `drop-shadow(0 2px 0 #3b1d02)`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ledge Rule",
+        "body": "A hard 0-blur downward ledge appears only under things you press (buttons, keycaps, coins, round arrows), under small gilt medallions, and under display lettering; on pressables it must shrink on `:active`. It is never a sideways offset and never sits under a card or panel.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** put the gilt rim on every major container, as a border via `padding-box` / `border-box` backgrounds.",
+      "**Do** give the gilt foil fill only to the primary action or current selection among controls, with a ledge that collapses on press.",
+      "**Do** tie every element colour to an element, in the canonical order Magic, Water, Tech, Fire, Earth, Life, Air, Undead, Light, Dark, with its sigil from the shared sprite.",
+      "**Do** set anything read from across the room in Lilita One 400, and body in Nunito 500.",
+      "**Do** use spring overshoot (`cubic-bezier(.3,1.5,.5,1)` or similar) for things that pop, drop or scale, and `cubic-bezier(.16,1,.3,1)` for rises and slides; disable motion under `prefers-reduced-motion`.",
+      "**Do** show every shortcut as a gilt keycap, and label beta and untested features with the ember chip."
+    ],
+    "donts": [
+      "**Don't** introduce hues outside lapis, gilt, parchment, the ten elements and the status colours.",
+      "**Don't** use a flat grey or pure-black ground; the ground is always lapis to night.",
+      "**Don't** use a hard offset shadow sideways or under a card or panel; the ledge belongs to pressables, medallions and lettering.",
+      "**Don't** set headings in Nunito or in a system face.",
+      "**Don't** add small uppercase kickers or eyebrows above headings; no surface in the world uses them."
+    ]
+  }
+}

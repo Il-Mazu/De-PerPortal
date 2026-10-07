@@ -1,0 +1,62 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-10-07T03:58:11.247Z",
+        "reason": "builder: element-coloured light from the portal and dial coins is the product's own portal glow (app/ui/radial.css does the same)"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-10-07T03:58:11.251Z",
+        "reason": "builder: intentional clips (die-cut window crops the corner ribbon; body overflow-x clip)"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-10-07T03:58:11.256Z",
+        "reason": "builder: the screenshot is printed on the box back, part of the toy-box direction the user locked"
+      },
+      {
+        "rule": "repeating-stripes-gradient",
+        "value": "*",
+        "files": [
+          "site/index.html"
+        ],
+        "createdAt": "2026-10-07T03:58:11.261Z",
+        "reason": "builder: packaging sunburst rays named in the direction contract"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "*",
+        "files": [
+          "site/style.css"
+        ],
+        "createdAt": "2026-10-07T03:58:11.265Z",
+        "reason": "builder: overshoot is a figure dropping onto the portal and coins popping, literal motion in the toy-box world"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "*",
+        "files": [
+          "site/main.js"
+        ],
+        "createdAt": "2026-10-07T03:58:11.271Z",
+        "reason": "builder: overshoot is a figure dropping onto the portal and coins popping, literal motion in the toy-box world"
+      }
+    ]
+  }
+}
