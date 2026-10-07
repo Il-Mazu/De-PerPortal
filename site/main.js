@@ -12,12 +12,17 @@ const ELEMENTS = [
   ['Life', '#68d445', ['Stealth Elf', 'Stump Smash', 'Camo', 'Zook', 'Tree Rex']],
   ['Air', '#8fdcff', ['Whirlwind', 'Sonic Boom', 'Warnado', 'Lightning Rod', 'Jet-Vac']],
   ['Undead', '#a59ac8', ['Chop Chop', 'Cynder', 'Hex', 'Ghost Roaster', 'Fright Rider']],
-  ['Light', '#ffe36b', ['Spotlight', 'Knight Light', 'Blaster-Tron']],
-  ['Dark', '#7b62d6', ['Blackout', 'Knight Mare', 'Nightfall']],
+  ['Light', '#ffe36b', ['Knight Light', 'Spotlight', 'Blaster-Tron']],
+  ['Dark', '#7b62d6', ['Knight Mare', 'Blackout', 'Nightfall']],
 ];
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '-'];
 const color = el => ELEMENTS.find(e => e[0] === el)[1];
 const el = (tag, cls, attrs = {}) => Object.assign(document.createElement(tag), cls ? { className: cls } : {}, attrs);
+// Each element's lead Skylander has a full render; everyone else shows the app's character card.
+const RENDERS = ['Spyro', 'Gill Grunt', 'Trigger Happy', 'Eruptor', 'Bash', 'Stealth Elf', 'Whirlwind', 'Chop Chop', 'Knight Light', 'Knight Mare', 'Thumpback'];
+const slug = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const card = name => `assets/cards/${slug(name)}.webp`;
+const art = name => RENDERS.includes(name) ? `assets/renders/${slug(name)}.webp` : card(name);
 const sigil = (e, cls) => { const i = el('i', cls); i.dataset.el = e; i.setAttribute('aria-hidden', 'true'); return i; };
 
 /* ---------- The portal ---------- */
@@ -52,7 +57,13 @@ function paint() {
   const root = document.documentElement.style;
   root.setProperty('--p1', color(players[0].el));
   root.setProperty('--p2', color(players[1].el));
-  players.forEach((p, i) => { figs[i].dataset.el = p.el; figs[i].setAttribute('aria-label', `Player ${i + 1}: ${p.name}`); });
+  players.forEach((p, i) => {
+    figs[i].dataset.el = p.el;
+    figs[i].setAttribute('aria-label', `Player ${i + 1}: ${p.name}`);
+    const img = figs[i].querySelector('img');
+    if (!img.src.endsWith(art(p.name))) img.src = art(p.name);
+    figs[i].classList.toggle('is-card', !RENDERS.includes(p.name));
+  });
   coins.forEach(c => c.classList.toggle('on', c.dataset.el === players[active].el));
 }
 
@@ -104,7 +115,7 @@ document.addEventListener('keydown', e => {
   else if (code === 'Digit0') { e.preventDefault(); load(p, ...players[p].home); }
   else if (code === 'KeyT' && !e.altKey) {
     if (e.shiftKey) toast('Thumpling needs the Giants sidekick dump', color('Water'));
-    else { load(0, 'Water', 'Thumpback'); setTimeout(() => toast('Hail to the Whale!', color('Water')), 900); }
+    else whale();
   } else if (code === 'Space' && document.activeElement === document.body && inView(holdSection)) { e.preventDefault(); holdStart(); }
 });
 document.addEventListener('keyup', e => { if (e.code === 'Space') holdEnd(); });
@@ -211,7 +222,7 @@ let saveCount = 0;
 function saveCard(i) {
   const d = new Date(Date.now() - i * 41 * 60000);
   const c = el('div', 'save');
-  c.innerHTML = `<div class="art" data-el="Water"><i data-el="Water" class="strip-i" aria-hidden="true"></i></div><div class="meta"><b>Gill Grunt</b><span>Level ${level[Math.min(i, 9)]}</span><span>${d.toLocaleDateString('en', { weekday: 'short' })} ${d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}</span></div>`;
+  c.innerHTML = `<div class="art"><img src="${card('Gill Grunt')}" alt=""></div><div class="meta"><b>Gill Grunt</b><span>Level ${level[Math.min(i, 9)]}</span><span>${d.toLocaleDateString('en', { weekday: 'short' })} ${d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })}</span></div>`;
   return c;
 }
 for (let i = 9; i >= 0; i--) stack.append(saveCard(i));
@@ -254,12 +265,14 @@ ELEMENTS.forEach(([name, , pool], col) => {
     s.style.setProperty('--dl', `${(col + r) * 40}ms`);
     s.append(sigil(name, 'strip-i'));
     if (owned[r]) {
+      s.style.setProperty('--card', `url(${card(fig)})`);
       const lv = 3 + Math.floor(rnd() * 9);
       const info = { name: fig, level: lv >= 10 ? '10+' : lv, gold: Math.floor(rnd() * 60000).toLocaleString('en'), hp: Math.floor(rnd() * 20) };
       s.setAttribute('aria-label', `${fig}, level ${info.level}`);
       const show = () => {
         grid.querySelector('.sel')?.classList.remove('sel'); s.classList.add('sel');
         Object.entries(info).forEach(([k, v]) => $('figcard').querySelector(`[data-k=${k}]`).textContent = v);
+        $('figart').src = card(fig); $('figart').alt = fig;
       };
       s.onmouseenter = s.onfocus = s.onclick = show;
     } else { s.setAttribute('aria-label', `${fig}, missing`); s.disabled = true; }
@@ -369,3 +382,36 @@ fetch('https://api.github.com/repos/Il-Mazu/De-PerPortal/releases/latest')
     document.querySelectorAll('[data-version]').forEach(p => p.textContent = `Version ${rel.tag_name.replace(/^v/, '')} for Windows x64${mb}. Free and open source.`);
   })
   .catch(() => {}); // The links already point at the releases page.
+
+/* ---------- The crew, standing on top of the back panel ---------- */
+const crew = $('crew');
+RENDERS.slice(0, 10).forEach((name, i) => {
+  const img = el('img', '', { src: art(name), alt: '', loading: 'lazy', title: name });
+  img.style.setProperty('--n', i);
+  img.dataset.el = ELEMENTS[i][0];
+  crew.append(img);
+});
+
+/* ---------- T: a splash, and Thumpback ---------- */
+const egg = $('egg');
+let eggBusy = false;
+new Image().src = 'assets/renders/thumpback-big.webp';
+function whale() {
+  load(0, 'Water', 'Thumpback');
+  if (eggBusy) return;
+  eggBusy = true;
+  const splash = $('eggsplash');
+  splash.replaceChildren();
+  // Droplets thrown up in a fan, plus two rings on the water.
+  for (let i = 0; i < 40; i++) {
+    const a = (-150 + Math.random() * 120) * Math.PI / 180, d = 160 + Math.random() * 300;
+    const drop = el('i', 'drop');
+    drop.style.cssText = `--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--s:${.5 + Math.random()};animation-delay:${Math.random() * 120}ms`;
+    splash.append(drop);
+  }
+  splash.append(el('b', 'ring'), el('b', 'ring r2'));
+  egg.classList.remove('go'); void egg.offsetWidth; egg.classList.add('go');
+  setTimeout(() => { egg.classList.remove('go'); eggBusy = false; }, reduced ? 1600 : 2900);
+}
+$('whalebtn').onclick = whale;
+egg.onclick = () => { egg.classList.remove('go'); eggBusy = false; };

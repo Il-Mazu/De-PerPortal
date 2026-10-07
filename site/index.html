@@ -63,8 +63,8 @@
             <div class="portal-wrap">
               <img class="portal" id="portal" src="assets/portal.webp" alt="The Portal of Power" width="578" height="360">
               <div class="flash" id="flash" aria-hidden="true"></div>
-              <div class="fig p1" id="fig1" data-el="Magic"><span class="sigil"></span><b class="tag">P1</b></div>
-              <div class="fig p2" id="fig2" data-el="Fire"><span class="sigil"></span><b class="tag">P2</b></div>
+              <div class="fig p1" id="fig1" data-el="Magic"><img class="fig-img" src="assets/renders/spyro.webp" alt=""><b class="tag">P1</b></div>
+              <div class="fig p2" id="fig2" data-el="Fire"><img class="fig-img" src="assets/renders/eruptor.webp" alt=""><b class="tag">P2</b></div>
             </div>
             <div class="hold" id="hold" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/></svg><span>Keep holding</span></div>
           </div>
@@ -118,6 +118,7 @@
   </div>
 </section>
 
+<div class="crew" id="crew" aria-label="Spyro, Gill Grunt, Trigger Happy, Eruptor, Bash, Stealth Elf, Whirlwind, Chop Chop, Knight Light and Knight Mare" role="img"></div>
 <div class="panel">
 <!-- Controller -->
 <section class="sec controller" id="controller" aria-labelledby="ctl-h">
@@ -147,7 +148,7 @@
       <li><span class="combo"><kbd>Alt</kbd><kbd>←</kbd><kbd>→</kbd></span><span>Step through the presets</span></li>
       <li><span class="combo"><kbd>Alt</kbd><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd></span><span>Swap Force perk bases, SuperChargers vehicles</span></li>
       <li><span class="combo"><kbd>Alt</kbd><kbd>D</kbd></span><span>A random Skylander</span></li>
-      <li class="whale"><span class="combo"><kbd>Alt</kbd><kbd>T</kbd></span><span>Thumpback. Try <kbd>T</kbd> on this page.</span></li>
+      <li class="whale"><span class="combo"><kbd>Alt</kbd><kbd>T</kbd></span><span>Thumpback. Try <button class="keybtn" id="whalebtn" type="button" aria-label="Summon Thumpback"><kbd>T</kbd></button> on this page.</span></li>
     </ul>
   </div>
 </section>
@@ -176,6 +177,7 @@
       <div class="col-grid" id="colgrid" aria-label="A sample library: lit slots are figures you own, dark slots are missing"></div>
       <aside class="col-side">
         <p class="sample">Sample library</p>
+        <img class="figart" id="figart" src="assets/cards/stealth-elf.webp" alt="Stealth Elf" width="175" height="275">
         <dl class="figcard" id="figcard">
           <dt>Figure</dt><dd data-k="name">Stealth Elf</dd>
           <dt>Level</dt><dd data-k="level">10+</dd>
@@ -279,6 +281,7 @@ npm run dist</code></pre>
   </div>
 </footer>
 
+<div class="egg" id="egg" aria-hidden="true"><div class="egg-splash" id="eggsplash"></div><img class="egg-whale" src="assets/renders/thumpback-big.webp" alt="" width="1118" height="947"><p class="egg-hail">Hail to the Whale!</p></div>
 <script src="main.js" defer></script>
 </body>
 </html>
