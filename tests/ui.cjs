@@ -221,6 +221,8 @@ const {installArt}=require('../app/artwork.cjs');
     await page.locator('#theme').click();await page.locator('#theme-prev').click();await page.locator('#theme-prev').click();await page.locator('#theme-apply').click();
     assert.equal(await page.locator('body').getAttribute('data-theme'),'fishbet');
     assert.equal(await page.locator('body').evaluate(b=>b.classList.contains('skin')),false);
+    // The logo and Gill Grunt in the banner load.
+    assert.equal(await page.locator('.brand img.fb, .fb-fish').evaluateAll(els=>els.every(i=>i.complete&&i.naturalWidth>0)),true);
     await page.locator('#spin-1').click();
     while(!(await instance.evaluate(()=>globalThis.uiActions.at(-1).target==='random')))await new Promise(r=>setTimeout(r,50));
     assert.equal(await instance.evaluate(()=>globalThis.uiActions.at(-1).player),1);

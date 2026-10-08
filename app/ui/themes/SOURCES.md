@@ -2,7 +2,7 @@
 
 ## Dè FishBet
 
-`fishbet-logo.png` was supplied by the maintainer; `fishbet-fish.png` is the mascot cut out of it.
+`fishbet-logo.png` was supplied by the maintainer; the banner shows Gill Grunt, `fishbet-gill-grunt.webp`, the Activision render from the Skylanders Wiki also used in `site/assets/renders/`.
 
 ## Dè Cell to Singularity
 

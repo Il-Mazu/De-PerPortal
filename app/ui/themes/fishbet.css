@@ -71,7 +71,7 @@
 .fb-slide small{display:block;color:#cfe6ff;font-size:12px}
 .fb-spins{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
 .fb-dots{display:flex;gap:9px;margin-top:16px}.fb-dots i{width:8px;height:8px;border-radius:50%;background:#ffffff55}.fb-dots i.on{background:#fff}
-.fb-fish{position:absolute;right:70px;bottom:-6px;height:250px;transform:scaleX(-1);filter:drop-shadow(0 10px 18px #0009);animation:swim 4s ease-in-out infinite alternate;pointer-events:none}
+.fb-fish{position:absolute;right:70px;bottom:-6px;height:250px;filter:drop-shadow(0 10px 18px #0009);animation:swim 4s ease-in-out infinite alternate;pointer-events:none}
 @keyframes swim{to{translate:0 -12px;rotate:-3deg}}
 [data-theme=fishbet] .fb-arrow{position:absolute;top:50%;z-index:2;translate:0 -50%;padding:0 10px;font-size:44px;line-height:1;color:#5ee8c0;background:none;border:0;box-shadow:none;text-shadow:0 2px 0 #021050}
 #fb-prev{left:6px}#fb-next{right:6px}
