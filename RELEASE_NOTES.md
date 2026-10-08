@@ -1,3 +1,13 @@
+# Dè PerPortal 2.1.1
+
+- **Changed:** Gill Grunt now swims in the Dè FishBet banner.
+
+## Validation
+
+The UI test still switches to Dè FishBet, spins for Player 2, survives a reload and fits a narrow window; the banner was checked from screenshots on Linux. It has not been tried on Windows yet.
+
+---
+
 # Dè PerPortal 2.1.0
 
 - **New:** patch notes. After an update, Dè PerPortal shows what changed the first time it starts. Read them again any time under **Settings** → **About** → **Patch notes**; older versions are folded underneath. With a controller, move up and down to scroll and press B to close.
