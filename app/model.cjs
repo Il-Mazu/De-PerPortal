@@ -4,6 +4,7 @@ const path = require('node:path');
 const catalog = require('../resources/catalog.json');
 const traps=require('./traps.cjs');
 const save=require('./figure.cjs');
+const dump=require('./dump.cjs');
 const elements = ['Magic','Water','Tech','Fire','Earth','Life','Air','Undead','Light','Dark'];
 const games = ["Spyro’s Adventure",'Giants','Swap Force','Trap Team','SuperChargers','Imaginators'];
 const perks = [
@@ -43,7 +44,8 @@ async function scan(root, artRoot) {
           // make the otherwise usable figure disappear from the library.
           if(figure.info?.kind==='Trap') figure.trap=traps.decode(bytes);
           figure.save=save.read(bytes,figure.info?.kind);
-          if(figure.save?.state==='damaged') warnings.push(`${entry.name}: save data failed its checksum`);
+          figure.dump=dump.diagnose(bytes,figure.info);
+          if(!figure.dump.ok) warnings.push(`${entry.name}: ${figure.dump.problems.map(p=>p.text).join(' ')}`);
           figures.push({...figure,path:file,key:path.relative(root,file).split(path.sep).join('/')});
           if(!figure.info) warnings.push(`Unknown figure ${figure.id}:${figure.variant} in ${entry.name}`);
         } catch(e) { warnings.push(`${entry.name}: ${e.message}`); }

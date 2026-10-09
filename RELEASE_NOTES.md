@@ -1,3 +1,20 @@
+# Dè PerPortal 2.2.0
+
+- **New:** each figure's card in **Collection** says why a dump is broken: a wrong UID check byte, an ID block that fails its checksum, wrong access bits or keys, a save area that fails a checksum, two save areas that both claim to be the newest, or no readable save at all. **Setup** and the **Damaged saves** filter now include all of these.
+- **New:** **Fix** repairs a figure the game calls a "broken toy". It keeps the newest save area that passes every checksum, rebuilds the other one from it and reseals the rest, so progress is kept. When no save can be read, it isn't offered.
+- **New:** **Reset**, pressed twice, turns a figure back into a toy fresh from the box, with the same UID, ID and variant.
+- **New:** **Create blank dump**, on the card of a figure you don't have, writes a new toy of it to `NFC/Created`.
+- **Changed:** traps can be emptied again, with **Reset** on their card. It uses the new code, not the old clear that could make traps unreadable, and clears the trap's villain name.
+- **Changed:** a trap that has never been written now shows as empty instead of unverified.
+
+Fix and Reset back the dump up first and only work while the figure is off the portal. Every result is checked before it is written; if a check fails, the dump isn't changed.
+
+## Validation
+
+Unit tests create, break, fix and reset dumps for a figure of every game, Swap Force tops and bottoms, a Trap Master, a SuperChargers vehicle and trophy, and an Imaginators Sensei and Creation Crystal, and check each reason a toy can be broken. A captured Life trap passes every check and is byte-identical after decode, encrypt and decode; fixing it keeps its villain, and resetting it leaves an empty trap. The UI test breaks a trap, fixes it, resets it and creates a missing figure through the app. The checksums follow Dolphin and were checked against that trap, but fixed, reset and created dumps have not been tried in a game yet, on Windows or anywhere else.
+
+---
+
 # Dè PerPortal 2.1.1
 
 - **Changed:** Gill Grunt now swims in the Dè FishBet banner.

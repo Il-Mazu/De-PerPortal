@@ -43,9 +43,10 @@ function decode(bytes) {
   try {
     if(!Buffer.isBuffer(bytes) || bytes.length!==1024) return {state:'unknown'};
     const data=decrypt(bytes), valid=[8,36].filter(block=>areaValid(data,block));
-    if(!valid.length) return {state:'unknown'};
+    // A trap fresh from the box (or reset) has never been written: it is empty.
+    if(!valid.length) return crc16(bytes.subarray(0,30))===bytes.readUInt16LE(30) && data.subarray(128).every((b,i)=>b===0 || trailers.has(8+(i>>4)))?{state:'empty'}:{state:'unknown'};
     const block=valid.length===1?valid[0]:newer(data[8*16+9],data[36*16+9])?8:36;
     return decodeRecord(data,block);
   } catch { return {state:'unknown'}; }
 }
-module.exports={crc16,decrypt,areaValid,newer,decodeRecord,decode};
+module.exports={crc16,key,trailers,decrypt,areaValid,newer,decodeRecord,decode};

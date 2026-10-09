@@ -432,12 +432,12 @@ function renderVault(game) {
     const mine=owned(c),f=best(mine);
     if(select.value && c.element!==select.value) return false;
     if(query && !`${c.name} ${c.kind} ${c.element}`.toLowerCase().includes(query)) return false;
-    return show==='all' || (show==='owned'?mine.length:show==='missing'?!mine.length:show==='leveling'?f?.save?.state==='ok' && !f.save.maxed:mine.some(m=>m.save?.state==='damaged'));
+    return show==='all' || (show==='owned'?mine.length:show==='missing'?!mine.length:show==='leveling'?f?.save?.state==='ok' && !f.save.maxed:mine.some(m=>m.save?.state==='damaged' || m.dump?.ok===false));
   });
   $('vault-empty').hidden=!!list.length;
   $('vault').innerHTML=list.map(c=>{
     const mine=owned(c),f=best(mine);
-    const meta=!mine.length?'Not in your library':mine.some(m=>m.save?.state==='damaged')?'Damaged save':stats(f) || c.kind;
+    const meta=!mine.length?'Not in your library':mine.some(m=>m.save?.state==='damaged' || m.dump?.ok===false)?'Damaged save':stats(f) || c.kind;
     return `<button class="vault-item${mine.length?'':' missing'}${fallen(f)?' fallen':''}" data-entry="${entryKey(c)}" data-el="${e(c.element)}" aria-pressed="${selected===entryKey(c)}"><div class="portrait">${f?(f.half==='whole'?portrait(f):halfPortrait(f)):`<span class="placeholder">${sigil(c.element)}</span>`}</div><span>${e(c.name)}</span><small>${e(meta)}${mine.length>1?` · ${mine.length} dumps`:''}</small></button>`;
   }).join('');
   for(const tile of $('vault').children) {
@@ -453,24 +453,39 @@ async function renderDetail(c) {
   if(!c) return;
   const mine=owned(c),kind=[c.element,c.kind].filter(Boolean).join(' ');
   if(!mine.length) {
-    aside.innerHTML=`<h3>${e(c.name)}</h3><p class="detail-kind">${e(kind)}</p><p class="hub-note">Not in your library yet. Put its dump in the NFC folder and it lights up here.</p>`;
+    aside.innerHTML=`<h3>${e(c.name)}</h3><p class="detail-kind">${e(kind)}</p><p class="hub-note">Not in your library yet. Put its dump in the NFC folder and it lights up here, or create a blank one: a new toy, as if fresh from the box.</p><div class="hub-actions"><button data-create>Create blank dump</button></div>`;
+    aside.querySelector('[data-create]').onclick=()=>perform(async()=>{const key=await api.createDump({id:c.id,variant:c.variant});toast(`${c.name} created in NFC/${key}.`);});
     return;
   }
   aside.innerHTML=`<h3>${e(c.name)}</h3><p class="detail-kind">${e(kind)}</p>`+mine.map(f=>{
     const s=f.save,rows=[['File',f.key]];
     if(s?.state==='ok') rows.unshift(['Level',s.maxed?'10 or higher':s.level],['Gold',number(s.gold)],['Hero points',number(s.heroPoints)],...(s.nickname?[['Nickname',s.nickname]]:[]));
     if(s?.state==='new') rows.unshift(['Save','New figure, never played']);
-    if(s?.state==='damaged') rows.unshift(['Save','Damaged: its checksums don’t match. Restore a backup below.']);
+    if(s?.state==='damaged') rows.unshift(['Save','Damaged: its checksums don’t match.']);
+    // Why the game may call it a broken toy, one check per line.
+    for(const p of f.dump?.problems || []) rows.push(['Problem',p.text]);
+    if(f.dump && !f.dump.ok) rows.push(['Remedy',f.dump.fixable?'Fix keeps the newest good save and repairs the rest.':'Fix can’t recover this save: restore a backup below or reset the figure.']);
     if(state.lastPlayed[f.key]) rows.push(['Last played',ago(state.lastPlayed[f.key])]);
     const load=playable(f) && compatible(f) && f.half!=='bottom';
     return `<article class="detail-figure" data-key="${e(f.key)}"><dl>${rows.map(([k,v])=>`<dt>${k}</dt><dd>${e(v)}</dd>`).join('')}</dl>
-      <div class="hub-actions">${load?`<button data-load="0" ${fallen(f)?'disabled':''}>Load for Player 1</button><button data-load="1" ${fallen(f)?'disabled':''}>Load for Player 2</button>`:''}<button data-show>Show in folder</button>${state.challenge.nuzlocke && load?`<button data-fallen>${fallen(f)?'Revive':'Mark as fallen'}</button>`:''}</div>
+      <div class="hub-actions">${load?`<button data-load="0" ${fallen(f)?'disabled':''}>Load for Player 1</button><button data-load="1" ${fallen(f)?'disabled':''}>Load for Player 2</button>`:''}${f.dump?.fixable?'<button data-fix>Fix</button>':''}<button data-reset>Reset</button><button data-show>Show in folder</button>${state.challenge.nuzlocke && load?`<button data-fallen>${fallen(f)?'Revive':'Mark as fallen'}</button>`:''}</div>
       <h4>Backups</h4><ol class="backups"><li class="hub-note">Loading…</li></ol></article>`;
   }).join('');
   for(const card of aside.querySelectorAll('.detail-figure')) {
     const key=card.dataset.key,f=figure(key);
     for(const button of card.querySelectorAll('[data-load]')) button.onclick=()=>perform(async()=>{await api.action({player:Number(button.dataset.load),target:'direct',choice:model(f)});toast(`${name(f)} is on the portal.`);});
     card.querySelector('[data-show]').onclick=()=>perform(()=>api.showFigure(key));
+    card.querySelector('[data-fix]')?.addEventListener('click',()=>perform(async()=>{await api.repairFigure(key);toast(`${name(f)} fixed. The file it replaced is kept as a backup.`);}));
+    // Reset asks twice, like Restore.
+    const reset=card.querySelector('[data-reset]');
+    reset.onclick=()=>perform(async()=>{
+      if(!reset.classList.contains('confirm')) {
+        reset.classList.add('confirm');reset.textContent='Erase all progress?';
+        setTimeout(()=>{reset.classList.remove('confirm');reset.textContent='Reset';},5000);return;
+      }
+      await api.resetFigure(key);
+      toast(`${name(f)} is a fresh toy again. The file it replaced is kept as a backup.`);
+    });
     card.querySelector('[data-fallen]')?.addEventListener('click',()=>perform(()=>api.challenge({key,fallen:!fallen(f)})));
     const list=card.querySelector('.backups');
     try {
@@ -542,7 +557,7 @@ async function renderChecks() {
     ...(d.running?[[d.supported?'ok':'bad','Supported Cemu build',d.supported?'This is the skylandersNFC Cemu build.':'Use the skylandersNFC Cemu-Skylanders-Emulated-Portal build; other builds can’t be controlled.']]:[]),
     ['info','Cemu’s portal and language','The emulated portal must be turned on, and Cemu must use its English interface.',['Enable Cemu portal','enable']],
     [d.nfc && d.total?'ok':'bad','NFC folder',d.nfc?(d.total?`${d.total} figures: ${per}.`:'The NFC folder is empty. Put your figure dumps in it.'):'Make a folder named NFC next to Dè PerPortal and put your figure dumps in it.',['Rescan','rescan']],
-    [d.damaged.length?'bad':'ok','Figure saves',d.damaged.length?`${d.damaged.length} save${d.damaged.length===1?' fails':'s fail'} its checksum: ${list(d.damaged)}. Restore a backup from its card.`:'Every save that was read passed its checksum.',d.damaged.length?['Show damaged','damaged']:null],
+    [d.damaged.length?'bad':'ok','Figure saves',d.damaged.length?`${d.damaged.length} save${d.damaged.length===1?' fails':'s fail'} a check: ${list(d.damaged)}. Fix it or restore a backup from its card.`:'Every dump that was read passed its checks.',d.damaged.length?['Show damaged','damaged']:null],
     [d.duplicates.length?'warn':'ok','Duplicate dumps',d.duplicates.length?`These files are copies of the same figure, so only one of each can be on the portal: ${d.duplicates.map(g=>g.map(e).join(' = ')).join('; ')}.`:'No figure appears twice.'],
     [d.misplaced.length?'warn':'ok','Folders',d.misplaced.length?`These figures are newer than the game their folder is named after, so that game can’t use them: ${list(d.misplaced)}.`:'No figure sits in a folder for a game older than itself.'],
     [d.unknown?'warn':'ok','Recognized figures',d.unknown?`${d.unknown} dump${d.unknown===1?' isn’t':'s aren’t'} in the figure list. See Library scan details in Settings.`:'Every dump is a known figure.'],
