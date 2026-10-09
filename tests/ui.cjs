@@ -8,7 +8,9 @@ const {installArt}=require('../app/artwork.cjs');
  const root=await fs.mkdtemp(path.resolve('out/ui-'));
  await fs.mkdir(path.join(root,'NFC'));
  const entries=[[16,0],[18,0],[12,0],[14,0],[9,0],[8,0],[19,0],[20,0],[4,0],[5,0],[24,0],[25,0],[0,0],[1,0],[29,0],[30,0],[107,4614],[2000,8192],[1000,8192],[505,0],[1001,8192],[541,4096],[200,0],[300,0],[211,12289],[3224,16384],[3222,16384],[3503,16384],[310,20480],[311,20480],[235,20481],[685,21007]];
- for(const [id,variant] of entries){const b=Buffer.alloc(1024);b.writeUInt32LE(id+1);b.writeUInt16LE(id,16);b.writeUInt16LE(variant,28);await fs.writeFile(path.join(root,'NFC',`${id}-${variant}.sky`),b);}
+ // Blank dumps, as a new toy would read: valid ID block, empty saves.
+ for(const [id,variant] of entries){const uid=Buffer.alloc(4);uid.writeUInt32LE(id+1);const b=require('../app/dump.cjs').create({id,variant},uid);if(id===211)b.fill(0x5a,8*16,9*16); // a trap whose save can't be read
+ await fs.writeFile(path.join(root,'NFC',`${id}-${variant}.sky`),b);}
  try {await installArt(root,await fs.readFile('out/artwork-pack.zip'));}catch(e){if(e.code!=='ENOENT')throw e;}
  const instance=await electron.launch({args:[path.resolve('.'),'--no-sandbox',...(process.platform==='linux'?['--ozone-platform=x11']:[]),`--user-data-dir=${path.join(root,'electron-data')}`],env:{...process.env,DE_PERPORTAL_HOME:root}});
  try {
@@ -279,6 +281,30 @@ const {installArt}=require('../app/artwork.cjs');
     assert.deepEqual(await fs.readFile(path.join(root,'NFC/captured-life.sky')),bytes);
     assert.match(await page.locator('#villain-roster').textContent(),/Ignored until contents change/);
     await page.locator('#settings-close').click();
+    // Diagnose, Fix and Reset on a figure card, then create a missing figure.
+    const broken=Buffer.from(bytes);broken[36*16+3]^=1;
+    await fs.writeFile(path.join(root,'NFC/captured-life.sky'),broken);
+    await page.locator('#settings').click();await page.locator('#rescan').click();await page.locator('#settings-close').click();
+    await page.locator('#collection').click();
+    await page.selectOption('#vault-show','damaged');
+    await page.locator('#vault .vault-item').filter({hasText:'Life Hammer'}).click();
+    await page.locator('#vault-detail').getByText('Save area 2: its header checksum fails.').waitFor();
+    await page.locator('#vault-detail [data-fix]').click();
+    await page.waitForFunction(()=>document.getElementById('toast').textContent.includes('fixed'));
+    assert.equal(require('../app/dump.cjs').diagnose(await fs.readFile(path.join(root,'NFC/captured-life.sky')),null).ok,true);
+    await page.selectOption('#vault-show','owned'); // Life Hammer stays selected
+    await page.locator('#vault-detail [data-reset]').click();
+    assert.equal(await page.locator('#vault-detail [data-reset]').textContent(),'Erase all progress?');
+    await page.locator('#vault-detail [data-reset]').click();
+    await page.waitForFunction(()=>document.getElementById('toast').textContent.includes('fresh toy'));
+    assert.deepEqual(require('../app/traps.cjs').decode(await fs.readFile(path.join(root,'NFC/captured-life.sky'))),{state:'empty'});
+    assert.equal((await fs.readdir(path.join(root,'de-perportal-data/backups/captured-life.sky'))).length,2);
+    await page.selectOption('#vault-show','missing');
+    await page.locator('#vault .vault-item').first().click();
+    await page.locator('#vault-detail [data-create]').click();
+    await page.locator('#library-count').filter({hasText:'34 figures'}).waitFor();
+    assert.equal((await fs.readdir(path.join(root,'NFC/Created'))).length,1);
+    await page.locator('#hub-close').click();
   }
   assert.deepEqual(errors,[]);
   // Integration is opt-in and requires a Cemu session with empty portal rows.

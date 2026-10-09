@@ -18,6 +18,7 @@ A portable Windows companion for the Cemu Skylanders portal. Choose figures for 
 - Nested NFC folders and optional community character artwork.
 - Themes: one for each Skylanders game (or one that follows the game), plus Dè perThumpback, Dè Cell to Singularity, Dè PerMCdonald, Dè perDoomScroll and Dè FishBet.
 - Automatic backups of every figure before it goes on the portal, and a warning when a figure leaves the portal without having saved.
+- Diagnose and fix figures the game calls a "broken toy", reset a figure to a fresh toy, and create a blank dump of any figure.
 - Each figure's level, gold, hero points and nickname, read from its own save.
 - A Collection with every figure of the game, your progress per element, what you played, and a setup check.
 - A random pick, a Nuzlocke challenge, and an elemental gate helper for each level (beta).
@@ -76,7 +77,7 @@ Click a character to load it; use **Edit** to change an assignment. For Swap For
 
 In Swap Force, fixed perk bases are Rocket (Boom Jet), Tornado (Doom Stone), Spring (Fire Kraken), Speed (Freeze Blade), Digging (Grilla Drilla), Portals (Hoot Loop), Sneak (Trap Shadow), and Climber (Spy Rise). A perk shortcut changes only the bottom when Dè PerPortal is already tracking a Swap Force top for that player; otherwise it loads that base's matching complete pair. Each perk needs matching top and bottom dumps in the NFC library.
 
-Cemu opens the selected dump directly and saves progress to it. Trap dump editing is disabled because the current clear operation can make trap toys unreadable. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
+Cemu opens the selected dump directly and saves progress to it. Dè PerPortal changes a dump only when you press **Fix** or **Reset** on its card in **Collection**. Keep backups of figures and game saves. Two rows are reserved per player, with a separate fifth row for the sidekick and dedicated accessory rows; in-game player ownership is determined by the game.
 
 The Emulated USB Devices window closes after successful swaps. File dialogs may appear briefly during automation. Failed operations leave Cemu's dialog available for inspection.
 
@@ -87,6 +88,16 @@ The Emulated USB Devices window closes after successful swaps. File dialogs may 
 Select a figure to see its level, gold, hero points, nickname and when you last played it, load it for either player, or open its folder. Levels come from the figure's own save; past level 10 they show as **10+**.
 
 Every time a figure goes on the portal, Dè PerPortal first copies its dump to `de-perportal-data/backups`, keeping the last 10 versions of each figure. Under **Backups** in a figure's card, press **Restore** twice to put an older save back; the file it replaces is backed up too. Take the figure off the portal first. Cemu writes a figure's progress when the game decides to save, so if a figure leaves the portal after more than 3 minutes without its dump changing, Dè PerPortal warns that recent progress may be lost. The figure cards also show when each dump was last saved.
+
+### Fix, reset and create dumps
+
+Each figure's card in **Collection** says what is wrong with its dump, if anything: a wrong UID check byte, an ID block that fails its checksum, wrong access bits or keys, a save area that fails one of its checksums, two save areas that both claim to be the newest, or no readable save area at all. **Setup** and the **Damaged saves** filter list these figures.
+
+- **Fix** keeps the newest save area that passes every checksum, rebuilds the other one from it and reseals the ID block, access bits and keys. Your progress is kept. When no save area can be read, Fix is not offered: restore a backup or reset the figure.
+- **Reset**, pressed twice, erases a figure's progress and turns it back into a toy fresh from the box. Its UID, ID and variant stay the same. This works for traps too: a reset trap is empty, and its villain name is cleared.
+- **Create blank dump**, on the card of a figure you don't have, writes a new toy with a random UID to `NFC/Created`.
+
+Fix and Reset back the dump up first, check that the result passes every check before writing it, and only work while the figure is off the portal. If a check fails, the dump is not changed. Restore the backup from the same card to undo either one.
 
 **Progress** shows how many of the game's figures you have per element, how many are level 10, the gold and hero points across your figures, and your most played Skylanders. Turn on **Nuzlocke rules** to mark a Skylander as fallen from its card: fallen Skylanders can't be loaded or picked at random until you revive them. **History** lists what went on the portal, newest first. **Setup** checks where Cemu is, whether it is running and supported, your NFC folder, damaged saves, duplicate dumps, figures in another game's folder and artwork, with a button to fix what it can.
 
@@ -102,7 +113,7 @@ In Trap Team, **Alt+↑ / Alt+↓** previews named captured villains, wrapping a
 
 Selection notifications appear for 4.5 seconds, even when the element overlay is dismissed. Empty and unnamed unverified traps are grouped under **Other traps**. Expand that group to load them or manually name an unverified trap whose contents you know.
 
-In **Settings**, **Reset trap detections · keep dumps unchanged** clears PerPortal's saved names and ignores each trap's current contents until its detected villain changes. The operation changes metadata only; the game still sees the contents stored in each dump. A newly detected captured villain appears in the detected list with a **Name villain** button. **Restore latest trap backup** remains available for originals saved before older destructive clears; restart Cemu after restoring.
+In **Settings**, **Reset trap detections · keep dumps unchanged** clears PerPortal's saved names and ignores each trap's current contents until its detected villain changes. The operation changes metadata only; the game still sees the contents stored in each dump. A newly detected captured villain appears in the detected list with a **Name villain** button. To actually empty a trap, press **Reset** twice on its card in **Collection**. **Restore latest trap backup** remains available for originals saved before older destructive clears; restart Cemu after restoring.
 
 Existing Trap Team profiles automatically replace ordinary Skylanders in the numbered element slots with matching Trap Masters from your library. Already selected Trap Masters and favorite presets are preserved. A slot stays unassigned when no unused matching Trap Master is available.
 

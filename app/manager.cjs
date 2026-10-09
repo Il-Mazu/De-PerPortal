@@ -5,6 +5,8 @@ const {EventEmitter}=require('node:events');
 const model=require('./model.cjs');
 const accessories=require('./accessories.cjs');
 const trapData=require('./traps.cjs');
+const dump=require('./dump.cjs');
+const catalog=require('../resources/catalog.json');
 const {Journal}=require('./journal.cjs');
 const discord=require('./discord.cjs');
 const obs=require('./obs.cjs');
@@ -386,11 +388,54 @@ class Manager extends EventEmitter {
     if(this.busy) throw Error('Wait for the current operation.');
     const f=this.figures.find(f=>f.key===key);
     if(!f) throw Error('That figure is not in your library.');
-    const onPortal=[this.sidekick,...this.active,...Object.values(this.accessories)].some(c=>c && (c.top===key || c.bottom===key));
-    if(onPortal) throw Error(`Take ${f.info?.name||key} off the portal before restoring it.`);
+    if(this.onPortal(key)) throw Error(`Take ${f.info?.name||key} off the portal before restoring it.`);
     this.busy=true;this.publish();
     try { await this.journal.restore(key,f.path,name);this.message=`${f.info?.name||key} restored from ${new Date(parseInt(name)).toLocaleString()}. The file it replaced is kept as a backup.`; }
     finally { this.busy=false;await this.rescan(); }
+  }
+  onPortal(key) { return [this.sidekick,...this.active,...Object.values(this.accessories)].some(c=>c && (c.top===key || c.bottom===key)); }
+  // Fix and Reset rewrite a dump in place: back it up, write a checked copy
+  // beside it and swap it in, like restoring a backup.
+  async rewrite(key,change,done) {
+    if(this.busy) throw Error('Wait for the current operation.');
+    const f=this.figures.find(f=>f.key===key);
+    if(!f) throw Error('That figure is not in your library.');
+    if(this.onPortal(key)) throw Error(`Take ${f.info?.name||key} off the portal first.`);
+    this.busy=true;this.publish();
+    try {
+      const bytes=await fs.readFile(f.path),now=model.identify(bytes);
+      if(now.id!==f.id || now.variant!==f.variant || now.uid!==f.uid) throw Error('A figure changed since scanning. Rescan your NFC folder.');
+      const out=change(bytes,f.info);
+      await this.journal.backup(f.key,f.path);
+      const temp=`${f.path}.${Date.now()}.tmp`;
+      await fs.writeFile(temp,out);await fs.rename(temp,f.path);
+      if(f.info?.kind==='Trap') {
+        // Names and ignored detections described the old contents.
+        const identity=trapIdentity(f);
+        delete this.config.trapLabels?.[identity];delete this.config.trapResets?.[identity];await this.save();
+      }
+      this.message=done(f.info?.name||key);
+    } finally { this.busy=false;await this.rescan(); }
+  }
+  repairFigure(key) { return this.rewrite(key,dump.repair,name=>`${name} fixed. The file it replaced is kept as a backup.`); }
+  resetFigure(key) { return this.rewrite(key,dump.reset,name=>`${name} is a fresh toy again. The file it replaced is kept as a backup.`); }
+  // New dumps go to NFC/Created, named after the figure, never over a file.
+  async createDump({id,variant}={}) {
+    if(this.busy) throw Error('Wait for the current operation.');
+    const info=catalog.find(c=>c.id===id && c.variant===variant);
+    if(!info) throw Error('Choose a figure from the catalog.');
+    const taken=new Set(this.figures.map(f=>f.uid));
+    let uid;do uid=require('node:crypto').randomBytes(4); while(taken.has(uid.toString('hex')));
+    const bytes=dump.create(info,uid),dir=path.join(this.root,'NFC','Created');
+    const stem=info.name.replace(/[<>:"/\\|?*\x00-\x1f]/g,'').trim() || `${id}-${variant}`;
+    await fs.mkdir(dir,{recursive:true});
+    for(let n=1;;n++) {
+      const file=path.join(dir,`${stem}${n>1?` ${n}`:''}.sky`);
+      try { await fs.writeFile(file,bytes,{flag:'wx'}); } catch(e) { if(e.code==='EEXIST') continue; throw e; }
+      this.message=`A new ${info.name} is in your NFC folder.`;
+      await this.rescan();
+      return path.relative(path.join(this.root,'NFC'),file).split(path.sep).join('/');
+    }
   }
   async random(player) {
     if(![0,1].includes(player)) throw Error('Invalid player.');
@@ -471,7 +516,7 @@ class Manager extends EventEmitter {
     }).map(f=>f.key);
     return {cemu,running:!!this.session.pid,supported:!!this.session.supported,game:this.session.game,nfc:await exists(path.join(this.root,'NFC')),
       counts:model.games.map((_,i)=>this.figures.filter(f=>f.info?.game===i+1).length),total:this.figures.length,unknown:this.figures.filter(f=>!f.info).length,
-      art:this.figures.some(f=>f.art),damaged:this.figures.filter(f=>f.save?.state==='damaged').map(f=>f.key),
+      art:this.figures.some(f=>f.art),damaged:this.figures.filter(f=>f.save?.state==='damaged' || f.dump?.ok===false).map(f=>f.key),
       duplicates:[...groups.values()].filter(g=>g.length>1),misplaced,warnings:this.warnings};
   }
   figurePath(key) { const f=this.figures.find(f=>f.key===key);if(!f) throw Error('That figure is not in your library.');return f.path; }
