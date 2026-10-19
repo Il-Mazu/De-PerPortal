@@ -1,5 +1,5 @@
 {
-  "_source": "Elemental gates per chapter. Spyro's Adventure from darkSpyro's walkthroughs (darkspyro.net), Giants, Swap Force and Trap Team from the Skylanders Wiki infoboxes (skylanderswiki.com). Only games 1-4 have elemental gates. Beta: report mistakes on GitHub.",
+  "_source": "Elemental gates per chapter. Spyro's Adventure from darkSpyro's walkthroughs (darkspyro.net), Giants, Swap Force and Trap Team from the Skylanders Wiki infoboxes (skylanderswiki.com). Imaginators has no elemental gates: its Sensei Shrines (one per battle class, Skylanders Wiki) and the ten Sensei Elemental Realms on the M.A.P. take their place. Beta: report mistakes on GitHub.",
   "1": [
     {"level": "Shattered Island", "elements": ["Water", "Magic", "Tech"]},
     {"level": "Perilous Pastures", "elements": ["Tech", "Life", "Water"]},
@@ -84,5 +84,15 @@
     {"level": "The Ultimate Weapon", "elements": ["Tech", "Dark"]},
     {"level": "Nightmare Express", "elements": ["Magic", "Tech"]},
     {"level": "Mirror of Mystery", "elements": ["Water", "Life"]}
+  ],
+  "6": [
+    {"level": "The Cradle of Creation · Brawler shrine", "classes": ["Brawler"]},
+    {"level": "Mushroom River · Ninja shrine", "classes": ["Ninja"]},
+    {"level": "Scholarville · Sorcerer and Sentinel shrines", "classes": ["Sorcerer", "Sentinel"]},
+    {"level": "Shellmont Shores · Knight and Bowslinger shrines", "classes": ["Knight", "Bowslinger"]},
+    {"level": "Sky Fortress · Smasher and Quickshot shrines", "classes": ["Smasher", "Quickshot"]},
+    {"level": "Fizzland · Swashbuckler shrine", "classes": ["Swashbuckler"]},
+    {"level": "The Golden Arcade · Bazooker shrine", "classes": ["Bazooker"]},
+    {"level": "M.A.P. · Sensei Elemental Realms", "elements": ["Magic", "Water", "Tech", "Fire", "Earth", "Life", "Air", "Undead", "Light", "Dark"]}
   ]
 }

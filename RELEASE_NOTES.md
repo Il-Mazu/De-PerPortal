@@ -1,3 +1,17 @@
+# Dè PerPortal 2.3.0
+
+- **New:** **Download supported Cemu** in Settings, and in **Setup** when no Cemu executable is found. It fetches the skylandersNFC Cemu Skylanders build (the one Dè PerPortal controls), checks the download's SHA-256, and unpacks it beside Dè PerPortal. Files that already exist are kept and your NFC folder is left alone.
+- **New (beta):** Imaginators Senseis. Element shortcuts (Alt + 1 … −) now take Senseis of the matching element, which is what opens the ten Sensei Elemental Realms. Kaos isn't one of the ten elements, so choose him as a player's Skylander.
+- **New (beta):** Senseis show their battle class in the picker and Collection, and you can search by class.
+- **New (beta):** the level helper now covers Imaginators. Pick a chapter under **Element shortcuts** and **Alt + G** loads a Sensei of the next battle class its Sensei Shrines need; pick the Elemental Realms entry and it lights the ten elements.
+- **Changed:** Imaginators element slots no longer hold ordinary Skylanders. A profile saved earlier is re-filled with Senseis the first time it starts.
+
+## Validation
+
+Unit tests cover the Sensei element-slot rule, the shrine and realm data against the catalog, Alt + G loading a Sensei of each missing class, and the Cemu unpacking (checksum, kept files, NFC skipped). The real Cemu ZIP was unpacked on Linux and its executable matches the SHA-256 in the README. The UI test still passes. The download button has not been tried on Windows yet, and the shrine data comes from fan wikis and has not been played through in the game.
+
+---
+
 # Dè PerPortal 2.2.0
 
 - **New:** each figure's card in **Collection** says why a dump is broken: a wrong UID check byte, an ID block that fails its checksum, wrong access bits or keys, a save area that fails a checksum, two save areas that both claim to be the newest, or no readable save at all. **Setup** and the **Damaged saves** filter now include all of these.

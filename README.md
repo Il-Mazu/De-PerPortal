@@ -41,6 +41,8 @@ Use the supported [Cemu Skylanders build](https://github.com/skylandersNFC/Cemu-
 65e22a4ec27915d60d71689c45a27eb7bf329d17bde6719b79ada561744ee280
 ```
 
+No build yet? **Download supported Cemu** in Settings (or in Setup) fetches that exact release, checks its SHA-256 and unpacks it beside Dè PerPortal, keeping files that already exist and leaving your NFC folder alone.
+
 The build currently requires Cemu's English interface. In Settings, enable the Cemu portal and optionally download the community artwork pack or select your own artwork folder.
 
 ## Controls
@@ -59,7 +61,7 @@ The build currently requires Cemu's English interface. In Settings, enable the C
 | Alt + Shift + Q / W / E / R / Y / U / I / O | Swap Force perk base for Player 2 |
 | Alt + Q / W / E | SuperChargers: load the assigned Sky / Land / Sea vehicle |
 | Alt + D | Load a random Skylander for Player 1 (add Shift for Player 2) |
-| Alt + G | Load the next element the chosen level has a gate for (add Shift for Player 2) |
+| Alt + G | Load the next element the chosen level has a gate for, or in Imaginators the next Sensei battle class it has a shrine for (add Shift for Player 2) |
 
 Shortcuts work while a Skylanders game is running and Cemu has focus. The element order is Magic, Water, Tech, Fire, Earth, Life, Air, Undead, Light, Dark. Thumpling requires the Giants sidekick dump; the Trap Team playable mini is a separate edition.
 
@@ -102,6 +104,8 @@ Fix and Reset back the dump up first, check that the result passes every check b
 **Progress** shows how many of the game's figures you have per element, how many are level 10, the gold and hero points across your figures, and your most played Skylanders. Turn on **Nuzlocke rules** to mark a Skylander as fallen from its card: fallen Skylanders can't be loaded or picked at random until you revive them. **History** lists what went on the portal, newest first. **Setup** checks where Cemu is, whether it is running and supported, your NFC folder, damaged saves, duplicate dumps, figures in another game's folder and artwork, with a button to fix what it can.
 
 **Random** (Alt + D) loads a random Skylander for the selected player, skipping fallen ones and figures already on the portal. In Spyro's Adventure, Giants, Swap Force and Trap Team, choose the level you are playing under **Element shortcuts**: the elements it has gates for light up, and Alt + G loads the next one that isn't on the portal yet. The level list comes from darkSpyro and the Skylanders Wiki and is in beta; use **report a wrong level** if one is off.
+
+Imaginators has no elemental gates. Its element slots take **Senseis** of the matching element (Kaos isn’t one of the ten elements, so choose him as a player’s Skylander), which is what opens the ten Sensei Elemental Realms on the M.A.P. Pick a chapter under **Element shortcuts** and Alt + G loads a Sensei of the next battle class that chapter's Sensei Shrines need; pick the realms entry and it works like a gate. Senseis show their battle class in the pickers and Collection, and you can search by class. This is beta too.
 
 In **Settings**, **Export profile** saves the game's defaults, presets and shortcuts to a file and **Import profile** loads one; figures missing from your library are left unassigned. **Discord status** shows the game and the Skylanders on your portal in your Discord profile. **OBS overlay** serves a page at `http://127.0.0.1:47831/` for an OBS Browser Source, showing the figures on your portal; it is only reachable from your computer.
 
