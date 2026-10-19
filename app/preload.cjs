@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('dePerPortal',{
   rescan:()=>ipcRenderer.invoke('rescan'),
   launch:()=>ipcRenderer.invoke('launch'),
   artwork:()=>ipcRenderer.invoke('artwork'),
+  cemu:()=>ipcRenderer.invoke('cemu'),
   artFolder:()=>ipcRenderer.invoke('art-folder'),
   enable:()=>ipcRenderer.invoke('enable'),
   catalog:()=>ipcRenderer.invoke('catalog'),

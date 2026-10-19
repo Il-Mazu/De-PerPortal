@@ -129,14 +129,15 @@ function draw() {
   }
   for(let p=0;p<2;p++) $(`tab-${p}`).classList.toggle('selected',p===player);
   $('random').disabled=state.busy;
-  // Elemental gates exist in the first four games only.
+  // Elemental gates exist in the first four games; Imaginators has shrines and realms instead.
   $('gates').hidden=!state.gates.length;
   if(state.gates.length) {
     if($('gate-level').dataset.game!==String(state.game)) {
-      $('gate-level').innerHTML=`<option value="">Not set</option>${state.gates.map((g,i)=>`<option value="${i}">${e(g.level)} · ${e(g.elements.join(', '))}</option>`).join('')}`;
+      $('gate-level').innerHTML=`<option value="">Not set</option>${state.gates.map((g,i)=>`<option value="${i}">${e(g.level)}${g.elements?` · ${e(g.elements.join(', '))}`:''}</option>`).join('')}`;
       $('gate-level').dataset.game=state.game;
     }
     $('gate-level').value=state.gateLevel ?? '';
+    $('gate-hint').textContent=state.game===6?'Shrines open for a Sensei of their battle class; the realms light up their elements.':'Lit cards open this level’s elemental gates.';
   }
   const needed=new Set(state.gates[state.gateLevel]?.elements || []);
   $('elements').innerHTML=state.elements.map((element,i)=>{
@@ -285,13 +286,13 @@ function compatible(f) { return f.info && f.info.game<=state.game; }
 function core(f) { return f.info?.kind==='Skylander' && !/lightcore|elite/i.test(f.info.name) && (f.variant & 0x600)!==0x200; }
 // Figures that can stand on a player's slot.
 function playable(f) { return ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei','Crystal'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4); }
-function elementalDoorFigure(f,element) { return f.info?.element===element && (state.game===4 ? f.info.kind==='TrapMaster' && f.half==='whole' : core(f)); }
+function elementalDoorFigure(f,element) { return f.info?.element===element && (state.game===4 ? f.info.kind==='TrapMaster' && f.half==='whole' : state.game===6 ? f.info.kind==='Sensei' : core(f)); }
 function available() {
   const query=$('search').value.trim().toLowerCase();
   if(picking.target==='vehicle-shortcut')return state.figures.filter(f=>f.accessory?.type===`${picking.type} vehicle` && (!query || `${f.info.name} ${f.key}`.toLowerCase().includes(query)));
   if(picking.target==='accessory')return state.figures.filter(f=>f.accessory?.slot===picking.slot && (!query || `${f.info.name} ${f.accessory.type} ${f.info.element} ${f.key}`.toLowerCase().includes(query)));
   if(pendingTop) return state.figures.filter(f=>compatible(f) && f.half==='bottom' && (!query || `${f.info.name} ${f.key}`.toLowerCase().includes(query))).sort((a,b)=>Number(b.id===pendingTop.id-1000 && b.variant===pendingTop.variant)-Number(a.id===pendingTop.id-1000 && a.variant===pendingTop.variant));
-  return state.figures.filter(f=>compatible(f) && f.half!=='bottom' && (!query || `${f.info.name} ${f.id} ${f.key}`.toLowerCase().includes(query)) && (picking.target==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : playable(f)) && (!state.elements.includes(picking.target) || elementalDoorFigure(f,picking.target)));
+  return state.figures.filter(f=>compatible(f) && f.half!=='bottom' && (!query || `${f.info.name} ${f.info.class||''} ${f.id} ${f.key}`.toLowerCase().includes(query)) && (picking.target==='sidekick' ? f.info.kind==='Mini' && f.info.game<4 : playable(f)) && (!state.elements.includes(picking.target) || elementalDoorFigure(f,picking.target)));
 }
 function openPicker(options) {
   if(options.target==='favorite') options={...options,preset:options.preset ?? state.profile.players[options.player].activeFavorite};
@@ -313,7 +314,7 @@ function renderPicker() {
   $('picker-sort').hidden=accessoryPicker;
   $('picker-empty').textContent=accessoryPicker?'No matching accessories in your NFC library for this game. Add your own dumps and rescan in Settings.':'No compatible figures found in your NFC folder.';
   $('picker-results').classList.toggle('accessory-picker',accessoryPicker);
-  $('picker-results').innerHTML=options.map(f=>`<button class="picker-item${fallen(f)?' fallen':''}" data-key="${e(f.key)}" data-el="${e(f.info.element)}"${accessoryPicker?` title="${e(f.accessory.effect)}"`: ''}${fallen(f)?' disabled':''}><div class="portrait">${f.half==='whole'?portrait(f):halfPortrait(f)}</div><span>${e(f.info.name)}</span><small>${e(f.info.element)} · ${pendingTop && f.id===pendingTop.id-1000 && f.variant===pendingTop.variant?'Matching bottom':e(f.info.kind)}</small>${accessoryPicker?`<small class="accessory-type">${e(f.accessory.type)}</small>`:''}${fallen(f)?'<small class="stat bad">Fallen</small>':stats(f)?`<small class="stat${f.save.state==='damaged'?' bad':''}">${e(stats(f))}</small>`:''}<small class="filename" title="${e(f.key)}">${e(f.key.split('/').pop())}</small></button>`).join('');
+  $('picker-results').innerHTML=options.map(f=>`<button class="picker-item${fallen(f)?' fallen':''}" data-key="${e(f.key)}" data-el="${e(f.info.element)}"${accessoryPicker?` title="${e(f.accessory.effect)}"`: ''}${fallen(f)?' disabled':''}><div class="portrait">${f.half==='whole'?portrait(f):halfPortrait(f)}</div><span>${e(f.info.name)}</span><small>${e(f.info.element)} · ${pendingTop && f.id===pendingTop.id-1000 && f.variant===pendingTop.variant?'Matching bottom':e([f.info.kind,f.info.class].filter(Boolean).join(' · '))}</small>${accessoryPicker?`<small class="accessory-type">${e(f.accessory.type)}</small>`:''}${fallen(f)?'<small class="stat bad">Fallen</small>':stats(f)?`<small class="stat${f.save.state==='damaged'?' bad':''}">${e(stats(f))}</small>`:''}<small class="filename" title="${e(f.key)}">${e(f.key.split('/').pop())}</small></button>`).join('');
   orientHalves();
   for(const button of $('picker-results').children) button.onclick=()=>perform(async()=>{
     if(pickerSaving)return;
@@ -431,7 +432,7 @@ function renderVault(game) {
   const list=game.filter(c=>{
     const mine=owned(c),f=best(mine);
     if(select.value && c.element!==select.value) return false;
-    if(query && !`${c.name} ${c.kind} ${c.element}`.toLowerCase().includes(query)) return false;
+    if(query && !`${c.name} ${c.kind} ${c.class||''} ${c.element}`.toLowerCase().includes(query)) return false;
     return show==='all' || (show==='owned'?mine.length:show==='missing'?!mine.length:show==='leveling'?f?.save?.state==='ok' && !f.save.maxed:mine.some(m=>m.save?.state==='damaged' || m.dump?.ok===false));
   });
   $('vault-empty').hidden=!!list.length;
@@ -451,7 +452,7 @@ async function renderDetail(c) {
   const aside=$('vault-detail');
   aside.hidden=!c;
   if(!c) return;
-  const mine=owned(c),kind=[c.element,c.kind].filter(Boolean).join(' ');
+  const mine=owned(c),kind=[[c.element,c.kind].filter(Boolean).join(' '),c.class].filter(Boolean).join(' · ');
   if(!mine.length) {
     aside.innerHTML=`<h3>${e(c.name)}</h3><p class="detail-kind">${e(kind)}</p><p class="hub-note">Not in your library yet. Put its dump in the NFC folder and it lights up here, or create a blank one: a new toy, as if fresh from the box.</p><div class="hub-actions"><button data-create>Create blank dump</button></div>`;
     aside.querySelector('[data-create]').onclick=()=>perform(async()=>{const key=await api.createDump({id:c.id,variant:c.variant});toast(`${c.name} created in NFC/${key}.`);});
@@ -552,7 +553,7 @@ async function renderChecks() {
   const list=keys=>keys.slice(0,6).map(e).join(', ')+(keys.length>6?`, and ${keys.length-6} more`:'');
   const per=state.games.map((g,i)=>d.counts[i]?`${d.counts[i]} ${g}`:'').filter(Boolean).join(', ');
   const rows=[
-    [d.cemu?'ok':'bad','Cemu next to Dè PerPortal',d.cemu?'Found the Cemu executable.':'Put Dè PerPortal and its release files in the folder with your Cemu executable.'],
+    [d.cemu?'ok':'bad','Cemu next to Dè PerPortal',d.cemu?'Found the Cemu executable.':'Put Dè PerPortal and its release files in the folder with your Cemu executable, or download the supported build.',d.cemu?null:['Download Cemu','cemu']],
     [d.running?'ok':'warn','Cemu is running',d.running?'Connected to Cemu.':'Start Cemu to use the portal.',d.running?null:['Launch Cemu','launch']],
     ...(d.running?[[d.supported?'ok':'bad','Supported Cemu build',d.supported?'This is the skylandersNFC Cemu build.':'Use the skylandersNFC Cemu-Skylanders-Emulated-Portal build; other builds can’t be controlled.']]:[]),
     ['info','Cemu’s portal and language','The emulated portal must be turned on, and Cemu must use its English interface.',['Enable Cemu portal','enable']],
@@ -563,7 +564,7 @@ async function renderChecks() {
     [d.unknown?'warn':'ok','Recognized figures',d.unknown?`${d.unknown} dump${d.unknown===1?' isn’t':'s aren’t'} in the figure list. See Library scan details in Settings.`:'Every dump is a known figure.'],
     [d.art?'ok':'warn','Character artwork',d.art?'Portraits are available.':'Portraits are optional, about 50 MB.',d.art?null:['Download art','art']]];
   $('checks').innerHTML=rows.map(([status,title,text,action])=>`<li class="check-row" data-status="${status}"><i class="check-mark" aria-label="${{ok:'Fine',warn:'Worth a look',bad:'Needs fixing',info:'Note'}[status]}">${{ok:'✓',warn:'!',bad:'✕',info:'i'}[status]}</i><div><b>${title}</b><p>${text}</p></div>${action?`<button data-do="${action[1]}">${action[0]}</button>`:''}</li>`).join('');
-  const actions={launch:()=>api.launch(),enable:async()=>{await api.enable();toast('Cemu portal emulation enabled.');},rescan:()=>api.rescan(),art:()=>api.artwork(),
+  const actions={launch:()=>api.launch(),enable:async()=>{await api.enable();toast('Cemu portal emulation enabled.');},rescan:()=>api.rescan(),art:()=>api.artwork(),cemu:()=>api.cemu(),
     damaged:()=>{$('vault-show').value='damaged';hubPanel='figures';renderHub();}};
   for(const button of $('checks').querySelectorAll('button')) button.onclick=()=>perform(async()=>{await actions[button.dataset.do]();if(button.dataset.do!=='damaged'){diagnostics=null;renderHub();}});
 }
@@ -608,6 +609,7 @@ $('reset-trap-detections').onclick=()=>perform(()=>api.resetTrapDetections());
 $('restore-trap-backup').onclick=()=>perform(()=>api.restoreTrapBackup());
 $('rescan').onclick=()=>perform(()=>api.rescan());
 $('art-folder').onclick=()=>perform(()=>api.artFolder());
+$('download-cemu').onclick=()=>perform(async()=>{const b=$('download-cemu');b.disabled=true;b.textContent='Downloading…';try{await api.cemu();}finally{b.disabled=false;b.textContent='Download supported Cemu · 26 MB';}});
 $('download-art').onclick=()=>perform(async()=>{const b=$('download-art');b.disabled=true;b.textContent='Downloading…';try{await api.artwork();}finally{b.disabled=false;b.textContent='Download character art · 50 MB';}});
 $('art-banner-btn').onclick=()=>perform(async()=>{$('art-banner-btn').disabled=true;$('art-banner-btn').textContent='Downloading…';try{await api.artwork();$('art-banner').hidden=true;}catch(err){$('art-banner-btn').disabled=false;$('art-banner-btn').textContent='Download art · ~50 MB';throw err;}});
 $('art-banner-dismiss').onclick=()=>{artBannerDismissed=true;$('art-banner').hidden=true;};

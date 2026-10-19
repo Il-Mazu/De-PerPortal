@@ -100,6 +100,14 @@ else {
       },
       'art-folder':async()=>{const r=await dialog.showOpenDialog(win,{properties:['openDirectory'],title:'Choose character artwork folder'});if(!r.canceled){manager.config.artRoot=r.filePaths[0];await manager.save();await manager.rescan();}},
       artwork:async()=>{const {downloadArt}=require('./artwork.cjs');manager.message='Downloading character artwork…';manager.publish();await downloadArt(root);manager.config.artRoot=null;await manager.save();await manager.rescan();manager.message='Character artwork is ready.';manager.publish();},
+      cemu:async()=>{
+        const {downloadCemu}=require('./cemu.cjs');
+        const previous=manager.message;manager.message='Downloading the supported Cemu build…';manager.publish();
+        try {
+          const {added,kept}=await downloadCemu(root);
+          manager.message=added?`The supported Cemu build is ready beside Dè PerPortal${kept?` (${kept} existing file${kept===1?'':'s'} kept)`:''}.`:'Every file of the supported Cemu build was already here.';
+        } catch(e) { manager.message=previous;throw e; } finally { manager.publish(); }
+      },
       catalog:()=>require('../resources/catalog.json'),
       diagnostics:()=>manager.diagnostics(),
       backups:key=>manager.backups(key),

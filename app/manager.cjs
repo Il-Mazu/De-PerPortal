@@ -67,7 +67,7 @@ class Manager extends EventEmitter {
       if(label && label.recordId!==null && (f.trap?.state!=='captured' || label.recordId!==f.trap.recordId)) { delete labels[identity];trapMetadataChanged=true; }
     }
     if(trapMetadataChanged) await this.save();
-    if(model.repairTrapTeamElements(this.config.profiles[4],this.figures)) await this.save();
+    for(const game of [4,6]) if(model.repairElementSlots(this.config.profiles[game],this.figures,game)) await this.save();
     this.profile;
     this.publish();
   }
@@ -226,7 +226,7 @@ class Manager extends EventEmitter {
     } else {
       if(![0,1].includes(player) || !model.elements.includes(target)) throw Error('Invalid selection.');
       const selected=model.resolveChoice(choice,this.figures,this.game);
-      if(selected.length!==1 || !model.elementalDoorFigure(selected[0],this.game,target)) throw Error(this.game===4 ? 'Trap Team element slots use Trap Masters of the matching element.' : 'Element slots use ordinary Skylanders of the matching element.');
+      if(selected.length!==1 || !model.elementalDoorFigure(selected[0],this.game,target)) throw Error(this.game===4 ? 'Trap Team element slots use Trap Masters of the matching element.' : this.game===6 ? 'Imaginators element slots use Senseis of the matching element.' : 'Element slots use ordinary Skylanders of the matching element.');
       this.profile.players[player].elements[target]=choice;
     }
     await this.save(); this.publish();
@@ -437,13 +437,17 @@ class Manager extends EventEmitter {
       return path.relative(path.join(this.root,'NFC'),file).split(path.sep).join('/');
     }
   }
-  async random(player) {
-    if(![0,1].includes(player)) throw Error('Invalid player.');
+  // Choices a pick may use: not fallen, and not on the portal for the other player, the sidekick or an accessory slot.
+  freeChoices(player,only=()=>true) {
     const fallen=this.config.nuzlocke?this.fallen():[];
     const taken=[this.sidekick,...this.active.filter((_,p)=>p!==player),...Object.values(this.accessories)].flatMap(c=>c?[c.top,c.bottom]:[]);
     const takenUids=new Set(this.figures.filter(f=>taken.includes(f.key)).map(f=>f.uid));
-    const pool=model.candidates(this.figures,this.game).filter(f=>f.half!=='bottom' && !fallen.includes(f.key) && !takenUids.has(f.uid))
+    return model.candidates(this.figures,this.game).filter(f=>f.half!=='bottom' && only(f) && !fallen.includes(f.key) && !takenUids.has(f.uid))
       .map(f=>model.choice(f,this.figures)).filter(c=>c && !(c.bottom && fallen.includes(c.bottom)));
+  }
+  async random(player) {
+    if(![0,1].includes(player)) throw Error('Invalid player.');
+    const pool=this.freeChoices(player);
     if(!pool.length) throw Error('No Skylander is free for a random pick.');
     const choice=pool[Math.floor(Math.random()*pool.length)];
     await this.action({player,target:'direct',choice});
@@ -589,7 +593,17 @@ class Manager extends EventEmitter {
         else {
           const level=this.gates[this.config.gateLevels?.[this.game]];
           if(!level) throw Error('Choose the level you are playing under Element shortcuts first.');
-          const onPortal=new Set(this.active.flatMap(c=>c?[c.top]:[]).map(k=>this.figures.find(f=>f.key===k)?.info?.element));
+          const onPortal=new Set(this.active.flatMap(c=>c?[c.top]:[]).map(k=>this.figures.find(f=>f.key===k)?.info?.[level.classes?'class':'element']));
+          if(level.classes) {
+            // Imaginators shrines open for a Sensei of their battle class.
+            const battleClass=level.classes.find(c=>!onPortal.has(c));
+            if(!battleClass) { this.emit('notification',`${level.level}: every class it needs is on the portal.`);return; }
+            const [choice]=this.freeChoices(player,f=>f.info.class===battleClass);
+            if(!choice) throw Error(`No free ${battleClass} Sensei in your NFC folder.`);
+            await this.action({player,target:'direct',choice});
+            this.emit('notification',`${level.level} · ${battleClass} Sensei`);
+            return;
+          }
           const element=level.elements.find(e=>!onPortal.has(e));
           if(!element) { this.emit('notification',`${level.level}: every element it needs is on the portal.`);return; }
           await this.action({player,target:element});

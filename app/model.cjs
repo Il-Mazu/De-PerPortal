@@ -79,7 +79,7 @@ function core(f) {
   return f?.info?.kind==='Skylander' && f.half==='whole' && !/lightcore|elite/i.test(f.info.name) && (f.variant & 0x600)!==0x200;
 }
 function elementalDoorFigure(f,game,element) {
-  return f?.info?.element===element && (game===4 ? f.info.kind==='TrapMaster' && f.half==='whole' : core(f));
+  return f?.info?.element===element && (game===4 ? f.info.kind==='TrapMaster' && f.half==='whole' : game===6 ? f.info.kind==='Sensei' : core(f));
 }
 function playable(f,game) { return compatible(f,game) && ['Skylander','Giant','Swapper','TrapMaster','Mini','Sensei','Crystal'].includes(f.info.kind) && !(f.info.kind==='Mini' && f.info.game<4); }
 function candidates(figures,game,element=null,kind='player') {
@@ -135,18 +135,19 @@ function resolveChoice(selected,figures,game) {
   if(top.half==='whole' && selected.bottom) throw Error('A whole figure cannot have a bottom half.');
   return top.half==='top'?[top,bottom]:[top];
 }
-function repairTrapTeamElements(profile,figures) {
+// Trap Team and Imaginators slots only take Trap Masters / Senseis; older profiles may hold ordinary figures.
+function repairElementSlots(profile,figures,game) {
   if(!profile || !figures.length)return false;
   const used=new Set(),pending=[];
   for(const player of profile.players) for(const element of elements) {
     const selected=player.elements[element],f=figures.find(f=>f.key===selected?.top);
-    if(!selected?.bottom && elementalDoorFigure(f,4,element)) used.add(f.uid);
+    if(!selected?.bottom && elementalDoorFigure(f,game,element)) used.add(f.uid);
     else pending.push({player,element});
   }
   let changed=false;
   const sorted=[...figures].sort((a,b)=>a.id-b.id || a.variant-b.variant || a.key.localeCompare(b.key));
   for(const {player,element} of pending) {
-    const f=candidates(sorted,4,element).find(f=>!used.has(f.uid));
+    const f=candidates(sorted,game,element).find(f=>!used.has(f.uid));
     const selected=choice(f,figures);
     if(f)used.add(f.uid);
     if(JSON.stringify(player.elements[element] || null)!==JSON.stringify(selected)) {
@@ -155,4 +156,4 @@ function repairTrapTeamElements(profile,figures) {
   }
   return changed;
 }
-module.exports={elements,games,perks,identify,scan,detectGame,compatible,core,elementalDoorFigure,playable,candidates,choice,perkChoice,normalizeDefaults,newProfile,resolveChoice,repairTrapTeamElements};
+module.exports={elements,games,perks,identify,scan,detectGame,compatible,core,elementalDoorFigure,playable,candidates,choice,perkChoice,normalizeDefaults,newProfile,resolveChoice,repairElementSlots};

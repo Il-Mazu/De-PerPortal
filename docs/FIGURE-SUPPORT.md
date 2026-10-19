@@ -28,7 +28,15 @@ Descriptions deliberately avoid promising repeatable gold, exact timers, or rese
 
 A reset or newly created dump has two empty save areas, exactly like a toy fresh from the box, and the game sets it up the first time it goes on the portal. Earlier trap clears kept each area's header and cleared only some data, leaving the extended checksum wrong; that is why they made traps unreadable.
 
+## Imaginators Senseis, shrines and realms
+
+Imaginators replaced elemental gates with ten Sensei Elemental Realms on the M.A.P., unlocked by a Sensei of that element. Each Sensei also has a fixed battle class, and there is one Sensei Shrine per class (Brawler: Cradle of Creation; Ninja: Mushroom River; Sorcerer and Sentinel: Scholarville; Knight and Bowslinger: Shellmont Shores; Smasher and Quickshot: Sky Fortress; Swashbuckler: Fizzland; Bazooker: The Golden Arcade). The wikis agree that only Senseis open shrines and ring Battle Gongs; the exact match between a shrine and the opening Sensei's class comes from one wiki, so treat it as beta. Kaos has an element and class of its own, no shrine and no realm. Lock puzzles don't depend on the portal. Creation Crystal classes live in the figure's save, which Dè PerPortal does not decode yet.
+
+Dè PerPortal therefore limits Imaginators element slots to Senseis, stores each Sensei's class in the catalog, and lists the shrine chapters and the realms entry in the level helper (`resources/gates.json`, key `6`).
+
 ## Behavior sources
+
+- [Skylanders Wiki: Sensei](https://skylanderswiki.com/wiki/Sensei), [Sensei Shrine](https://skylanderswiki.com/wiki/Sensei_Shrine) and [Elemental Gate](https://skylanderswiki.com/wiki/Elemental_Gate): Sensei elements and classes, shrine locations, and realms replacing gates.
 
 - [Activision: SuperChargers FAQ, question 12](https://support.activision.com/no/skylanders-superchargers/articles/skylanders-superchargers-faq): two characters and one shared vehicle in local story co-op.
 

@@ -233,3 +233,43 @@ test('arrow hotkeys cycle assigned defaults independently, wrap, persist, and no
   assert.equal(manager.config.profiles[3].players[0].activeFavorite,2);
  }finally{await fs.rm(root,{recursive:true,force:true});}
 });
+test('Imaginators element slots take Senseis of the matching element; Kaos has none',()=>{
+ const pit=figure(605,20480),barbella=figure(606,20480),kaos=figure(627,20480),crystal=figure(680,21000),spyro=figure(16);
+ assert.equal(m.elementalDoorFigure(pit,6,'Undead'),true);
+ assert.equal(m.elementalDoorFigure(pit,6,'Fire'),false);
+ for(const f of [spyro,crystal])assert.equal(m.elementalDoorFigure(f,6,f.info.element),false);
+ for(const el of m.elements)assert.equal(m.elementalDoorFigure(kaos,6,el),false);
+ const p=m.newProfile([spyro,crystal,pit,barbella],6);
+ assert.equal(p.players[0].elements.Undead.top,pit.key);assert.equal(p.players[0].elements.Magic,null);
+ // A profile saved before Senseis were required is re-filled.
+ p.players[0].elements.Magic={top:spyro.key,bottom:null};
+ assert.equal(m.repairElementSlots(p,[spyro,crystal,pit,barbella],6),true);
+ assert.equal(p.players[0].elements.Magic,null);assert.equal(p.players[0].elements.Undead.top,pit.key);
+});
+test('Imaginators shrine and realm data matches the catalog',()=>{
+ const catalog=require('../resources/catalog.json'),gates=require('../resources/gates.json')[6];
+ const classes=new Set(catalog.filter(f=>f.kind==='Sensei' && f.class).map(f=>f.class));
+ assert.equal(classes.size,10);
+ assert.deepEqual(catalog.filter(f=>f.kind==='Sensei' && !f.class).map(f=>f.name),['Kaos']);
+ for(const g of gates) {
+  assert.equal(!!g.classes!==!!g.elements,true);
+  for(const c of g.classes||[])assert.equal(classes.has(c),true,c);
+  for(const el of g.elements||[])assert.equal(m.elements.includes(el),true,el);
+ }
+ assert.deepEqual([...new Set(gates.flatMap(g=>g.classes||[]))].sort(),[...classes].sort());
+});
+test('Alt+G in an Imaginators shrine level loads a Sensei of each missing class',async()=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'de-perportal-shrine-'));await fs.mkdir(path.join(root,'NFC'));
+ try {
+  for(const [id,v] of [[16,0],[605,20480],[616,20480],[606,20480]])await fs.writeFile(path.join(root,'NFC',`${id}-${v}.sky`),bytes(id,v));
+  const manager=new Manager(root,async()=>'');await manager.init();
+  manager.updateSession({pid:100,supported:true,focused:true,title:'Cemu Skylanders Imaginators'});
+  const gates=require('../resources/gates.json')[6];
+  await manager.setGateLevel(gates.findIndex(g=>g.level.startsWith('Scholarville')));
+  const classOf=p=>manager.figures.find(f=>f.key===manager.active[p].top).info.class;
+  await manager.hotkey({player:0,key:'G'});assert.equal(classOf(0),'Sorcerer');
+  await manager.hotkey({player:1,key:'G'});assert.equal(classOf(1),'Sentinel');
+  const before=JSON.stringify(manager.active);
+  await manager.hotkey({player:0,key:'G'});assert.equal(JSON.stringify(manager.active),before);
+ } finally {await fs.rm(root,{recursive:true,force:true});}
+});
